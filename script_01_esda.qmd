@@ -57,7 +57,7 @@ st_crs(np_sf1) == st_crs(nnc_1)
 
 mapview(np_sf1) + mapview(nnc_1)
 
-mapview(hab_sf1, zcol = "Depth", cex = "Depth", alpha.regions = .8, legend = TRUE, popup = popupTable(hab_sf1, zcol = c("Depth", "Site"))) + mapview(bigbend_seagrass)
+# mapview(hab_sf1, zcol = "Depth", cex = "Depth", alpha.regions = .8, legend = TRUE, popup = popupTable(hab_sf1, zcol = c("Depth", "Site"))) + mapview(bigbend_seagrass)
 
 ```
 
