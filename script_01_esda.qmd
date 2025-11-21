@@ -1,0 +1,71 @@
+---
+title: "ESDA of St. Andrew Bay Watershed Water Quality"
+author: "Mike McManus and Ruth Horn"
+format: html
+editor: visual
+editor_options: 
+  chunk_output_type: console
+---
+
+## Exploratory Spatial Data Analysis 
+The purpose of this script to examine statistical and spatial patterns in the water qualiy of St. Andrews Bay (SAB) watershed using monitoring data collected by several agencies and organizations.
+
+## Libraries
+
+```{r libraries}
+library(tidyverse)
+library(sf)
+library(mapview)
+
+```
+
+## Log
+
+2025-11-21 Bring in csv files
+
+
+## Reading in Data
+Two csv file, one on nutrients and other on conductivity, provided by Rose Horn, SASJBEP, by email on November 13, 2025. Rose pulled the data from WIN 
+```{r data}
+np_ds1 <- read_csv("data/WQ_Values_Station_Baysection_NP.csv")
+
+spec(np_ds1)
+names(np_ds1)
+
+# See Long and Lat in decimal degrees
+View(np_ds1) 
+str(np_ds1)
+glimpse(np_ds1)
+coords <- data.frame(longitude  = np_ds1$DEP_Longitude, latitude = np_ds1$DEP_Latitude)
+head(coords)
+
+# See Marc Weber workshop above about Coordinate Reference Systems (CRS)
+
+np_sf1 <- st_as_sf(np_ds1, coords = c("DEP_Longitude", "DEP_Latitude"), crs =4269) %>% st_transform((5070))
+
+class(np_sf1)
+# read in shapefile
+nnc_1 <- st_read("data_gis/NNC_Bay_Segments.shp")
+class(nnc_1)
+summary(nnc_1)
+# see that espg code is 3087
+# asking do the two sf objects have the same CRS
+st_crs(np_sf1) == st_crs(nnc_1)
+
+np_sf1 <- np_sf1 %>% st_transform(3087)
+st_crs(np_sf1) == st_crs(nnc_1)
+
+mapview(np_sf1) + mapview(nnc_1)
+
+mapview(hab_sf1, zcol = "Depth", cex = "Depth", alpha.regions = .8, legend = TRUE, popup = popupTable(hab_sf1, zcol = c("Depth", "Site"))) + mapview(bigbend_seagrass)
+
+```
+
+You can add options to executable code like this
+
+```{r}
+#| echo: false
+2 * 2
+```
+
+The `echo: false` option disables the printing of code (only output is displayed).
