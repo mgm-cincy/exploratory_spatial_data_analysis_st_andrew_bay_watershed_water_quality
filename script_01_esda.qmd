@@ -7,7 +7,8 @@ editor_options:
   chunk_output_type: console
 ---
 
-## Exploratory Spatial Data Analysis 
+## Exploratory Spatial Data Analysis
+
 The purpose of this script to examine statistical and spatial patterns in the water qualiy of St. Andrews Bay (SAB) watershed using monitoring data collected by several agencies and organizations.
 
 ## Libraries
@@ -16,32 +17,42 @@ The purpose of this script to examine statistical and spatial patterns in the wa
 library(tidyverse)
 library(sf)
 library(mapview)
+library(janitor)
 
 ```
 
 ## Log
 
+2025-11-22 Unsure the DEP longitude and latitude are actual coordinates of monitoring stations
+
 2025-11-21 Bring in csv files
 
-
 ## Reading in Data
-Two csv file, one on nutrients and other on conductivity, provided by Rose Horn, SASJBEP, by email on November 13, 2025. Rose pulled the data from WIN 
+
+Two csv file, one on nutrients and other on conductivity, provided by Rose Horn, SASJBEP, by email on November 13, 2025. Rose pulled the data from WIN. Note activity_start_date comes in as character.
+
 ```{r data}
 np_ds1 <- read_csv("data/WQ_Values_Station_Baysection_NP.csv")
 
 spec(np_ds1)
 names(np_ds1)
+np_ds1 <- clean_names(np_ds1)
 
 # See Long and Lat in decimal degrees
 View(np_ds1) 
 str(np_ds1)
 glimpse(np_ds1)
-coords <- data.frame(longitude  = np_ds1$DEP_Longitude, latitude = np_ds1$DEP_Latitude)
+
+np_ds1$activity_start_date <- lubridate::mdy(np_ds1$activity_start_date)
+str(np_ds1)
+
+# create sf object
+coords <- data.frame(longitude  = np_ds1$dep_longitude, latitude = np_ds1$dep_latitude)
 head(coords)
 
 # See Marc Weber workshop above about Coordinate Reference Systems (CRS)
 
-np_sf1 <- st_as_sf(np_ds1, coords = c("DEP_Longitude", "DEP_Latitude"), crs =4269) %>% st_transform((5070))
+np_sf1 <- st_as_sf(np_ds1, coords = c("dep_longitude", "dep_latitude"), crs =4269) %>% st_transform((5070))
 
 class(np_sf1)
 # read in shapefile
@@ -61,11 +72,31 @@ mapview(np_sf1) + mapview(nnc_1)
 
 ```
 
-You can add options to executable code like this
+## Data Structure and Summaries
+Seven distinct organizations collected monitoring data with Florida Lakewatch being a synonym for St. Andrew Baywatch. Get 890 dates spanning 2013-01-24 to 2023-12-20. There are 7894 distinct coordinates/locations.
 
-```{r}
-#| echo: false
-2 * 2
+But, I am wondering if DEP assigns coordinates that are not the actual locations of the monitoring station, but instead are always to same place (the centroid) of the spatial feature.
+```{r data_structure}
+names(np_ds1)
+distinct(np_ds1, organization_name)
+
+distinct(np_ds1, activity_start_date ) %>% arrange(., activity_start_date) %>% 
+  print(n = Inf)
+
+np_ds1 %>% 
+  group_by(organization_name) %>% 
+  summarise(count = n_distinct(monitoring_location_name))
+
+
+
+# distinct monitoring stations
+np_stations <- unique.data.frame(np_sf1) # returns 7894 obs/stations & geometries
+
+np_stations %>% 
+  group_by(organization_name) %>% 
+  summarise(count = n_distinct(monitoring_location_name))
+
+
 ```
 
 The `echo: false` option disables the printing of code (only output is displayed).
