@@ -73,21 +73,29 @@ mapview(np_sf1) + mapview(nnc_1)
 ```
 
 ## Data Structure and Summaries
-Seven distinct organizations collected monitoring data with Florida Lakewatch being a synonym for St. Andrew Baywatch. Get 890 dates spanning 2013-01-24 to 2023-12-20. There are 7894 distinct coordinates/locations.
 
-But, I am wondering if DEP assigns coordinates that are not the actual locations of the monitoring station, but instead are always to same place (the centroid) of the spatial feature.
+Seven distinct organizations collected monitoring data with Florida Lakewatch being a synonym for St. Andrew Baywatch. Get 890 dates spanning 2013-01-24 to 2023-12-20. Have 213 distinct monitoring location IDs. Have 210 distinct monitoring location names. There are 7894 distinct coordinates/locations.
+
+But, I am wondering if DEP assigns coordinates that are not the actual locations of the monitoring station, but instead are always to same place (the centroid) of the spatial feature. Also, are there any analyte code remarks about questionable values?
+
 ```{r data_structure}
 names(np_ds1)
 distinct(np_ds1, organization_name)
 
-distinct(np_ds1, activity_start_date ) %>% arrange(., activity_start_date) %>% 
+distinct(np_ds1, activity_start_date) %>% arrange(., activity_start_date) %>% 
   print(n = Inf)
 
 np_ds1 %>% 
   group_by(organization_name) %>% 
   summarise(count = n_distinct(monitoring_location_name))
 
+distinct(np_ds1, monitoring_location_id) %>% arrange(., monitoring_location_id) %>% 
+  print(n = Inf)
 
+distinct(np_ds1, monitoring_location_name) %>% arrange(., monitoring_location_name) %>% 
+  print(n = Inf)
+
+distinct(np_ds1, dep_analyte_name)
 
 # distinct monitoring stations
 np_stations <- unique.data.frame(np_sf1) # returns 7894 obs/stations & geometries
@@ -99,4 +107,65 @@ np_stations %>%
 
 ```
 
-The `echo: false` option disables the printing of code (only output is displayed).
+Interesting that total phosphorus has monitoring names that include format of DEP's status survey of zone 1 (Z1) for NWFMD region followed by resource type large lake (LL), but that's not the case for total nitrogen.
+
+```{r summaries}
+
+tn_ds1 <- filter(np_ds1, dep_analyte_name == "Nitrogen- Total")
+
+
+
+summarize(tn_ds1, min = fivenum(dep_result_value_number)[1],
+              q1 = fivenum(dep_result_value_number)[2],
+              median = fivenum(dep_result_value_number)[3],
+              q3 = fivenum(dep_result_value_number)[4],
+              max = fivenum(dep_result_value_number)[5],
+              count = dplyr::n(),
+              mean = mean(dep_result_value_number))
+  
+tn_sum_monitoring_name <- tn_ds1 %>% 
+  group_by(monitoring_location_name) %>% 
+  summarize(min = fivenum(dep_result_value_number)[1],
+              q1 = fivenum(dep_result_value_number)[2],
+              median = fivenum(dep_result_value_number)[3],
+              q3 = fivenum(dep_result_value_number)[4],
+              max = fivenum(dep_result_value_number)[5],
+              count = dplyr::n(),
+              mean = mean(dep_result_value_number))
+
+
+tp_ds1 <- filter(np_ds1, dep_analyte_name == "Phosphorus- Total")
+
+summarize(tp_ds1, min = fivenum(dep_result_value_number)[1],
+              q1 = fivenum(dep_result_value_number)[2],
+              median = fivenum(dep_result_value_number)[3],
+              q3 = fivenum(dep_result_value_number)[4],
+              max = fivenum(dep_result_value_number)[5],
+              count = dplyr::n(),
+              mean = mean(dep_result_value_number))
+  
+tp_sum_monitoring_name <- tp_ds1 %>% 
+  group_by(monitoring_location_name) %>% 
+  summarize(min = fivenum(dep_result_value_number)[1],
+              q1 = fivenum(dep_result_value_number)[2],
+              median = fivenum(dep_result_value_number)[3],
+              q3 = fivenum(dep_result_value_number)[4],
+              max = fivenum(dep_result_value_number)[5],
+              count = dplyr::n(),
+              mean = mean(dep_result_value_number))
+
+
+
+
+  
+    iris %>%
+          group_by(Species) %>%
+          summarize(min = fivenum(Petal.Width)[1],
+                    low = fivenum(Petal.Width)[2],
+                    median = fivenum(Petal.Width)[3],
+                    upper = fivenum(Petal.Width)[4],
+                    max = fivenum(Petal.Width)[5],
+                    count = dplyr::n())
+
+```
+
