@@ -18,10 +18,16 @@ library(tidyverse)
 library(sf)
 library(mapview)
 library(janitor)
-
+library(leaflet)
+library(leafpop) # for popups in 
+library(leafsync) # sync mapview maps
+library(patchwork)
+library(nhdplusTools)
 ```
 
 ## Log
+
+2025-12-02 pulled in Bays_Bayous_Lakes_V1.shp
 
 2025-11-22 Unsure the DEP longitude and latitude are actual coordinates of monitoring stations
 
@@ -31,6 +37,7 @@ library(janitor)
 
 Two csv file, one on nutrients and other on conductivity, provided by Rose Horn, SASJBEP, by email on November 13, 2025. Rose pulled the data from WIN. Note activity_start_date comes in as character.
 
+Read in Bays_Bayous_Lakes_V1 shapefile that Rose uploaded to repository.
 ```{r data}
 np_ds1 <- read_csv("data/WQ_Values_Station_Baysection_NP.csv")
 
@@ -69,6 +76,16 @@ st_crs(np_sf1) == st_crs(nnc_1)
 mapview(np_sf1) + mapview(nnc_1)
 
 # mapview(hab_sf1, zcol = "Depth", cex = "Depth", alpha.regions = .8, legend = TRUE, popup = popupTable(hab_sf1, zcol = c("Depth", "Site"))) + mapview(bigbend_seagrass)
+
+bbl_1 <- st_read("data_gis/Bays_Bayous_Lakes_V1.shp")
+class(bbl_1)
+summary(bbl_1)
+
+bbl_1 <- bbl_1 %>% st_transform(3087)
+
+mapview(bbl_1)
+
+mapview(np_sf1) + mapview(bbl_1)
 
 ```
 
@@ -169,3 +186,11 @@ tp_sum_monitoring_name <- tp_ds1 %>%
 
 ```
 
+## HUCs
+```{r hucs}
+huc8 <- get_huc(id = '03140101', type = "huc08")
+
+mapview(huc8)
+
+huc8 <- st_transform(huc8, crs = 3087)
+```
