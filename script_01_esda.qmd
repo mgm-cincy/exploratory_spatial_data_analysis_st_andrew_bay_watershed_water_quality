@@ -38,6 +38,7 @@ library(nhdplusTools)
 Two csv file, one on nutrients and other on conductivity, provided by Rose Horn, SASJBEP, by email on November 13, 2025. Rose pulled the data from WIN. Note activity_start_date comes in as character.
 
 Read in Bays_Bayous_Lakes_V1 shapefile that Rose uploaded to repository.
+
 ```{r data}
 np_ds1 <- read_csv("data/WQ_Values_Station_Baysection_NP.csv")
 
@@ -187,6 +188,7 @@ tp_sum_monitoring_name <- tp_ds1 %>%
 ```
 
 ## HUCs
+
 ```{r hucs}
 huc8 <- get_huc(id = '03140101', type = "huc08")
 
