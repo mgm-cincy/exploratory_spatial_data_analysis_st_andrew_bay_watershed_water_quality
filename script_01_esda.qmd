@@ -172,10 +172,6 @@ tp_sum_monitoring_name <- tp_ds1 %>%
               count = dplyr::n(),
               mean = mean(dep_result_value_number))
 
-
-
-
-  
     iris %>%
           group_by(Species) %>%
           summarize(min = fivenum(Petal.Width)[1],
@@ -186,8 +182,158 @@ tp_sum_monitoring_name <- tp_ds1 %>%
                     count = dplyr::n())
 
 ```
-<<<<<<< HEAD
-=======
+
+
+## Spatial Intersect
+Does spatial intersection result in, for example, of upper Crooked Creek not being included?
+```{r st_intersect}
+# four sub_bays
+subbay_1 <- dplyr::filter(bbl_1, SEGMENT_NA == "West Bay" | SEGMENT_NA == "North Bay" | SEGMENT_NA == "St. Andrew Bay" | SEGMENT_NA == "East Bay")
+
+mapview(subbay_1)
+sab_np1 <- st_intersection(np_sf1, subbay_1)
+head(sab_np1)
+
+
+mapview(sab_np1) + mapview(bbl_1)
+mapview(sab_np1) + mapview(subbay_1)
+
+```
+
+## Sub-bay Data Structure
+```{r subbay_data_struct}
+names(sab_np1)
+distinct(sab_np1, organization_name) # 4 organizations
+
+distinct(sab_np1, activity_start_date) %>% arrange(., activity_start_date) %>% 
+  print(n = Inf) #242 dates from 2016-07-20 to 2023-12-20
+
+distinct(sab_np1, activity_start_date) %>% arrange(., activity_start_date) %>% 
+  print(n = Inf) #242 dates from 2016-07-20 to 2023-12-20
+
+
+sab_np1 %>% 
+  group_by(organization_name) %>% 
+  summarise(count = n_distinct(monitoring_location_name))
+
+distinct(sab_np1, monitoring_location_id) %>% arrange(., monitoring_location_id) %>% 
+  print(n = Inf)
+
+distinct(sab_np1, monitoring_location_name) %>% arrange(., monitoring_location_name) %>%   print(n = Inf)
+
+distinct(sab_np1, dep_analyte_name)
+
+# distinct monitoring stations
+sab_np_stations <- unique.data.frame(sab_np1) # returns 1651 obs/stations & geometries
+
+sab_np_stations %>% 
+  group_by(organization_name) %>% 
+  summarise(count = n_distinct(monitoring_location_name))
+
+
+```
+
+
+## Sub-bay Summaries
+```{r subbay_summaries}
+tn_sub1 <- filter(sab_np1, dep_analyte_name == "Nitrogen- Total") 
+# tn data is only from Florida Lakewatch
+
+mapview(tn_sub1)
+
+tn_sub1$bay_section_1 == tn_sub1$SEGMENT_NA
+# obs 287 to 303 returns FALSE as have Robinson Bayou vs North Bay
+# note that station appears located in St Andrew Bay as below subbay line
+
+summarize(tn_sub1, min = fivenum(dep_result_value_number)[1],
+              q1 = fivenum(dep_result_value_number)[2],
+              median = fivenum(dep_result_value_number)[3],
+              q3 = fivenum(dep_result_value_number)[4],
+              max = fivenum(dep_result_value_number)[5],
+              count = dplyr::n(),
+              mean = mean(dep_result_value_number))
+  
+tn_sum_sub <- tn_sub1 %>% 
+  group_by(SEGMENT_NA) %>% 
+  summarize(min = fivenum(dep_result_value_number)[1],
+              q1 = fivenum(dep_result_value_number)[2],
+              median = fivenum(dep_result_value_number)[3],
+              q3 = fivenum(dep_result_value_number)[4],
+              max = fivenum(dep_result_value_number)[5],
+              count = dplyr::n(),
+              mean = mean(dep_result_value_number))
+
+
+tn_sub1 %>% 
+  group_by(organization_name) %>% 
+  summarize(min = fivenum(dep_result_value_number)[1],
+              q1 = fivenum(dep_result_value_number)[2],
+              median = fivenum(dep_result_value_number)[3],
+              q3 = fivenum(dep_result_value_number)[4],
+              max = fivenum(dep_result_value_number)[5],
+              count = dplyr::n(),
+              mean = mean(dep_result_value_number))
+
+tp_sub1 <- filter(sab_np1, dep_analyte_name == "Phosphorus- Total")
+# lot more tp obs/stations than tn. is that b/c tn samples had a lot of nondetects whereas tp samples are almost always detectable?
+
+distinct(tp_sub1, organization_name)
+# FDEP WATERSHED ASSESSMENT SECTION, FLORIDA LAKEWATCH, FDEP NORTHWEST REGIONAL OPERATIONS CENTER,FDEP TALLAHASSEE REGIONAL OPERATIONS CENTER 
+
+mapview(tp_sub1)
+
+tp_locations <- tp_sub1$bay_section_1 == tp_sub1$SEGMENT_NA
+print(as.vector(tp_locations))
+
+View(as.data.frame(tp_locations))
+# obs 317-321 FALSE corresponds to Sandy Creek vs East Bay
+# obs 478-494 FALSE corresponds to Robinson Bayou vs North Bay
+
+
+summarize(tp_sub1, min = fivenum(dep_result_value_number)[1],
+              q1 = fivenum(dep_result_value_number)[2],
+              median = fivenum(dep_result_value_number)[3],
+              q3 = fivenum(dep_result_value_number)[4],
+              max = fivenum(dep_result_value_number)[5],
+              count = dplyr::n(),
+              mean = mean(dep_result_value_number))
+
+# min tp is 0.002, which I believe is detection limit
+  
+tp_sum_sub <- tp_sub1 %>% 
+  group_by(SEGMENT_NA) %>% 
+  summarize(min = fivenum(dep_result_value_number)[1],
+              q1 = fivenum(dep_result_value_number)[2],
+              median = fivenum(dep_result_value_number)[3],
+              q3 = fivenum(dep_result_value_number)[4],
+              max = fivenum(dep_result_value_number)[5],
+              count = dplyr::n(),
+              mean = mean(dep_result_value_number))
+
+tp_sub1 %>% 
+  group_by(organization_name) %>% 
+  summarize(min = fivenum(dep_result_value_number)[1],
+              q1 = fivenum(dep_result_value_number)[2],
+              median = fivenum(dep_result_value_number)[3],
+              q3 = fivenum(dep_result_value_number)[4],
+              max = fivenum(dep_result_value_number)[5],
+              count = dplyr::n(),
+              mean = mean(dep_result_value_number))
+
+# 65% of obs for tp are from Florida Watershed Assessment Section
+    iris %>%
+          group_by(Species) %>%
+          summarize(min = fivenum(Petal.Width)[1],
+                    low = fivenum(Petal.Width)[2],
+                    median = fivenum(Petal.Width)[3],
+                    upper = fivenum(Petal.Width)[4],
+                    max = fivenum(Petal.Width)[5],
+                    count = dplyr::n())
+
+```
+
+
+## Parse Date Information
 
 ## HUCs
 
@@ -198,4 +344,3 @@ mapview(huc8)
 
 huc8 <- st_transform(huc8, crs = 3087)
 ```
->>>>>>> 72f0be9982adc5ebed6982dc53ff743ac10f78d4
