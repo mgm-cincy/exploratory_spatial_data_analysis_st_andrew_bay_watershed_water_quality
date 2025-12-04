@@ -186,6 +186,8 @@ tp_sum_monitoring_name <- tp_ds1 %>%
                     count = dplyr::n())
 
 ```
+<<<<<<< HEAD
+=======
 
 ## HUCs
 
@@ -196,3 +198,4 @@ mapview(huc8)
 
 huc8 <- st_transform(huc8, crs = 3087)
 ```
+>>>>>>> 72f0be9982adc5ebed6982dc53ff743ac10f78d4
