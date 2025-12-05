@@ -9,7 +9,7 @@ editor_options:
 
 ## Exploratory Spatial Data Analysis
 
-The purpose of this script to examine statistical and spatial patterns in the water qualiy of St. Andrews Bay (SAB) watershed using monitoring data collected by several agencies and organizations.
+The purpose of this script to examine statistical and spatial patterns in the water qualiy of St. Andrews Bay (sub) watershed using monitoring data collected by several agencies and organizations.
 
 ## Libraries
 
@@ -23,6 +23,8 @@ library(leafpop) # for popups in
 library(leafsync) # sync mapview maps
 library(patchwork)
 library(nhdplusTools)
+library(tmap)
+library(forcats)
 ```
 
 ## Log
@@ -51,8 +53,16 @@ View(np_ds1)
 str(np_ds1)
 glimpse(np_ds1)
 
+# have to create actvity start date as factor for tmap animation
+np_ds1$date_factor <- np_ds1$activity_start_date
+
 np_ds1$activity_start_date <- lubridate::mdy(np_ds1$activity_start_date)
 str(np_ds1)
+
+np_ds1 <- arrange(np_ds1, activity_start_date)
+np_ds1$date_factor <- as_factor(np_ds1$date_factor)
+head(np_ds1$date_factor)
+levels(np_ds1$date_factor)
 
 # create sf object
 coords <- data.frame(longitude  = np_ds1$dep_longitude, latitude = np_ds1$dep_latitude)
@@ -183,63 +193,68 @@ tp_sum_monitoring_name <- tp_ds1 %>%
 
 ```
 
-
 ## Spatial Intersect
-Does spatial intersection result in, for example, of upper Crooked Creek not being included?
+
+Does spatial intersection result in, for example, of upper Crooked Creek being excluded?
+
 ```{r st_intersect}
 # four sub_bays
 subbay_1 <- dplyr::filter(bbl_1, SEGMENT_NA == "West Bay" | SEGMENT_NA == "North Bay" | SEGMENT_NA == "St. Andrew Bay" | SEGMENT_NA == "East Bay")
 
 mapview(subbay_1)
-sab_np1 <- st_intersection(np_sf1, subbay_1)
-head(sab_np1)
+sub_np1 <- st_intersection(np_sf1, subbay_1)
+head(sub_np1)
 
 
-mapview(sab_np1) + mapview(bbl_1)
-mapview(sab_np1) + mapview(subbay_1)
+mapview(sub_np1) + mapview(bbl_1)
+mapview(sub_np1) + mapview(subbay_1)
 
 ```
 
 ## Sub-bay Data Structure
+
 ```{r subbay_data_struct}
-names(sab_np1)
-distinct(sab_np1, organization_name) # 4 organizations
+names(sub_np1)
+distinct(sub_np1, organization_name) # 4 organizations
 
-distinct(sab_np1, activity_start_date) %>% arrange(., activity_start_date) %>% 
+distinct(sub_np1, activity_start_date) %>% arrange(., activity_start_date) %>% 
   print(n = Inf) #242 dates from 2016-07-20 to 2023-12-20
 
-distinct(sab_np1, activity_start_date) %>% arrange(., activity_start_date) %>% 
-  print(n = Inf) #242 dates from 2016-07-20 to 2023-12-20
-
-
-sab_np1 %>% 
+sub_np1 %>% 
   group_by(organization_name) %>% 
   summarise(count = n_distinct(monitoring_location_name))
 
-distinct(sab_np1, monitoring_location_id) %>% arrange(., monitoring_location_id) %>% 
+distinct(sub_np1, monitoring_location_id) %>% arrange(., monitoring_location_id) %>% 
   print(n = Inf)
 
-distinct(sab_np1, monitoring_location_name) %>% arrange(., monitoring_location_name) %>%   print(n = Inf)
+distinct(sub_np1, monitoring_location_name) %>% arrange(., monitoring_location_name) %>%   print(n = Inf)
 
-distinct(sab_np1, dep_analyte_name)
+distinct(sub_np1, dep_analyte_name)
 
 # distinct monitoring stations
-sab_np_stations <- unique.data.frame(sab_np1) # returns 1651 obs/stations & geometries
+sub_np_stations <- unique.data.frame(sub_np1) # returns 1651 obs/stations & geometries
 
-sab_np_stations %>% 
+sub_np_stations %>% 
   group_by(organization_name) %>% 
   summarise(count = n_distinct(monitoring_location_name))
 
 
 ```
 
-
 ## Sub-bay Summaries
+A lot more tp stations than tn stations. Is that because tp almost always has samples with detectable concentrations whereas tn has fewer samples with detectable concentrations? Are nondetects entered into WIN? Do an inner join to find what observations in tn have a matching key in y. Also, I need to check for duplicate entries.
 ```{r subbay_summaries}
-tn_sub1 <- filter(sab_np1, dep_analyte_name == "Nitrogen- Total") 
+tn_sub1 <- filter(sub_np1, dep_analyte_name == "Nitrogen- Total") 
 # tn data is only from Florida Lakewatch
 
+distinct(tn_sub1, organization_name)
+
+# distinct tn monitoring stations
+tn_stations <- unique.data.frame(tn_sub1)
+
 mapview(tn_sub1)
+
+mapview(tn_stations)
 
 tn_sub1$bay_section_1 == tn_sub1$SEGMENT_NA
 # obs 287 to 303 returns FALSE as have Robinson Bayou vs North Bay
@@ -274,11 +289,14 @@ tn_sub1 %>%
               count = dplyr::n(),
               mean = mean(dep_result_value_number))
 
-tp_sub1 <- filter(sab_np1, dep_analyte_name == "Phosphorus- Total")
+tp_sub1 <- filter(sub_np1, dep_analyte_name == "Phosphorus- Total")
 # lot more tp obs/stations than tn. is that b/c tn samples had a lot of nondetects whereas tp samples are almost always detectable?
 
 distinct(tp_sub1, organization_name)
 # FDEP WATERSHED ASSESSMENT SECTION, FLORIDA LAKEWATCH, FDEP NORTHWEST REGIONAL OPERATIONS CENTER,FDEP TALLAHASSEE REGIONAL OPERATIONS CENTER 
+
+# distinct tp monitoring stations
+tp_stations <- unique.data.frame(tp_sub1)
 
 mapview(tp_sub1)
 
@@ -331,6 +349,55 @@ tp_sub1 %>%
                     count = dplyr::n())
 
 ```
+
+I am very suspicious that tn_sub1 is almost exactly twice the number of observations of tn_stations, and likewise for tpsub1 and tp_stations. Viewing tn_sub1 shows first two entries for Bay-Parker-Bayou-1 being collected on same date with same tn concentrations. Can we talk to someone at FDEP knowledgeable about WIN to tell us about any QA/QC to check for exact duplicates? Or does Lakewatch always run samples in duplicate?
+
+For now, I am going to believe and assume that tn_stations and tp_stations accurately reflects the number of observations.
+
+## Boxplots
+```{r boxplot_tn}
+
+ggplot(tn_stations, aes(x = SEGMENT_NA, y = dep_result_value_number)) + geom_boxplot(varwidth = TRUE) + labs(x = "Segment Name", y = "TN, (mg/L)", title = "Total Nitrogen in Bay Segments", subtitle = "WIN Data from 2018-12-07 to 2023-08-28, n = 420")
+
+```
+
+
+```{r boxplot_tp}
+
+ggplot(tp_stations, aes(x = SEGMENT_NA, y = log(dep_result_value_number))) + geom_boxplot(varwidth = TRUE) + labs(x = "Segment Name", y = "Log TP, (mg/L)", title = "Total Phosphorus in Bay Segments", subtitle = "WIN Data from 2016-07-20 to 2023-12-20, n = 1231")
+
+ggplot(tp_stations, aes(x = SEGMENT_NA, y = log(dep_result_value_number))) + geom_boxplot(varwidth = TRUE) + labs(x = "Segment Name", y = "Log TP, (mg/L)", title = "Total Phosphorus in Bay Segments", subtitle = "WIN Data from 2016-07-20 to 2023-12-20, n = 1231") + facet_wrap(vars(organization_name))
+
+```
+
+## TMAP
+```{r animate}
+
+tn_stations$date <- as_factor(tn_stations$activity_start_date)
+
+tn_bubble <- tm_shape(subbay_1) +
+  tm_fill("#dddddd") + 
+tm_shape(tn_stations) +
+  tm_bubbles(size =  "dep_result_value_number",
+             size.legend = tm_legend("TN (mg/L"))
+
+tn_bubble + tm_animate(frame = as_factor("activity_start_date"))
+
+
+
+tm_shape(World) +
+    tm_fill("#dddddd") +
+tm_shape(metro) +
+    tm_bubbles(size = paste0("pop", seq(1960,2030, by = 10)),
+               size.scale = tm_scale_continuous(values.scale = 2),
+               size.legend = tm_legend("Population"),
+               fill = "gold",
+               size.free = FALSE) +
+    tm_animate()
+
+
+```
+
 
 
 ## Parse Date Information
