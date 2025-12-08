@@ -25,9 +25,12 @@ library(patchwork)
 library(nhdplusTools)
 library(tmap)
 library(forcats)
+library(gifski) #for tmap animation
 ```
 
 ## Log
+
+2025-12-05 made date a factor for tmap animation
 
 2025-12-02 pulled in Bays_Bayous_Lakes_V1.shp
 
@@ -48,15 +51,20 @@ spec(np_ds1)
 names(np_ds1)
 np_ds1 <- clean_names(np_ds1)
 
-# See Long and Lat in decimal degrees
+# See Long and Lat in decimal degrees and date as character
 View(np_ds1) 
 str(np_ds1)
 glimpse(np_ds1)
+class(np_ds1$activity_start_date)
+
 
 # have to create actvity start date as factor for tmap animation
 np_ds1$date_factor <- np_ds1$activity_start_date
 
 np_ds1$activity_start_date <- lubridate::mdy(np_ds1$activity_start_date)
+
+np_ds1$ym <- lubridate::ym(np_ds1$activity_start_date)
+
 str(np_ds1)
 
 np_ds1 <- arrange(np_ds1, activity_start_date)
@@ -242,7 +250,11 @@ sub_np_stations %>%
 ```
 
 ## Sub-bay Summaries
+
+tn_stations and tp_stations get rid of duplicates. Also try get_dupes function in janitor package.
+
 A lot more tp stations than tn stations. Is that because tp almost always has samples with detectable concentrations whereas tn has fewer samples with detectable concentrations? Are nondetects entered into WIN? Do an inner join to find what observations in tn have a matching key in y. Also, I need to check for duplicate entries.
+
 ```{r subbay_summaries}
 tn_sub1 <- filter(sub_np1, dep_analyte_name == "Nitrogen- Total") 
 # tn data is only from Florida Lakewatch
@@ -355,12 +367,12 @@ I am very suspicious that tn_sub1 is almost exactly twice the number of observat
 For now, I am going to believe and assume that tn_stations and tp_stations accurately reflects the number of observations.
 
 ## Boxplots
+
 ```{r boxplot_tn}
 
 ggplot(tn_stations, aes(x = SEGMENT_NA, y = dep_result_value_number)) + geom_boxplot(varwidth = TRUE) + labs(x = "Segment Name", y = "TN, (mg/L)", title = "Total Nitrogen in Bay Segments", subtitle = "WIN Data from 2018-12-07 to 2023-08-28, n = 420")
 
 ```
-
 
 ```{r boxplot_tp}
 
@@ -370,10 +382,9 @@ ggplot(tp_stations, aes(x = SEGMENT_NA, y = log(dep_result_value_number))) + geo
 
 ```
 
-## TMAP
+## Map Animation
+Make sure use tn_stations and tp_stations so don't have duplicate stations. Also, need to set year-month as factor using the ym function in lubridate rather than date.
 ```{r animate}
-
-tn_stations$date <- as_factor(tn_stations$activity_start_date)
 
 tn_bubble <- tm_shape(subbay_1) +
   tm_fill("#dddddd") + 
@@ -381,7 +392,7 @@ tm_shape(tn_stations) +
   tm_bubbles(size =  "dep_result_value_number",
              size.legend = tm_legend("TN (mg/L"))
 
-tn_bubble + tm_animate(frame = as_factor("activity_start_date"))
+tn_bubble + tm_animate(frame = "date_factor", fps = 1, play = "loop")
 
 
 
@@ -395,10 +406,17 @@ tm_shape(metro) +
                size.free = FALSE) +
     tm_animate()
 
+tp_bubble <- tm_shape(subbay_1) +
+  tm_fill("#dddddd") + 
+tm_shape(tp_stations) +
+  tm_bubbles(size =  "dep_result_value_number",
+             # size.scale = tm_scale_continuous_log(values.scale = "dep_result_value_number"),
+             size.legend = tm_legend("TP (mg/L)"))
+
+tp_bubble + tm_animate(frame = "date_factor", fps = 1, play = "loop")
+
 
 ```
-
-
 
 ## Parse Date Information
 
