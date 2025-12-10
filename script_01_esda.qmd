@@ -57,7 +57,9 @@ str(np_ds1)
 glimpse(np_ds1)
 class(np_ds1$activity_start_date)
 
-
+zdates <- distinct(np_ds1, activity_start_date)
+ym_ds1 <- lubridate::ym(zdates$activity_start_date)
+saveRDS(zdates, "zdates")
 # have to create actvity start date as factor for tmap animation
 np_ds1$date_factor <- np_ds1$activity_start_date
 
@@ -383,7 +385,9 @@ ggplot(tp_stations, aes(x = SEGMENT_NA, y = log(dep_result_value_number))) + geo
 ```
 
 ## Map Animation
+
 Make sure use tn_stations and tp_stations so don't have duplicate stations. Also, need to set year-month as factor using the ym function in lubridate rather than date.
+
 ```{r animate}
 
 tn_bubble <- tm_shape(subbay_1) +
