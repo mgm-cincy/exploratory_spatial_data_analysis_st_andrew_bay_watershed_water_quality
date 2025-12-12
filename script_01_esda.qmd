@@ -58,14 +58,16 @@ glimpse(np_ds1)
 class(np_ds1$activity_start_date)
 
 zdates <- distinct(np_ds1, activity_start_date)
-ym_ds1 <- lubridate::ym(zdates$activity_start_date)
+ym_ds1 <- lubridate::mdy(zdates$activity_start_date)
+floor_date(ym_ds1, "month")
+
 saveRDS(zdates, "zdates")
 # have to create actvity start date as factor for tmap animation
 np_ds1$date_factor <- np_ds1$activity_start_date
 
 np_ds1$activity_start_date <- lubridate::mdy(np_ds1$activity_start_date)
 
-np_ds1$ym <- lubridate::ym(np_ds1$activity_start_date)
+# np_ds1$ym <- lubridate::ym(np_ds1$activity_start_date)
 
 str(np_ds1)
 
@@ -73,6 +75,8 @@ np_ds1 <- arrange(np_ds1, activity_start_date)
 np_ds1$date_factor <- as_factor(np_ds1$date_factor)
 head(np_ds1$date_factor)
 levels(np_ds1$date_factor)
+
+np_ds1$yrmm <- floor_date(np_ds1$activity_start_date, "month")
 
 # create sf object
 coords <- data.frame(longitude  = np_ds1$dep_longitude, latitude = np_ds1$dep_latitude)
