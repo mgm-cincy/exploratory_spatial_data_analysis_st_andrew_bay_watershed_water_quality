@@ -46,10 +46,10 @@ Read in Bays_Bayous_Lakes_V1 shapefile that Rose uploaded to repository.
 
 ```{r data}
 np_ds1 <- read_csv("data/WQ_Values_Station_Baysection_NP.csv")
-
-spec(np_ds1)
-names(np_ds1)
 np_ds1 <- clean_names(np_ds1)
+# spec(np_ds1)
+# names(np_ds1)
+
 
 # See Long and Lat in decimal degrees and date as character
 View(np_ds1) 
@@ -57,26 +57,34 @@ str(np_ds1)
 glimpse(np_ds1)
 class(np_ds1$activity_start_date)
 
-zdates <- distinct(np_ds1, activity_start_date)
-ym_ds1 <- lubridate::mdy(zdates$activity_start_date)
-floor_date(ym_ds1, "month")
+#zdates <- distinct(np_ds1, activity_start_date)
+#ym_ds1 <- lubridate::mdy(zdates$activity_start_date)
+#floor_date(ym_ds1, "month")
+#saveRDS(zdates, "zdates")
 
-saveRDS(zdates, "zdates")
-# have to create actvity start date as factor for tmap animation
+# with activity start date still character have to assign factors
+# have to create activity start date as factor for tmap animation
 np_ds1$date_factor <- np_ds1$activity_start_date
+np_ds1$yrmm_factor <- np_ds1$activity_start_date
 
+# convert to date
 np_ds1$activity_start_date <- lubridate::mdy(np_ds1$activity_start_date)
+class(np_ds1$activity_start_date)
+np_ds1$yrmm <- floor_date(np_ds1$activity_start_date, "month")
+head(np_ds1$yrmm)
+class(np_ds1$yrmm)
 
-# np_ds1$ym <- lubridate::ym(np_ds1$activity_start_date)
-
-str(np_ds1)
-
+# have to create activity start date as factor for tmap animation
 np_ds1 <- arrange(np_ds1, activity_start_date)
 np_ds1$date_factor <- as_factor(np_ds1$date_factor)
 head(np_ds1$date_factor)
 levels(np_ds1$date_factor)
 
-np_ds1$yrmm <- floor_date(np_ds1$activity_start_date, "month")
+
+np_ds1$yrmm_factor <- as_factor(as.character(np_ds1$yrmm))
+head(np_ds1$yrmm_factor)
+levels(np_ds1$yrmm_factor)
+
 
 # create sf object
 coords <- data.frame(longitude  = np_ds1$dep_longitude, latitude = np_ds1$dep_latitude)
@@ -391,7 +399,7 @@ ggplot(tp_stations, aes(x = SEGMENT_NA, y = log(dep_result_value_number))) + geo
 ## Map Animation
 
 Make sure use tn_stations and tp_stations so don't have duplicate stations. Also, need to set year-month as factor using the ym function in lubridate rather than date.
-
+Have both daily and monthly loops.
 ```{r animate}
 
 tn_bubble <- tm_shape(subbay_1) +
@@ -400,9 +408,10 @@ tm_shape(tn_stations) +
   tm_bubbles(size =  "dep_result_value_number",
              size.legend = tm_legend("TN (mg/L"))
 
+# daily loop
 tn_bubble + tm_animate(frame = "date_factor", fps = 1, play = "loop")
-
-
+# monthly loop
+tn_bubble + tm_animate(frame = "yrmm_factor", fps = 1, play = "loop")
 
 tm_shape(World) +
     tm_fill("#dddddd") +
@@ -421,8 +430,11 @@ tm_shape(tp_stations) +
              # size.scale = tm_scale_continuous_log(values.scale = "dep_result_value_number"),
              size.legend = tm_legend("TP (mg/L)"))
 
+#daily loop
 tp_bubble + tm_animate(frame = "date_factor", fps = 1, play = "loop")
 
+# monthly loop
+tp_bubble + tm_animate(frame = "yrmm_factor", fps = 1, play = "loop")
 
 ```
 
