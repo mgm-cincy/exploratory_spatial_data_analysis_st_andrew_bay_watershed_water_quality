@@ -30,6 +30,8 @@ library(gifski) #for tmap animation
 
 ## Log
 
+2025-12-12 made tmap animation using monthly loop
+
 2025-12-05 made date a factor for tmap animation
 
 2025-12-02 pulled in Bays_Bayous_Lakes_V1.shp
@@ -38,7 +40,7 @@ library(gifski) #for tmap animation
 
 2025-11-21 Bring in csv files
 
-## Reading in Data
+## Reading in Data and Formatting Date Variables
 
 Two csv file, one on nutrients and other on conductivity, provided by Rose Horn, SASJBEP, by email on November 13, 2025. Rose pulled the data from WIN. Note activity_start_date comes in as character.
 
@@ -85,7 +87,10 @@ np_ds1$yrmm_factor <- as_factor(as.character(np_ds1$yrmm))
 head(np_ds1$yrmm_factor)
 levels(np_ds1$yrmm_factor)
 
+```
 
+## Create sf object
+```{r create_sf}
 # create sf object
 coords <- data.frame(longitude  = np_ds1$dep_longitude, latitude = np_ds1$dep_latitude)
 head(coords)
@@ -215,7 +220,7 @@ tp_sum_monitoring_name <- tp_ds1 %>%
 
 ```
 
-## Spatial Intersect
+## Sub-bay Spatial Intersect
 
 Does spatial intersection result in, for example, of upper Crooked Creek being excluded?
 
@@ -263,7 +268,7 @@ sub_np_stations %>%
 
 ```
 
-## Sub-bay Summaries
+## Sub-bay Stations
 
 tn_stations and tp_stations get rid of duplicates. Also try get_dupes function in janitor package.
 
@@ -398,8 +403,8 @@ ggplot(tp_stations, aes(x = SEGMENT_NA, y = log(dep_result_value_number))) + geo
 
 ## Map Animation
 
-Make sure use tn_stations and tp_stations so don't have duplicate stations. Also, need to set year-month as factor using the ym function in lubridate rather than date.
-Have both daily and monthly loops.
+Make sure use tn_stations and tp_stations so don't have duplicate stations. Also, need to set year-month as factor using the ym function in lubridate rather than date. Have both daily and monthly loops.
+
 ```{r animate}
 
 tn_bubble <- tm_shape(subbay_1) +
@@ -438,7 +443,34 @@ tp_bubble + tm_animate(frame = "yrmm_factor", fps = 1, play = "loop")
 
 ```
 
-## Parse Date Information
+## Time Series
+```{r time_series}
+
+ggplot(tn_stations, aes(x = activity_start_date, y = dep_result_value_number)) + 
+  geom_point()
+
+ggplot(tn_stations, aes(x = activity_start_date, y = dep_result_value_number)) + 
+  geom_point() + 
+  labs(x = "Date", y = "TN, (mg/L)", title = "Total Nitrogen in Bay Segments", subtitle = "WIN Data from 2018-12-07 to 2023-08-28, n = 420") + 
+  facet_wrap(vars(SEGMENT_NA))
+
+
+ggplot(tp_stations, aes(x = activity_start_date, y = dep_result_value_number)) + 
+  geom_point()
+
+ggplot(tp_stations, aes(x = activity_start_date, y = log(dep_result_value_number))) + 
+  geom_point()
+
+ggplot(tp_stations, aes(x = activity_start_date, y = log(dep_result_value_number))) + 
+  geom_point() + 
+  labs(x = "Date", y = "Log TP, (mg/L)", title = "Total Phosphorus in Bay Segments", subtitle = "WIN Data from 2018-12-07 to 2023-08-28, n = 1231") + 
+  facet_wrap(vars(SEGMENT_NA))
+
+ggplot(tn_stations, aes(x = SEGMENT_NA, y = dep_result_value_number)) + geom_boxplot(varwidth = TRUE) + labs(x = "Segment Name", y = "TN, (mg/L)", title = "Total Nitrogen in Bay Segments", subtitle = "WIN Data from 2018-12-07 to 2023-08-28, n = 420")
+
+
+```
+
 
 ## HUCs
 
