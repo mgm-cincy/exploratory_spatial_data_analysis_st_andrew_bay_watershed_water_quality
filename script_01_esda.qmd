@@ -90,6 +90,7 @@ levels(np_ds1$yrmm_factor)
 ```
 
 ## Create sf object
+
 ```{r create_sf}
 # create sf object
 coords <- data.frame(longitude  = np_ds1$dep_longitude, latitude = np_ds1$dep_latitude)
@@ -391,6 +392,12 @@ For now, I am going to believe and assume that tn_stations and tp_stations accur
 
 ggplot(tn_stations, aes(x = SEGMENT_NA, y = dep_result_value_number)) + geom_boxplot(varwidth = TRUE) + labs(x = "Segment Name", y = "TN, (mg/L)", title = "Total Nitrogen in Bay Segments", subtitle = "WIN Data from 2018-12-07 to 2023-08-28, n = 420")
 
+
+ggplot(tn_stations, aes(x = dep_result_value_number, y = monitoring_location_id)) + geom_boxplot(varwidth = TRUE) + labs(y = "Station ID", x = "TN, (mg/L)", title = "Total Nitrogen in Bay Segments", subtitle = "WIN Data from 2018-12-07 to 2023-08-28, n = 420")
+
+ggplot(tn_stations, aes(x = dep_result_value_number, y = monitoring_location_id)) + geom_boxplot(varwidth = TRUE) + labs(y = "Station ID", x = "TN, (mg/L)", title = "Total Nitrogen in Bay Segments", subtitle = "WIN Data from 2018-12-07 to 2023-08-28, n = 420") +
+  facet_wrap(vars(SEGMENT_NA))
+
 ```
 
 ```{r boxplot_tp}
@@ -398,6 +405,17 @@ ggplot(tn_stations, aes(x = SEGMENT_NA, y = dep_result_value_number)) + geom_box
 ggplot(tp_stations, aes(x = SEGMENT_NA, y = log(dep_result_value_number))) + geom_boxplot(varwidth = TRUE) + labs(x = "Segment Name", y = "Log TP, (mg/L)", title = "Total Phosphorus in Bay Segments", subtitle = "WIN Data from 2016-07-20 to 2023-12-20, n = 1231")
 
 ggplot(tp_stations, aes(x = SEGMENT_NA, y = log(dep_result_value_number))) + geom_boxplot(varwidth = TRUE) + labs(x = "Segment Name", y = "Log TP, (mg/L)", title = "Total Phosphorus in Bay Segments", subtitle = "WIN Data from 2016-07-20 to 2023-12-20, n = 1231") + facet_wrap(vars(organization_name))
+
+ggplot(tp_stations, aes(x = log(dep_result_value_number), y = monitoring_location_id)) + geom_boxplot(varwidth = TRUE) + labs(y = "Station ID", x = "Log TP, (mg/L)", title = "Total Phosphorus in Bay Segments", subtitle = "WIN Data from 2016-07-20 to 2023-12-20, n = 1231") + facet_wrap(vars(organization_name))
+
+
+ggplot(tp_stations, aes(x = log(dep_result_value_number), y = monitoring_location_id)) + geom_boxplot(varwidth = TRUE) + labs(y = "Station ID", x = "Log TP, (mg/L)", title = "Total Phosphorus in Bay Segments", subtitle = "WIN Data from 2016-07-20 to 2023-12-20, n = 1231") + facet_wrap(vars(SEGMENT_NA))
+
+
+ggplot(tp_stations |> filter(organization_name == "FDEP WATERSHED ASSESSMENT SECTION"), aes(x = log(dep_result_value_number), y = monitoring_location_id)) + geom_boxplot(varwidth = TRUE) + labs(y = "Station ID", x = "Log TP, (mg/L)", title = "Total Phosphorus in Bay Segments", subtitle = "WIN Data from 2016-07-20 to 2023-12-20, n = 1231") + facet_wrap(vars(SEGMENT_NA))
+
+ggplot(tp_stations |> filter(organization_name == "FLORIDA LAKEWATCH"), aes(x = log(dep_result_value_number), y = monitoring_location_id)) + geom_boxplot(varwidth = TRUE) + labs(y = "Station ID", x = "Log TP, (mg/L)", title = "Total Phosphorus in Bay Segments", subtitle = "WIN Data from 2016-07-20 to 2023-12-20, n = 1231") + facet_wrap(vars(SEGMENT_NA))
+
 
 ```
 
@@ -444,6 +462,7 @@ tp_bubble + tm_animate(frame = "yrmm_factor", fps = 1, play = "loop")
 ```
 
 ## Time Series
+
 ```{r time_series}
 
 ggplot(tn_stations, aes(x = activity_start_date, y = dep_result_value_number)) + 
@@ -470,7 +489,6 @@ ggplot(tn_stations, aes(x = SEGMENT_NA, y = dep_result_value_number)) + geom_box
 
 
 ```
-
 
 ## HUCs
 
