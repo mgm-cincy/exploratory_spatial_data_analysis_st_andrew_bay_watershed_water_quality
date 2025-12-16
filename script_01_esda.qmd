@@ -542,22 +542,51 @@ ggplot(tn_stations, aes(x = SEGMENT_NA, y = dep_result_value_number)) + geom_box
 
 ```
 
-
 ## tmap and histogram
+
 ```{r}
 
 tn_stations_2019_04 <- dplyr::filter(tn_stations, yrmm_factor == "2019-04-01")
 
 tmap_mode("plot")
 tn_map_201904 <- tm_shape(subbay_1) +
-  tm_title("Total Nitrogen in Bay Segments, April 2019, n =20")  + 
+  tm_polygons() +
+  tm_title("Total Nitrogen in Bay Segments, April 2019, n =
+           20")  + 
   tm_compass(position = c("LEFT", "BOTTOM")) +
   tm_scalebar(position = c("LEFT", "BOTTOM")) +
   tm_shape(tn_stations_2019_04) +
   tm_symbols(fill = "dep_result_value_number",
              fill.chart = tm_chart_histogram())
   
+
+tp_stations_2019_04 <- dplyr::filter(tp_stations, yrmm_factor == "2019-04-01")
+
+tmap_mode("plot")
+tp_map_201904 <- tm_shape(subbay_1) +
+  tm_polygons() +
+  tm_title("Total Phosphorus in Bay Segments, April 2019, n =
+           47")  + 
+  tm_compass(position = c("LEFT", "BOTTOM")) +
+  tm_scalebar(position = c("LEFT", "BOTTOM")) +
+  tm_shape(tp_stations_2019_04) +
+  tm_symbols(fill = "dep_result_value_number",
+             fill.chart = tm_chart_histogram())
+
+
+tp_stations_2019_04_no_outlier <- filter(tp_stations_2019_04, dep_result_value_number < 0.560)
   
+tm_shape(subbay_1) +
+  tm_polygons() +
+  tm_title("Total Phosphorus in Bay Segments, April 2019,
+  n = 47, dropped outlier")  + 
+  tm_compass(position = c("LEFT", "BOTTOM")) +
+  tm_scalebar(position = c("LEFT", "BOTTOM")) +
+  tm_shape(tp_stations_2019_04_no_outlier) +
+  tm_symbols(fill = "dep_result_value_number",
+             fill.chart = tm_chart_histogram())
+
+
 # plot mode is static and supports charts function  
 tmap_mode("plot")
 sr_map_pH_plot <- tm_shape(basin) + 
