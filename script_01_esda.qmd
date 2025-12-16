@@ -277,9 +277,10 @@ tn_stations and tp_stations get rid of duplicates. Also try get_dupes function i
 
 A lot more tp stations than tn stations. Is that because tp almost always has samples with detectable concentrations whereas tn has fewer samples with detectable concentrations? Are nondetects entered into WIN? Do an inner join to find what observations in tn have a matching key in y. Also, I need to check for duplicate entries.
 
-For tn_stations, have 31 months of sampling with number of stations ranging from 1 to 20 stations. April 2019 is when 20 stations were sampled. In 2020, 2021, and 2022 have up to 18 stations sampled in some months. 
+For tn_stations, have 31 months of sampling with number of stations ranging from 1 to 20 stations. April 2019 is when 20 stations were sampled. In 2020, 2021, and 2022 have up to 18 stations sampled in some months.
 
 ### TN Subbay Summaries
+
 ```{r tn_subbay_summaries}
 tn_sub1 <- filter(sub_np1, dep_analyte_name == "Nitrogen- Total") 
 # tn data is only from Florida Lakewatch
@@ -339,7 +340,9 @@ tn_month_sum_stations <- tn_stations %>%
 ```
 
 ### TP Subbay Summaries
+
 For TP stations, have 77 months of sampling, with a max of 47 stations sampled in April 2019, then 38, 37, and 30 sampled in June 2019, August 2019, and June 2020, respectively. Have 4 months where semivariogram sample size requirement of 30 is met. In April 2019 all four organizations sampled. Was there some coordinated effort to do this?
+
 ```{r tp_subbays_summaries}
 tp_sub1 <- filter(sub_np1, dep_analyte_name == "Phosphorus- Total")
 # lot more tp obs/stations than tn. is that b/c tn samples had a lot of nondetects whereas tp samples are almost always detectable?
@@ -417,7 +420,9 @@ I am very suspicious that tn_sub1 is almost exactly twice the number of observat
 For now, I am going to believe and assume that tn_stations and tp_stations accurately reflects the number of observations.
 
 ## Boxplots
+
 Note that some of the station monitoring location ID do not correspond to the spatially intersected subbay names. For tn_stations, have 24 distinct monitoring location IDs. For tp_stations, have 47.
+
 ```{r boxplot_tn}
 
 ggplot(tn_stations, aes(x = SEGMENT_NA, y = dep_result_value_number)) + geom_boxplot(varwidth = TRUE) + labs(x = "Segment Name", y = "TN, (mg/L)", title = "Total Nitrogen in Bay Segments", subtitle = "WIN Data from 2018-12-07 to 2023-08-28, n = 420")
@@ -492,7 +497,9 @@ tp_bubble + tm_animate(frame = "yrmm_factor", fps = 1, play = "loop")
 ```
 
 ## Time Series
-For TN have 24 stations and at most 29 dates. What happened in late 2021 for all stations to have hight TN values?
+
+For TN have 24 stations and at most 29 dates. What happened in late 2021 for all stations to have high TN values?
+
 ```{r time_series}
 
 ggplot(tn_stations, aes(x = activity_start_date, y = dep_result_value_number)) + 
@@ -532,6 +539,39 @@ ggplot(tp_stations, aes(x = activity_start_date, y = log(dep_result_value_number
 
 ggplot(tn_stations, aes(x = SEGMENT_NA, y = dep_result_value_number)) + geom_boxplot(varwidth = TRUE) + labs(x = "Segment Name", y = "TN, (mg/L)", title = "Total Nitrogen in Bay Segments", subtitle = "WIN Data from 2018-12-07 to 2023-08-28, n = 420")
 
+
+```
+
+
+## tmap and histogram
+```{r}
+
+tn_stations_2019_04 <- dplyr::filter(tn_stations, yrmm_factor == "2019-04-01")
+
+tmap_mode("plot")
+tn_map_201904 <- tm_shape(subbay_1) +
+  tm_title("Total Nitrogen in Bay Segments, April 2019, n =20")  + 
+  tm_compass(position = c("LEFT", "BOTTOM")) +
+  tm_scalebar(position = c("LEFT", "BOTTOM")) +
+  tm_shape(tn_stations_2019_04) +
+  tm_symbols(fill = "dep_result_value_number",
+             fill.chart = tm_chart_histogram())
+  
+  
+# plot mode is static and supports charts function  
+tmap_mode("plot")
+sr_map_pH_plot <- tm_shape(basin) + 
+  tm_borders(col = "black", lwd = 0.5, lty = "dashed")+
+  tm_title("Seven Runs Watershed Stream Survey\nAverage pH 5.3 (5.1, 5.5), 95% Confidence Limits") + 
+  tm_compass(position = c("LEFT", "BOTTOM")) +
+  tm_scalebar(position = c("LEFT", "BOTTOM")) +
+  tm_shape(sr_sf) + tm_lines() + 
+  tm_shape(dt_2) + 
+  tm_symbols(fill = "pH", 
+             fill.chart = tm_chart_histogram())
+
+sr_map_pH_plot
+# tmap_save(sr_map_pH_plot, "tmaps/pH_histogram_v1_20251027.jpeg", width = 7, height = 3.5, dpi = 150)
 
 ```
 
