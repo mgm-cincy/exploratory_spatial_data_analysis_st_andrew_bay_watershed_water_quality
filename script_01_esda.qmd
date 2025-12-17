@@ -223,7 +223,7 @@ tp_sum_monitoring_name <- tp_ds1 %>%
 
 ```
 
-## Sub-bay Spatial Intersect
+## Spatial Intersect of Sub-bays
 
 Does spatial intersection result in, for example, of upper Crooked Creek being excluded?
 
@@ -549,42 +549,60 @@ ggplot(tn_stations, aes(x = SEGMENT_NA, y = dep_result_value_number)) + geom_box
 tn_stations_2019_04 <- dplyr::filter(tn_stations, yrmm_factor == "2019-04-01")
 
 tmap_mode("plot")
-tn_map_201904 <- tm_shape(subbay_1) +
+tn_map_201904_v1 <- tm_shape(subbay_1) +
   tm_polygons() +
-  tm_title("Total Nitrogen in Bay Segments, April 2019, n =
-           20")  + 
+  tm_title("Total Nitrogen in Bay Segments,
+  April 2019, n = 20")  + 
   tm_compass(position = c("LEFT", "BOTTOM")) +
   tm_scalebar(position = c("LEFT", "BOTTOM")) +
   tm_shape(tn_stations_2019_04) +
   tm_symbols(fill = "dep_result_value_number",
-             fill.chart = tm_chart_histogram())
+             fill.chart = tm_chart_histogram(),
+             fill.legend = tm_legend(
+               title = "TN (mg/L)"
+             ))
   
+tn_map_201904_v1
+tmap_save(tn_map_201904_v1, "output_map/tn_map_201904_v1_2025-12-17.jpeg", width = 7, height = 3.5, dpi = 150)
+
 
 tp_stations_2019_04 <- dplyr::filter(tp_stations, yrmm_factor == "2019-04-01")
 
 tmap_mode("plot")
-tp_map_201904 <- tm_shape(subbay_1) +
+tp_map_201904_v1 <- tm_shape(subbay_1) +
   tm_polygons() +
-  tm_title("Total Phosphorus in Bay Segments, April 2019, n =
-           47")  + 
+  tm_title("Total Phosphorus in Bay Segments,
+  April 2019, n = 47")  + 
   tm_compass(position = c("LEFT", "BOTTOM")) +
   tm_scalebar(position = c("LEFT", "BOTTOM")) +
   tm_shape(tp_stations_2019_04) +
   tm_symbols(fill = "dep_result_value_number",
-             fill.chart = tm_chart_histogram())
+             fill.chart = tm_chart_histogram(),
+             fill.legend = tm_legend(
+               title = "TP (mg/L)"
+             ))
+
+tp_map_201904_v1
+tmap_save(tp_map_201904_v1, "output_map/tp_map_201904_v1_2025-12-17.jpeg", width = 7, height = 3.5, dpi = 150)
 
 
 tp_stations_2019_04_no_outlier <- filter(tp_stations_2019_04, dep_result_value_number < 0.560)
   
-tm_shape(subbay_1) +
+tp_map_201904_v2 <- tm_shape(subbay_1) +
   tm_polygons() +
   tm_title("Total Phosphorus in Bay Segments, April 2019,
-  n = 47, dropped outlier")  + 
+  n = 46, dropped outlier")  + 
   tm_compass(position = c("LEFT", "BOTTOM")) +
   tm_scalebar(position = c("LEFT", "BOTTOM")) +
   tm_shape(tp_stations_2019_04_no_outlier) +
   tm_symbols(fill = "dep_result_value_number",
-             fill.chart = tm_chart_histogram())
+             fill.chart = tm_chart_histogram(),
+             fill.legend = tm_legend(
+               title = "TP (mg/L)"
+             ))
+
+tp_map_201904_v2
+tmap_save(tp_map_201904_v2, "output_map/tp_map_201904_v2_2025-12-17.jpeg", width = 7, height = 3.5, dpi = 150)
 
 
 # plot mode is static and supports charts function  
