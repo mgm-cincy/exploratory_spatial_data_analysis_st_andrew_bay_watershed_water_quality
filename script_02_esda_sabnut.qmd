@@ -1,0 +1,121 @@
+---
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+## Libraries
+
+```{r libraries}
+library(tidyverse)
+library(sf)
+library(mapview)
+library(janitor)
+library(leaflet)
+library(leafpop) # for popups in 
+library(leafsync) # sync mapview maps
+library(patchwork)
+library(nhdplusTools)
+library(tmap)
+library(forcats)
+library(gifski) #for tmap animation
+```
+
+## Log
+
+2025-12-27 read in win_baywatch_sabnut.csv and using code and data frame names from script_01_esda.qmd
+
+## Reading in Data and Formatting Date Variables
+
+One csv file, win_baywatch_sabnut.csv, uploaded by Ryann Rossi, SASJBEP, on December 23, 2025. Ryan pulled the data from WIN and did some data cleaning. Note activity_start_date comes in as character.
+
+Read in Bays_Bayous_Lakes_V1 shapefile that Rose uploaded to repository.
+
+```{r data}
+np_ds1 <- read_csv("data/win_baywatch_sabnut.csv")
+names(np_ds1)
+np_ds1 <- clean_names(np_ds1)
+# spec(np_ds1)
+# names(np_ds1)
+
+
+# See Long and Lat in decimal degrees and date as character
+View(np_ds1) 
+str(np_ds1)
+glimpse(np_ds1)
+class(np_ds1$date)
+
+#zdates <- distinct(np_ds1, activity_start_date)
+#ym_ds1 <- lubridate::mdy(zdates$activity_start_date)
+#floor_date(ym_ds1, "month")
+#saveRDS(zdates, "zdates")
+
+# with activity start date still character have to assign factors
+# have to create activity start date as factor for tmap animation
+np_ds1$date_factor <- np_ds1$date
+np_ds1$yrmm_factor <- np_ds1$date
+
+# convert to date
+np_ds1$date <- lubridate::mdy(np_ds1$date)
+class(np_ds1$date)
+np_ds1$yrmm <- floor_date(np_ds1$date, "month")
+head(np_ds1$yrmm)
+class(np_ds1$yrmm)
+
+# have to create activity start date as factor for tmap animation
+np_ds1 <- arrange(np_ds1, date)
+np_ds1$date_factor <- as_factor(np_ds1$date_factor)
+head(np_ds1$date_factor)
+levels(np_ds1$date_factor)
+
+
+np_ds1$yrmm_factor <- as_factor(as.character(np_ds1$yrmm))
+head(np_ds1$yrmm_factor)
+levels(np_ds1$yrmm_factor)
+
+# filter(dg_sf1, (!is.na(log_n2o))
+
+np_ds1 <- filter(np_ds1, (!is.na(long)))
+# drops to 10,369 obs and summary(mp_ds2$lat) returns no NA
+
+```
+
+## Create sf object
+Have NA for some lat and long entries so remove these
+```{r create_sf}
+
+# create sf object
+coords <- data.frame(longitude  = np_ds1$long, latitude = np_ds1$lat)
+head(coords)
+
+# See Marc Weber workshop above about Coordinate Reference Systems (CRS)
+
+np_sf1 <- st_as_sf(np_ds1, coords = c("long", "lat"), crs =4269) %>% st_transform((5070))
+
+class(np_sf1)
+# read in shapefile
+nnc_1 <- st_read("data_gis/NNC_Bay_Segments.shp")
+class(nnc_1)
+summary(nnc_1)
+# see that espg code is 3087
+# asking do the two sf objects have the same CRS
+st_crs(np_sf1) == st_crs(nnc_1)
+
+np_sf1 <- np_sf1 %>% st_transform(3087)
+st_crs(np_sf1) == st_crs(nnc_1)
+
+mapview(np_sf1) + mapview(nnc_1)
+
+# mapview(hab_sf1, zcol = "Depth", cex = "Depth", alpha.regions = .8, legend = TRUE, popup = popupTable(hab_sf1, zcol = c("Depth", "Site"))) + mapview(bigbend_seagrass)
+
+bbl_1 <- st_read("data_gis/Bays_Bayous_Lakes_V1.shp")
+class(bbl_1)
+summary(bbl_1)
+
+bbl_1 <- bbl_1 %>% st_transform(3087)
+
+mapview(bbl_1)
+
+mapview(np_sf1) + mapview(bbl_1)
+
+```
+
