@@ -119,3 +119,115 @@ mapview(np_sf1) + mapview(bbl_1)
 
 ```
 
+## Data Structure and Summaries
+
+Six distinct organizations collected monitoring data with Florida Lakewatch being a synonym for St. Andrew Baywatch. An NA organization is listed and missing is NWFWMD. Need to compare Ryann and Rose's queries. Get 1020 dates spanning 1998-07-10 to 2025-04-23. Have 130 distinct monitoring location IDs, including NA. Have 210 distinct monitoring location names. There are 7894 distinct coordinates/locations.
+
+But, I am wondering if DEP assigns coordinates that are not the actual locations of the monitoring station, but instead are always to same place (the centroid) of the spatial feature. Also, are there any analyte code remarks about questionable values?
+
+```{r data_structure}
+names(np_ds1)
+distinct(np_ds1, organization_name)
+
+distinct(np_ds1, date) %>% arrange(., date) %>% 
+  print(n = Inf)
+
+np_ds1 %>% 
+  group_by(organization_name) %>% 
+  summarise(count = n_distinct(monitoring_location_name))
+
+distinct(np_ds1, monitoring_location_id) %>% arrange(., monitoring_location_id) %>% 
+  print(n = Inf)
+
+distinct(np_ds1, monitoring_location_name) %>% arrange(., monitoring_location_name) %>% 
+  print(n = Inf)
+
+distinct(np_ds1, chl) %>% arrange(., chl) %>% print(n = Inf)
+distinct(np_ds1, tn) %>% arrange(., tn) %>% print(n = Inf)
+distinct(np_ds1, tp) %>% arrange(., tp) %>% print(n = Inf)
+
+# distinct monitoring stations
+np_stations <- unique.data.frame(np_sf1) # returns 10,367 obs/stations & geometries
+
+np_stations %>% 
+  group_by(organization_name) %>% 
+  summarise(count = n_distinct(monitoring_location_name))
+
+
+```
+
+Interesting that total phosphorus has monitoring names that include format of DEP's status survey of zone 1 (Z1) for NWFMD region followed by resource type large lake (LL), but that's not the case for total nitrogen.
+
+```{r summaries}
+
+tn_ds1 <- filter(np_ds1, dep_analyte_name == "Nitrogen- Total")
+
+
+
+summarize(tn_ds1, min = fivenum(dep_result_value_number)[1],
+              q1 = fivenum(dep_result_value_number)[2],
+              median = fivenum(dep_result_value_number)[3],
+              q3 = fivenum(dep_result_value_number)[4],
+              max = fivenum(dep_result_value_number)[5],
+              count = dplyr::n(),
+              mean = mean(dep_result_value_number))
+  
+tn_sum_monitoring_name <- tn_ds1 %>% 
+  group_by(monitoring_location_name) %>% 
+  summarize(min = fivenum(dep_result_value_number)[1],
+              q1 = fivenum(dep_result_value_number)[2],
+              median = fivenum(dep_result_value_number)[3],
+              q3 = fivenum(dep_result_value_number)[4],
+              max = fivenum(dep_result_value_number)[5],
+              count = dplyr::n(),
+              mean = mean(dep_result_value_number))
+
+
+tp_ds1 <- filter(np_ds1, dep_analyte_name == "Phosphorus- Total")
+
+summarize(tp_ds1, min = fivenum(dep_result_value_number)[1],
+              q1 = fivenum(dep_result_value_number)[2],
+              median = fivenum(dep_result_value_number)[3],
+              q3 = fivenum(dep_result_value_number)[4],
+              max = fivenum(dep_result_value_number)[5],
+              count = dplyr::n(),
+              mean = mean(dep_result_value_number))
+  
+tp_sum_monitoring_name <- tp_ds1 %>% 
+  group_by(monitoring_location_name) %>% 
+  summarize(min = fivenum(dep_result_value_number)[1],
+              q1 = fivenum(dep_result_value_number)[2],
+              median = fivenum(dep_result_value_number)[3],
+              q3 = fivenum(dep_result_value_number)[4],
+              max = fivenum(dep_result_value_number)[5],
+              count = dplyr::n(),
+              mean = mean(dep_result_value_number))
+
+    iris %>%
+          group_by(Species) %>%
+          summarize(min = fivenum(Petal.Width)[1],
+                    low = fivenum(Petal.Width)[2],
+                    median = fivenum(Petal.Width)[3],
+                    upper = fivenum(Petal.Width)[4],
+                    max = fivenum(Petal.Width)[5],
+                    count = dplyr::n())
+
+```
+
+## Spatial Intersect of Sub-bays
+
+Does spatial intersection result in, for example, of upper Crooked Creek being excluded?
+
+```{r st_intersect}
+# four sub_bays
+subbay_1 <- dplyr::filter(bbl_1, SEGMENT_NA == "West Bay" | SEGMENT_NA == "North Bay" | SEGMENT_NA == "St. Andrew Bay" | SEGMENT_NA == "East Bay")
+
+mapview(subbay_1)
+sub_np1 <- st_intersection(np_sf1, subbay_1)
+head(sub_np1)
+
+
+mapview(sub_np1) + mapview(bbl_1)
+mapview(sub_np1) + mapview(subbay_1)
+
+```
