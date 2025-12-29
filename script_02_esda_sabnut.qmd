@@ -129,6 +129,8 @@ But, I am wondering if DEP assigns coordinates that are not the actual locations
 names(np_ds1)
 distinct(np_ds1, organization_name)
 
+distinct(np_ds1, sampling_agency_name) # shows ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.
+
 distinct(np_ds1, date) %>% arrange(., date) %>% 
   print(n = Inf)
 
@@ -153,71 +155,94 @@ np_stations %>%
   group_by(organization_name) %>% 
   summarise(count = n_distinct(monitoring_location_name))
 
+# distinct bay
+distinct(np_ds1, bay) %>% print(n = Inf)
+
+np_ds1 %>% 
+  group_by(bay) %>% 
+  summarise(count = n_distinct(monitoring_location_name)) %>% 
+  print(n = Inf)
 
 ```
 
 Interesting that total phosphorus has monitoring names that include format of DEP's status survey of zone 1 (Z1) for NWFMD region followed by resource type large lake (LL), but that's not the case for total nitrogen.
 
 ```{r summaries}
-
-tn_ds1 <- filter(np_ds1, dep_analyte_name == "Nitrogen- Total")
-
-
-
-summarize(tn_ds1, min = fivenum(dep_result_value_number)[1],
-              q1 = fivenum(dep_result_value_number)[2],
-              median = fivenum(dep_result_value_number)[3],
-              q3 = fivenum(dep_result_value_number)[4],
-              max = fivenum(dep_result_value_number)[5],
+# tn
+dplyr::select(np_ds1, tn) %>% 
+summarize(., min = fivenum(tn)[1],
+              q1 = fivenum(tn)[2],
+              median = fivenum(tn)[3],
+              q3 = fivenum(tn)[4],
+              max = fivenum(tn)[5],
               count = dplyr::n(),
-              mean = mean(dep_result_value_number))
+              mean = mean(tn, na.rm = TRUE),
+              na_count = sum(is.na(tn)))
+
+dplyr::select(np_ds1, tn, bay) %>% 
+group_by(., bay) %>% 
+summarize(., min = fivenum(tn)[1],
+              q1 = fivenum(tn)[2],
+              median = fivenum(tn)[3],
+              q3 = fivenum(tn)[4],
+              max = fivenum(tn)[5],
+              count = dplyr::n(),
+              mean = mean(tn, na.rm = TRUE),
+              na_count = sum(is.na(tn))) %>% 
+print(n = Inf)
+
+# tp
+dplyr::select(np_ds1, tp) %>% 
+summarize(., min = fivenum(tp)[1],
+              q1 = fivenum(tp)[2],
+              median = fivenum(tp)[3],
+              q3 = fivenum(tp)[4],
+              max = fivenum(tp)[5],
+              count = dplyr::n(),
+              mean = mean(tp, na.rm = TRUE),
+              na_count = sum(is.na(tp)))
+
+dplyr::select(np_ds1, tp, bay) %>% 
+group_by(., bay) %>% 
+summarize(., min = fivenum(tp)[1],
+              q1 = fivenum(tp)[2],
+              median = fivenum(tp)[3],
+              q3 = fivenum(tp)[4],
+              max = fivenum(tp)[5],
+              count = dplyr::n(),
+              mean = mean(tp, na.rm = TRUE),
+              na_count = sum(is.na(tp))) %>% 
+print(n = Inf)
+
+# chl
+dplyr::select(np_ds1, chl) %>% 
+summarize(., min = fivenum(chl)[1],
+              q1 = fivenum(chl)[2],
+              median = fivenum(chl)[3],
+              q3 = fivenum(chl)[4],
+              max = fivenum(chl)[5],
+              count = dplyr::n(),
+              mean = mean(chl, na.rm = TRUE),
+              na_count = sum(is.na(chl)))
+
+dplyr::select(np_ds1, chl, bay) %>% 
+group_by(., bay) %>% 
+summarize(., min = fivenum(chl)[1],
+              q1 = fivenum(chl)[2],
+              median = fivenum(chl)[3],
+              q3 = fivenum(chl)[4],
+              max = fivenum(chl)[5],
+              count = dplyr::n(),
+              mean = mean(chl, na.rm = TRUE),
+              na_count = sum(is.na(chl))) %>% 
+print(n = Inf)
   
-tn_sum_monitoring_name <- tn_ds1 %>% 
-  group_by(monitoring_location_name) %>% 
-  summarize(min = fivenum(dep_result_value_number)[1],
-              q1 = fivenum(dep_result_value_number)[2],
-              median = fivenum(dep_result_value_number)[3],
-              q3 = fivenum(dep_result_value_number)[4],
-              max = fivenum(dep_result_value_number)[5],
-              count = dplyr::n(),
-              mean = mean(dep_result_value_number))
-
-
-tp_ds1 <- filter(np_ds1, dep_analyte_name == "Phosphorus- Total")
-
-summarize(tp_ds1, min = fivenum(dep_result_value_number)[1],
-              q1 = fivenum(dep_result_value_number)[2],
-              median = fivenum(dep_result_value_number)[3],
-              q3 = fivenum(dep_result_value_number)[4],
-              max = fivenum(dep_result_value_number)[5],
-              count = dplyr::n(),
-              mean = mean(dep_result_value_number))
-  
-tp_sum_monitoring_name <- tp_ds1 %>% 
-  group_by(monitoring_location_name) %>% 
-  summarize(min = fivenum(dep_result_value_number)[1],
-              q1 = fivenum(dep_result_value_number)[2],
-              median = fivenum(dep_result_value_number)[3],
-              q3 = fivenum(dep_result_value_number)[4],
-              max = fivenum(dep_result_value_number)[5],
-              count = dplyr::n(),
-              mean = mean(dep_result_value_number))
-
-    iris %>%
-          group_by(Species) %>%
-          summarize(min = fivenum(Petal.Width)[1],
-                    low = fivenum(Petal.Width)[2],
-                    median = fivenum(Petal.Width)[3],
-                    upper = fivenum(Petal.Width)[4],
-                    max = fivenum(Petal.Width)[5],
-                    count = dplyr::n())
-
 ```
 
 ## Spatial Intersect of Sub-bays
 
-Does spatial intersection result in, for example, of upper Crooked Creek being excluded?
-
+Does spatial intersection result in, for example, of upper Crooked Creek being excluded? Yes, it does. Do Rose and Ryann needed to include, possibly, NHDPlus polygons of Crooked Creek and Burnt Mill Creek so as not to "lose" stations in those locations?
+Spatial intersection with sub-bay drops obs to 5737
 ```{r st_intersect}
 # four sub_bays
 subbay_1 <- dplyr::filter(bbl_1, SEGMENT_NA == "West Bay" | SEGMENT_NA == "North Bay" | SEGMENT_NA == "St. Andrew Bay" | SEGMENT_NA == "East Bay")
