@@ -256,3 +256,93 @@ mapview(sub_np1) + mapview(bbl_1)
 mapview(sub_np1) + mapview(subbay_1)
 
 ```
+
+## Sub-bay Data Structure
+Note sector does not always match SEGMENT_NA
+```{r subbay_data_struct}
+names(sub_np1)
+distinct(sub_np1, organization_name) # 4 organizations
+
+distinct(sub_np1, sampling_agency_name)
+
+distinct(sub_np1, date) %>% arrange(., date) %>% 
+  print(n = Inf) #660 dates from 1990-02-11 to 2024-12-17
+
+sub_np1 %>% 
+  group_by(organization_name) %>% 
+  summarise(count = n_distinct(monitoring_location_name))
+
+distinct(sub_np1, monitoring_location_id) %>% arrange(., monitoring_location_id) %>% 
+  print(n = Inf)
+
+distinct(sub_np1, monitoring_location_name) %>% arrange(., monitoring_location_name) %>%   print(n = Inf)
+
+distinct(sub_np1, bay) %>% arrange(., bay) %>%   print(n = Inf)
+# return 15 bays
+
+# distinct(sub_np1, dep_analyte_name)
+
+# distinct monitoring stations
+sub_np_stations <- unique.data.frame(sub_np1) # returns 5736 obs/stations & geometries
+
+sub_np_stations %>% 
+  group_by(organization_name) %>% 
+  summarise(count = n_distinct(monitoring_location_name))
+
+distinct(sub_np_stations, sector)
+```
+
+## Subbay Stations
+```{r subbay_tn}
+
+# tn
+dplyr::select(sub_np_stations, tn) %>% 
+summarize(., min = fivenum(tn)[1],
+              q1 = fivenum(tn)[2],
+              median = fivenum(tn)[3],
+              q3 = fivenum(tn)[4],
+              max = fivenum(tn)[5],
+              count = dplyr::n(),
+              mean = mean(tn, na.rm = TRUE),
+              na_count = sum(is.na(tn)))
+
+dplyr::select(sub_np_stations, tn, SEGMENT_NA) %>% 
+group_by(., SEGMENT_NA) %>% 
+summarize(., min = fivenum(tn)[1],
+              q1 = fivenum(tn)[2],
+              median = fivenum(tn)[3],
+              q3 = fivenum(tn)[4],
+              max = fivenum(tn)[5],
+              count = dplyr::n(),
+              mean = mean(tn, na.rm = TRUE),
+              na_count = sum(is.na(tn))) %>% 
+print(n = Inf)
+
+mapview(sub_np_stations)
+
+sub_np_stations %>% 
+  group_by(SEGMENT_NA) %>% 
+  summarise(count = n_distinct(u_of_f_number))
+
+# tn_sub1 <- filter(sub_np1, dep_analyte_name == "Nitrogen- Total") 
+# tn data is only from Florida Lakewatch
+
+# distinct(tn_sub1, organization_name)
+
+# distinct tn monitoring stations
+# tn_stations <- unique.data.frame(tn_sub1)
+
+# mapview(tn_sub1)
+
+# mapview(tn_stations)
+```
+
+## North Bay
+Believe it has smalles n of stations based on SEGEMENT_NA
+```{r northbay}
+nb_ds1 <- dplyr::filter(sub_np_stations, SEGMENT_NA == "North Bay")
+
+mapview(nb_ds1)
+# why does map show 8 stations
+```
+
