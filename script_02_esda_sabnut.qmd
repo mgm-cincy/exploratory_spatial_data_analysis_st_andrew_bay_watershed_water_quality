@@ -259,6 +259,7 @@ mapview(sub_np1) + mapview(subbay_1)
 
 ## Sub-bay Data Structure
 Note sector does not always match SEGMENT_NA
+
 ```{r subbay_data_struct}
 names(sub_np1)
 distinct(sub_np1, organization_name) # 4 organizations
@@ -338,11 +339,52 @@ sub_np_stations %>%
 ```
 
 ## North Bay
-Believe it has smalles n of stations based on SEGEMENT_NA
+Believe it has smallest n of stations based on SEGEMENT_NA
+Does not appear to be unique station identifier as have NA entries for U of F number, in addition to North Bay-1, North Bay-2, North Bay-3, and Fannin Bayou-1
 ```{r northbay}
 nb_ds1 <- dplyr::filter(sub_np_stations, SEGMENT_NA == "North Bay")
 
+distinct(nb_ds1, u_of_f_number)
+distinct(nb_ds1, monitoring_location_name)
+distinct(nb_ds1, sta_nr)
+# does 1.1, 1.2,1.3, and 1.7 corresponds to North Bay 1, 2, 3 and Fannin Bayou?
+
+dplyr::select(nb_ds1, tn, monitoring_location_name) %>% 
+group_by(., monitoring_location_name) %>% 
+summarize(., min = fivenum(tn)[1],
+              q1 = fivenum(tn)[2],
+              median = fivenum(tn)[3],
+              q3 = fivenum(tn)[4],
+              max = fivenum(tn)[5],
+              count = dplyr::n(),
+              mean = mean(tn, na.rm = TRUE),
+              na_count = sum(is.na(tn))) %>% 
+print(n = Inf)
+
+# why 620 observations not assigned a monitoring location name
+
+dplyr::select(nb_ds1, tn, sta_nr) %>% 
+group_by(., sta_nr) %>% 
+summarize(., min = fivenum(tn)[1],
+              q1 = fivenum(tn)[2],
+              median = fivenum(tn)[3],
+              q3 = fivenum(tn)[4],
+              max = fivenum(tn)[5],
+              count = dplyr::n(),
+              mean = mean(tn, na.rm = TRUE),
+              na_count = sum(is.na(tn))) %>% 
+print(n = Inf)
+# now returns only 178 with sta_nr NA
+
+
 mapview(nb_ds1)
 # why does map show 8 stations
+
+nb_ds2 <- dplyr::select(nb_ds1, tn, monitoring_location_name, geometry)
+
+nb_geom <- dplyr::select(nb_ds1, geometry)
+
+distinct(nb_geom)
+mapview(nb_geom)
 ```
 
