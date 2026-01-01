@@ -388,3 +388,42 @@ distinct(nb_geom)
 mapview(nb_geom)
 ```
 
+## tmap North Bay
+Does tn is NA means no sample taken or sample taken by concentration was not detectable? Filter to just year 1999 gives 43 observations, but with some tn being NA. Filter 1999 and (!(is.na(tn))) gives 12 observations. tmap does not like missing values so no longer have Fannin Bayou. Was Fannin Bayou not sampled or was it sampled and had non-detecable concentration.
+```{r}
+
+distinct(nb_ds1, year) %>% print(n=Inf)
+
+# (dg_sf1, (!is.na(log_n2o))
+nb_ds3 <- filter(nb_ds1, year == "1990")
+nb_ds4 <- filter(nb_ds1, year == "1990" & (!(is.na(tn))))
+
+tmap_mode("plot")
+tn_map_1990_v1 <- tm_shape(subbay_1) +
+  tm_polygons() +
+  tm_title("Detectable Total Nitrogen (mg/L) in North Bay, 1990")  + 
+  tm_shape(nb_ds4) +
+  tm_symbols(size = "tn") +
+  tm_facets(by = "yrmm_factor")
+
+
+
+tn_bubble <- tm_shape(subbay_1) +
+  tm_fill("#dddddd") + 
+tm_shape(nb_ds3) +
+  tm_bubbles(size =  "tn",
+             # size.scale = tm_scale_continuous_log(values.scale = "dep_result_value_number"),
+             size.legend = tm_legend("TN (mg/L)"))
+
+#daily loop
+tn_bubble + tm_animate(frame = "date_factor", fps = 1, play = "loop")
+
+# monthly loop
+tn_bubble + tm_animate(frame = "yrmm_factor", fps = 1, play = "loop")
+
+
+
+  tm_compass(position = c("LEFT", "BOTTOM")) +
+  tm_scalebar(position = c("LEFT", "BOTTOM")) +
+```
+
