@@ -389,7 +389,7 @@ mapview(nb_geom)
 ```
 
 ## tmap North Bay
-Does tn is NA means no sample taken or sample taken by concentration was not detectable? Filter to just year 1999 gives 43 observations, but with some tn being NA. Filter 1999 and (!(is.na(tn))) gives 12 observations. tmap does not like missing values so no longer have Fannin Bayou. Was Fannin Bayou not sampled or was it sampled and had non-detecable concentration.
+Does tn is NA means no sample taken or sample taken by concentration was not detectable? Filter to just year 1999 gives 43 observations, but with some tn being NA. Filter 1999 and (!(is.na(tn))) gives 12 observations. tmap does not like missing values so no longer have Fannin Bayou. Was Fannin Bayou not sampled or was it sampled and had non-detecable concentration. Use tm_symbols(fill = "tn") to get nondetectable NA's mapped.
 ```{r}
 
 distinct(nb_ds1, year) %>% print(n=Inf)
@@ -399,19 +399,20 @@ nb_ds3 <- filter(nb_ds1, year == "1990")
 nb_ds4 <- filter(nb_ds1, year == "1990" & (!(is.na(tn))))
 
 tmap_mode("plot")
+tmap_mode("view")
 tn_map_1990_v1 <- tm_shape(subbay_1) +
   tm_polygons() +
-  tm_title("Detectable Total Nitrogen (mg/L) in North Bay, 1990")  + 
-  tm_shape(nb_ds4) +
-  tm_symbols(size = "tn") +
-  tm_facets(by = "yrmm_factor")
+  tm_title("Detectable and Nondetectable Total Nitrogen (mg/L) in North Bay, 1990")  + 
+  tm_shape(nb_ds3) +
+  tm_symbols(fill = "tn") +
+  tm_facets(by = "date_factor")
 
 
-
+tmap_mode("plot")
 tn_bubble <- tm_shape(subbay_1) +
   tm_fill("#dddddd") + 
 tm_shape(nb_ds3) +
-  tm_bubbles(size =  "tn",
+  tm_symbols(fill =  "tn",
              # size.scale = tm_scale_continuous_log(values.scale = "dep_result_value_number"),
              size.legend = tm_legend("TN (mg/L)"))
 
