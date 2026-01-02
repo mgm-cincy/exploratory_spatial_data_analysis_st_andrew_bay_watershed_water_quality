@@ -389,7 +389,7 @@ mapview(nb_geom)
 ```
 
 ## tmap North Bay
-Does tn is NA means no sample taken or sample taken by concentration was not detectable? Filter to just year 1999 gives 43 observations, but with some tn being NA. Filter 1999 and (!(is.na(tn))) gives 12 observations. tmap does not like missing values so no longer have Fannin Bayou. Was Fannin Bayou not sampled or was it sampled and had non-detecable concentration. Use tm_symbols(fill = "tn") to get nondetectable NA's mapped.
+Does tn is NA means no sample taken or sample taken by concentration was not detectable? Filter to just year 1999 gives 43 observations, but with some tn being NA. Filter 1999 and (!(is.na(tn))) gives 12 observations. tmap does not like missing values so no longer have Fannin Bayou. Was Fannin Bayou not sampled or was it sampled and had non-detecable concentration. Use tm_symbols(fill = "tn") to get nondetectable NA's mapped as missing data. Also, using date_factor showed two April samplings
 ```{r}
 
 distinct(nb_ds1, year) %>% print(n=Inf)
