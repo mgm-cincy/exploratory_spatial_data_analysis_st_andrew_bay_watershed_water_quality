@@ -567,3 +567,12 @@ tn_bubble + tm_animate(frame = "yrmm_factor", fps = 1, play = "loop")
   tm_compass(position = c("LEFT", "BOTTOM")) +
   tm_scalebar(position = c("LEFT", "BOTTOM")) +
 ```
+
+
+## ECDF of Sub-Bays
+```{r ecdf}
+
+ggplot(sub_np_stations, aes(tn, color = SEGMENT_NA)) + stat_ecdf()
+
+```
+
