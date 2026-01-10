@@ -568,11 +568,87 @@ tn_bubble + tm_animate(frame = "yrmm_factor", fps = 1, play = "loop")
   tm_scalebar(position = c("LEFT", "BOTTOM")) +
 ```
 
+## East Bay
+```{r westbay}
+eb_ds1 <- dplyr::filter(sub_np_stations, SEGMENT_NA == "East Bay")
+
+distinct(eb_ds1, u_of_f_number)
+distinct(eb_ds1, monitoring_location_name)
+distinct(eb_ds1, sta_nr)
+# does 1.1, 1.2,1.3, and 1.7 corresponds to North Bay 1, 2, 3 and Fannin Bayou?
+
+dplyr::select(eb_ds1, tn, monitoring_location_name) %>% 
+group_by(., monitoring_location_name) %>% 
+summarize(., min = fivenum(tn)[1],
+              q1 = fivenum(tn)[2],
+              median = fivenum(tn)[3],
+              q3 = fivenum(tn)[4],
+              max = fivenum(tn)[5],
+              count = dplyr::n(),
+              mean = mean(tn, na.rm = TRUE),
+              na_count = sum(is.na(tn))) %>% 
+print(n = Inf)
+
+# why 575 observations not assigned a monitoring location name
+
+dplyr::select(eb_ds1, tn, sta_nr) %>% 
+group_by(., sta_nr) %>% 
+summarize(., min = fivenum(tn)[1],
+              q1 = fivenum(tn)[2],
+              median = fivenum(tn)[3],
+              q3 = fivenum(tn)[4],
+              max = fivenum(tn)[5],
+              count = dplyr::n(),
+              mean = mean(tn, na.rm = TRUE),
+              na_count = sum(is.na(tn))) %>% 
+print(n = Inf)
+# now returns only 1555 with sta_nr NA
+
+dplyr::select(eb_ds1, tn, year) %>% 
+group_by(., year) %>% 
+summarize(., min = fivenum(tn)[1],
+              q1 = fivenum(tn)[2],
+              median = fivenum(tn)[3],
+              q3 = fivenum(tn)[4],
+              max = fivenum(tn)[5],
+              count = dplyr::n(),
+              mean = mean(tn, na.rm = TRUE),
+              na_count = sum(is.na(tn))) %>% 
+print(n = Inf)
+
+dplyr::select(eb_ds1, tn, date_factor) %>% 
+group_by(., date_factor) %>% 
+summarize(., min = fivenum(tn)[1],
+              q1 = fivenum(tn)[2],
+              median = fivenum(tn)[3],
+              q3 = fivenum(tn)[4],
+              max = fivenum(tn)[5],
+              count = dplyr::n(),
+              mean = mean(tn, na.rm = TRUE),
+              na_count = sum(is.na(tn))) %>% 
+print(n = Inf)
+
+
+mapview(eb_ds1)
+# why does map show 8 stations
+
+eb_ds2 <- dplyr::select(eb_ds1, tn, monitoring_location_name, geometry)
+
+eb_geom <- dplyr::select(eb_ds1, geometry)
+
+distinct(eb_geom)
+mapview(eb_geom)
+```
+
+## tmap East Bay
+
 
 ## ECDF of Sub-Bays
 ```{r ecdf}
 
 ggplot(sub_np_stations, aes(tn, color = SEGMENT_NA)) + stat_ecdf()
+
+ggplot(sub_np_stations, aes(tn, color = SEGMENT_NA)) + stat_ecdf() + facet_wrap(vars(year))
 
 ```
 
