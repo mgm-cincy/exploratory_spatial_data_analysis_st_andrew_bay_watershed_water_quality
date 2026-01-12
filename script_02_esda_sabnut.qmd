@@ -681,6 +681,120 @@ tn_bubble + tm_animate(frame = "yrmm_factor", fps = 1, play = "loop")
   tm_scalebar(position = c("LEFT", "BOTTOM")) +
 ```
 
+## St Andrews Bay
+```{r saintandrewsbay}
+sb_ds1 <- dplyr::filter(sub_np_stations, SEGMENT_NA == "St. Andrew Bay")
+
+distinct(sb_ds1, u_of_f_number)
+distinct(sb_ds1, monitoring_location_name) %>% print(n = Inf)
+distinct(sb_ds1, sta_nr)
+# does 1.1, 1.2,1.3, and 1.7 corresponds to North Bay 1, 2, 3 and Fannin Bayou?
+
+
+dplyr::select(sb_ds1, tn, monitoring_location_name) %>% 
+group_by(., monitoring_location_name) %>% 
+summarize(., min = fivenum(tn)[1],
+              q1 = fivenum(tn)[2],
+              median = fivenum(tn)[3],
+              q3 = fivenum(tn)[4],
+              max = fivenum(tn)[5],
+              count = dplyr::n(),
+              mean = mean(tn, na.rm = TRUE),
+              na_count = sum(is.na(tn))) %>% 
+print(n = Inf)
+
+# why 620 observations not assigned a monitoring location name
+
+dplyr::select(sb_ds1, tn, sta_nr) %>% 
+group_by(., sta_nr) %>% 
+summarize(., min = fivenum(tn)[1],
+              q1 = fivenum(tn)[2],
+              median = fivenum(tn)[3],
+              q3 = fivenum(tn)[4],
+              max = fivenum(tn)[5],
+              count = dplyr::n(),
+              mean = mean(tn, na.rm = TRUE),
+              na_count = sum(is.na(tn))) %>% 
+print(n = Inf)
+# now returns only 178 with sta_nr NA
+
+dplyr::select(sb_ds1, tn, year) %>% 
+group_by(., year) %>% 
+summarize(., min = fivenum(tn)[1],
+              q1 = fivenum(tn)[2],
+              median = fivenum(tn)[3],
+              q3 = fivenum(tn)[4],
+              max = fivenum(tn)[5],
+              count = dplyr::n(),
+              mean = mean(tn, na.rm = TRUE),
+              na_count = sum(is.na(tn))) %>% 
+print(n = Inf)
+
+dplyr::select(sb_ds1, tn, date_factor) %>% 
+group_by(., date_factor) %>% 
+summarize(., min = fivenum(tn)[1],
+              q1 = fivenum(tn)[2],
+              median = fivenum(tn)[3],
+              q3 = fivenum(tn)[4],
+              max = fivenum(tn)[5],
+              count = dplyr::n(),
+              mean = mean(tn, na.rm = TRUE),
+              na_count = sum(is.na(tn))) %>% 
+print(n = Inf)
+
+
+mapview(sb_ds1)
+# why does map show 8 stations
+
+sb_ds2 <- dplyr::select(sb_ds1, tn, monitoring_location_name, geometry)
+
+sb_geom <- dplyr::select(sb_ds1, geometry)
+
+distinct(sb_geom)
+mapview(sb_geom)
+```
+
+##tmap St. Andrews Bay
+
+```{r tmap_sb}
+
+distinct(sb_ds1, year) %>% print(n=Inf)
+
+# (dg_sf1, (!is.na(log_n2o))
+sb_ds3 <- filter(sb_ds1, year == "2000")
+# wb_ds4 <- filter(wb_ds1, year == "1990" & (!(is.na(tn))))
+
+tmap_mode("plot")
+# tmap_mode("view")
+tn_map_1990_v1 <- tm_shape(subbay_1) +
+  tm_polygons(fill = "white", lwd = 2) +
+  tm_title("Detectable and Nondetectable Total Nitrogen (mg/L) in St. Andrews Bay, 2000")  + 
+  tm_shape(sb_ds3) +
+  tm_symbols(fill = "tn") +
+  tm_facets(by = "date_factor")
+
+tn_map_1990_v1
+
+tmap_mode("plot")
+tn_bubble <- tm_shape(subbay_1) +
+  tm_fill("#dddddd") + 
+tm_shape(sb_ds3) +
+  tm_symbols(fill =  "tn",
+             # size.scale = tm_scale_continuous_log(values.scale = "dep_result_value_number"),
+             size.legend = tm_legend("TN (mg/L)"))
+
+#daily loop
+tn_bubble + tm_animate(frame = "date_factor", fps = 1, play = "loop")
+
+# monthly loop
+tn_bubble + tm_animate(frame = "yrmm_factor", fps = 1, play = "loop")
+
+
+
+  tm_compass(position = c("LEFT", "BOTTOM")) +
+  tm_scalebar(position = c("LEFT", "BOTTOM")) +
+```
+
 
 ## ECDF of Sub-Bays
 ```{r ecdf}
