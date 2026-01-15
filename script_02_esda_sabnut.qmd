@@ -796,6 +796,41 @@ tn_bubble + tm_animate(frame = "yrmm_factor", fps = 1, play = "loop")
 ```
 
 
+## Nondetects Map
+```{r nondetects}
+
+nd_ds1 <- group_by(sub_np_stations, year) %>% 
+  summarize(.,  count = dplyr::n(),
+            na_count = sum(is.na(tn))) %>%
+  mutate(., pct_na = (na_count/count)*100) %>% 
+  print(n = Inf)
+
+  
+tm_shape(subbay_1) +
+  tm_polygons(fill = "white", lwd = 2) +
+  tm_title("Percentage Nondetectable Total Nitrogen in St. Andrews Bay")  + 
+  tm_shape(nd_ds1) +
+  tm_symbols(fill = "pct_na") +
+  tm_facets(by = "year")
+
+nd_ds2 <- sub_np_stations %>% group_by(year,SEGMENT_NA) %>% 
+  summarize(.,  count = dplyr::n(),
+            na_count = sum(is.na(tn))) %>%
+  mutate(., pct_na = (na_count/count)*100) %>% 
+  print(n = Inf)
+
+nd_1990 <- filter(nd_ds, year < 2000)
+
+
+tm_shape(subbay_1) +
+  tm_polygons(fill = "white", lwd = 2) +
+  tm_title("Nondetectable Total Nitrogen (mg/L) in St. Andrews Bay")  + 
+  tm_shape(nd_ds2) +
+  tm_symbols(fill = "na_count") +
+  tm_facets(by = "year")
+```
+
+
 ## ECDF of Sub-Bays
 ```{r ecdf}
 
