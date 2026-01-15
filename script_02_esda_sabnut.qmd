@@ -18,6 +18,7 @@ library(nhdplusTools)
 library(tmap)
 library(forcats)
 library(gifski) #for tmap animation
+library(plotly)
 ```
 
 ## Log
@@ -819,15 +820,27 @@ nd_ds2 <- sub_np_stations %>% group_by(year,SEGMENT_NA) %>%
   mutate(., pct_na = (na_count/count)*100) %>% 
   print(n = Inf)
 
-nd_1990 <- filter(nd_ds, year < 2000)
-
-
 tm_shape(subbay_1) +
   tm_polygons(fill = "white", lwd = 2) +
   tm_title("Nondetectable Total Nitrogen (mg/L) in St. Andrews Bay")  + 
   tm_shape(nd_ds2) +
-  tm_symbols(fill = "na_count") +
+  tm_symbols(fill = "pct_na") +
   tm_facets(by = "year")
+
+
+ggplot(nd_ds2, aes(x = year, y = pct_na, color = SEGMENT_NA)) + geom_point()
+
+ggplot(nd_ds2, aes(x = year, y = pct_na, color = SEGMENT_NA)) + geom_point() +
+  geom_smooth() +
+  facet_wrap(~SEGMENT_NA)
+
+nd_plot <- ggplot(nd_ds2, aes(x = year, y = pct_na, color = SEGMENT_NA)) + geom_point() +
+  geom_smooth() +
+  facet_wrap(~SEGMENT_NA)
+
+ggplotly(nd_plot)
+
+nd_1990 <- filter(nd_ds, year < 2000)
 ```
 
 
