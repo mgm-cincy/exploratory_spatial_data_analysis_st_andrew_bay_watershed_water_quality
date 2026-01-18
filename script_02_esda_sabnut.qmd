@@ -80,6 +80,16 @@ np_ds1 <- filter(np_ds1, (!is.na(long)))
 
 ```
 
+## Explore Duplicates and NAs
+```{r dupes_na}
+# z1 <- get_dupes(np_ds1)
+# 
+# z2 <- filter(np_ds1, (is.na(tn) & !is.na(tp)))
+# 
+# z3 <- filter(np_ds1, is.na(tn))
+```
+
+
 ## Create sf object
 Have NA for some lat and long entries so remove these
 ```{r create_sf}
@@ -799,6 +809,11 @@ tn_bubble + tm_animate(frame = "yrmm_factor", fps = 1, play = "loop")
 
 ## Nondetects Map
 ```{r nondetects}
+
+na_tn1 <- filter(sub_np_stations, is.na(tn)) # returns 2941 obs
+
+# tn NA's occurring when tp is detected
+na_tn2 <- filter(sub_np_stations, is.na(tn) & !is.na(tp))
 
 nd_ds1 <- group_by(sub_np_stations, year) %>% 
   summarize(.,  count = dplyr::n(),
