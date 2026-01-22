@@ -23,6 +23,9 @@ library(plotly)
 
 ## Log
 
+
+2026-01-22 sta_nr assignments seem to indicate Baywatch stations, but also have 1491 obs with NA assigned for sta_nr
+
 2025-12-27 read in win_baywatch_sabnut.csv and using code and data frame names from script_01_esda.qmd
 
 ## Reading in Data and Formatting Date Variables
