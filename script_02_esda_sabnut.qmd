@@ -270,7 +270,7 @@ mapview(sub_np1) + mapview(subbay_1)
 
 ## Sub-bay Data Structure
 Note sector does not always match SEGMENT_NA
-
+Group by sta_nr return 4246 obs out of 5737 as having a sta_nr assignment so I believe those are Baywatch stations. Have 1491 obs with NA station were they collected by other organizations?
 ```{r subbay_data_struct}
 names(sub_np1)
 distinct(sub_np1, organization_name) # 4 organizations
@@ -292,9 +292,24 @@ distinct(sub_np1, monitoring_location_name) %>% arrange(., monitoring_location_n
 distinct(sub_np1, bay) %>% arrange(., bay) %>%   print(n = Inf)
 # return 15 bays
 
+distinct(sub_np1, sta_nr) %>% arrange(., sta_nr) %>% print(n=Inf)
+
+group_by(sub_np1, sta_nr) %>% 
+  summarize(., count = dplyr::n()) %>% 
+  arrange(., sta_nr) %>% 
+  print(n=Inf)
+
+  
+# nd_ds1 <- group_by(sub_np_stations, year) %>% 
+#   summarize(.,  count = dplyr::n(),
+#             na_count = sum(is.na(tn))) %>%
+#   mutate(., pct_na = (na_count/count)*100) %>% 
+#   print(n = Inf)
+
 # distinct(sub_np1, dep_analyte_name)
 
 # distinct monitoring stations
+# drops by 1 from sub_np1 I think b/c of duplicate
 sub_np_stations <- unique.data.frame(sub_np1) # returns 5736 obs/stations & geometries
 
 sub_np_stations %>% 
@@ -302,6 +317,18 @@ sub_np_stations %>%
   summarise(count = n_distinct(monitoring_location_name))
 
 distinct(sub_np_stations, sector)
+
+
+sub_np_stations %>% 
+  group_by(sta_nr) %>% 
+  summarise(count = n_distinct(sta_nr)) %>% 
+  print(n=Inf)
+
+
+sub_np_stations %>% 
+  group_by(sta_nr) %>% 
+  summarise(., count = dplyr::n()) %>% 
+  print(n=Inf)
 ```
 
 ## Subbay Stations
