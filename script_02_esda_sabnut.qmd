@@ -334,6 +334,46 @@ sub_np_stations %>%
   print(n=Inf)
 ```
 
+
+## na_sta_nr Station Data
+Can I idenfiy unique stations identifiers for these observations where sta_nr is NA?
+```{r na_sta_nr}
+filter(sub_np_stations, is.na(sta_nr)) %>% 
+  distinct(., organization_name)
+
+na_sta_nr1 <- filter(sub_np_stations, is.na(sta_nr))
+
+
+# FDEP NORTHWEST REGIONAL OPERATIONS CENTER       5
+# FDEP TALLAHASSEE REGIONAL OPERATIONS CENTER    15
+# FDEP WATERSHED ASSESSMENT SECTION             610
+# FLORIDA LAKEWATCH                             861 
+
+na_sta_nr1 %>% 
+  group_by(organization_name) %>% 
+  summarise(., count = dplyr::n()) %>% 
+  print(n=Inf)
+
+fdep_nw1 <- filter(sub_np_stations, organization_name == "FDEP NORTHWEST REGIONAL OPERATIONS CENTER")
+
+mapview(fdep_nw1)
+# tn is NA for all 5bobservations, but tp and chl detectable concentrations
+# two East Bay stations, one near southeast of downtown PC, the other near
+# Dupont Bridge, each with an April 30, 2019 and December 7, 2020 collection.
+# One West bay station sampled on June 6, 2018.
+
+fdep_tlh1 <- filter(sub_np_stations, organization_name == "FDEP TALLAHASSEE REGIONAL OPERATIONS CENTER")
+
+
+mapview(fdep_tlh1)
+# tn is NA for all 15 observations, but tp and chl detectable concentrations
+# One East Bay station at Sandy Creek, and five observations
+# One North Bay station at Fannin Bayou, and five observations
+# Another North Bay station near Lynn Haven Golf course with five observations
+# Samples collected from 2021-2024
+```
+
+
 ## Subbay Stations
 ```{r subbay_tn}
 
