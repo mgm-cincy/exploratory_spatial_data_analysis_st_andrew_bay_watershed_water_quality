@@ -22,7 +22,7 @@ library(plotly)
 ```
 
 ## Log
-
+2026-01-12 exploring stations and organizations that have sta_nr assigned as NA
 
 2026-01-22 sta_nr assignments seem to indicate Baywatch stations, but also have 1491 obs with NA assigned for sta_nr
 
