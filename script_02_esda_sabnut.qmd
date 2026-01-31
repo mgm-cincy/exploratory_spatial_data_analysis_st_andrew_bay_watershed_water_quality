@@ -22,6 +22,9 @@ library(plotly)
 ```
 
 ## Log
+
+2026-01-31 Rose Horn uploaded Bays_Bayous_Lakes_V2.zip to data_gis
+
 2026-01-12 exploring stations and organizations that have sta_nr assigned as NA
 
 2026-01-22 sta_nr assignments seem to indicate Baywatch stations, but also have 1491 obs with NA assigned for sta_nr
@@ -132,6 +135,19 @@ mapview(bbl_1)
 mapview(np_sf1) + mapview(bbl_1)
 
 ```
+
+## Read Bays, Bayous and Lakes V2
+Rose Horn took 2 polygons for Alligator Bayou, which borders the U.S. Coast Guard Station on St. Andrew Bay, and splits them into separate sampling areas. Will stick with using version 1 for now.
+```{r bbl_v2}
+# 
+# bbl_2 <- st_read("data_gis/Bays_Bayous_Lakes_V2/Bays_Bayous_Lakes_V2.shp")
+# 
+# mapview(bbl_2)
+
+
+
+```
+
 
 ## Data Structure and Summaries
 
