@@ -23,6 +23,8 @@ library(plotly)
 
 ## Log
 
+2026-02-01 looked at FDEP WATERSHED ASSESSMENT SECTION data
+
 2026-01-31 Rose Horn uploaded Bays_Bayous_Lakes_V2.zip to data_gis
 
 2026-01-12 exploring stations and organizations that have sta_nr assigned as NA
@@ -373,13 +375,12 @@ na_sta_nr1 %>%
 fdep_nw1 <- filter(sub_np_stations, organization_name == "FDEP NORTHWEST REGIONAL OPERATIONS CENTER")
 
 mapview(fdep_nw1)
-# tn is NA for all 5bobservations, but tp and chl detectable concentrations
+# tn is NA for all 5 observations, but tp and chl detectable concentrations
 # two East Bay stations, one near southeast of downtown PC, the other near
 # Dupont Bridge, each with an April 30, 2019 and December 7, 2020 collection.
 # One West bay station sampled on June 6, 2018.
 
 fdep_tlh1 <- filter(sub_np_stations, organization_name == "FDEP TALLAHASSEE REGIONAL OPERATIONS CENTER")
-
 
 mapview(fdep_tlh1)
 # tn is NA for all 15 observations, but tp and chl detectable concentrations
@@ -387,6 +388,33 @@ mapview(fdep_tlh1)
 # One North Bay station at Fannin Bayou, and five observations
 # Another North Bay station near Lynn Haven Golf course with five observations
 # Samples collected from 2021-2024
+
+fdep_was1 <- filter(sub_np_stations, organization_name == "FDEP WATERSHED ASSESSMENT SECTION")
+# 610 observations with sampling agency being FDEP Central Panhandle Aquatic Preserves and believe monitoring locations confined to aquatic preserve boundaries on either side of the pass. There are 11 distinct monitoring location names. 84 distinct dates, monthly, starting 2016-07-20, skip to 2017-07-10 through 2024-12-17. Only 4 stations span the full time period
+
+summary(fdep_was1$tp)
+summary(fdep_was1$chl)
+summary(fdep_was1$tn)
+
+mapview(fdep_was1)
+
+distinct(fdep_was1, sampling_agency_name)
+distinct(fdep_was1, monitoring_location_name)
+distinct(fdep_was1, date) %>% 
+  arrange(.) %>% 
+  print(n = Inf)
+
+ggplot(fdep_was1, aes(x = date, y = tp)) + geom_point() + 
+  facet_wrap(vars(monitoring_location_name))
+
+ggplot(fdep_was1, aes(x = date, y = tp)) + geom_point() + 
+  facet_wrap(vars(monitoring_location_name), scales = "free_y")
+
+ggplot(fdep_was1, aes(x = date, y = chl)) + geom_point() + 
+  facet_wrap(vars(monitoring_location_name))
+
+ggplot(fdep_was1, aes(x = date, y = chl)) + geom_point() + 
+  facet_wrap(vars(monitoring_location_name), scales = "free_y")
 ```
 
 
