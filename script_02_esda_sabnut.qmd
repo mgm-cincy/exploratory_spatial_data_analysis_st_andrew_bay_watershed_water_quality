@@ -291,10 +291,10 @@ mapview(sub_np1) + mapview(subbay_1)
 
 ## Sub-bay Data Structure
 Note sector does not always match SEGMENT_NA
-Group by sta_nr return 4246 obs out of 5737 as having a sta_nr assignment so I believe those are Baywatch stations. Have 1491 obs with NA station were they collected by other organizations?
+Group by sta_nr return 4246 obs out of 5737 as having a sta_nr assignment so I believe those are Baywatch stations. Have 1491 obs with NA station were they collected by other organizations? Also, why does creating a unique simple features data frame drop observations down to 5736?
 ```{r subbay_data_struct}
 names(sub_np1)
-distinct(sub_np1, organization_name) # 4 organizations
+distinct(sub_np1, organization_name) # 4 organizations plus NA
 
 distinct(sub_np1, sampling_agency_name)
 
@@ -353,8 +353,23 @@ sub_np_stations %>%
 ```
 
 
+## Facet Map by Organization
+This can possible identify which organizations have unique station locations and which organizations have overlapping locations. A lot of overlap between Florida Lakewatch and Missing organization name.
+```{r facetp_map_org}
+
+tm_shape(subbay_1) +
+  tm_polygons(fill = "white", lwd = 2) +
+  tm_title("Detectable and NA Entries of Total Nitrogen (mg/L)")  + 
+  tm_shape(sub_np_stations) +
+  tm_symbols(fill = "tn") +
+  tm_facets(by = "organization_name")
+
+```
+
+
+
 ## na_sta_nr Station Data
-Can I idenfiy unique stations identifiers for these observations where sta_nr is NA?
+Can I idenfiy unique stations identifiers for these observations where sta_nr is NA? Have 1,491 observations with sta_nr being NA. One concern is how to check that 861 Lakewatch observations are not duplicates of entries where sta_nr had a numerical coded entry. Another concern is how to know if a tn, tp, or chl entry is NA does that indicate a nondetect or no sample taken?
 ```{r na_sta_nr}
 filter(sub_np_stations, is.na(sta_nr)) %>% 
   distinct(., organization_name)
@@ -390,7 +405,7 @@ mapview(fdep_tlh1)
 # Samples collected from 2021-2024
 
 fdep_was1 <- filter(sub_np_stations, organization_name == "FDEP WATERSHED ASSESSMENT SECTION")
-# 610 observations with sampling agency being FDEP Central Panhandle Aquatic Preserves and believe monitoring locations confined to aquatic preserve boundaries on either side of the pass. There are 11 distinct monitoring location names. 84 distinct dates, monthly, starting 2016-07-20, skip to 2017-07-10 through 2024-12-17. Only 4 stations span the full time period
+# 610 observations with sampling agency being FDEP Central Panhandle Aquatic Preserves and believe monitoring locations confined to aquatic preserve boundaries on either side of the pass. There are 11 distinct monitoring location names. 84 distinct dates, monthly, starting 2016-07-20, skip to 2017-07-10 through 2024-12-17. Only 4 stations span the full time period, which include Hurricane Michael
 
 summary(fdep_was1$tp)
 summary(fdep_was1$chl)
@@ -400,6 +415,7 @@ mapview(fdep_was1)
 
 distinct(fdep_was1, sampling_agency_name)
 distinct(fdep_was1, monitoring_location_name)
+distinct(fdep_was1, monitoring_location_id)
 distinct(fdep_was1, date) %>% 
   arrange(.) %>% 
   print(n = Inf)
@@ -415,6 +431,44 @@ ggplot(fdep_was1, aes(x = date, y = chl)) + geom_point() +
 
 ggplot(fdep_was1, aes(x = date, y = chl)) + geom_point() + 
   facet_wrap(vars(monitoring_location_name), scales = "free_y")
+
+
+fl_lw1 <- filter(sub_np_stations, organization_name == "FLORIDA LAKEWATCH")
+# note sta_nr entries are NA for these 610 observations. But, do their coordinates put them on top of the other Lakewatch stations? Have 37 distinct station IDs. Dates spanning from 2018-12-07 to 2024-04-29
+
+summary(fl_lw1$tp)
+summary(fl_lw1$chl)
+summary(fl_lw1$tn)
+
+mapview(fl_lw1)
+
+distinct(fl_lw1, sampling_agency_name)
+distinct(fl_lw1, monitoring_location_name) %>%  print(n = Inf)
+distinct(fl_lw1, monitoring_location_id) %>%  print(n = Inf)
+distinct(fl_lw1, date) %>% 
+  arrange(.) %>% 
+  print(n = Inf)
+
+
+ggplot(fl_lw1, aes(x = date, y = tp)) + geom_point() + 
+  facet_wrap(vars(monitoring_location_name))
+
+ggplot(fl_lw1, aes(x = date, y = tp)) + geom_point() + 
+  facet_wrap(vars(monitoring_location_name), scales = "free_y")
+
+ggplot(fl_lw1, aes(x = date, y = tn)) + geom_point() + 
+  facet_wrap(vars(monitoring_location_name))
+
+ggplot(fl_lw1, aes(x = date, y = tn)) + geom_point() + 
+  facet_wrap(vars(monitoring_location_name), scales = "free_y")
+
+ggplot(fl_lw1, aes(x = date, y = chl)) + geom_point() + 
+  facet_wrap(vars(monitoring_location_name))
+
+ggplot(fl_lw1, aes(x = date, y = chl)) + geom_point() + 
+  facet_wrap(vars(monitoring_location_name), scales = "free_y")
+
+
 ```
 
 
