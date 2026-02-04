@@ -557,7 +557,7 @@ sta_nr_labels <- mapview(sta_nr_coded1) %>%
 # mapshot(sta_nr_labels, file =" ~/output_maps/sta_nr_labels.png")
 # getting error about install_phantomjs
 
-# in Viewer selected Export as webpage and put in output_maps
+# in Viewer selected Export as webpage and put in Baywatch_documents as such a large file
 
 
 tm_1 <- mapview(fl_lw1, color = "magenta") + mapview(subbay_1)
