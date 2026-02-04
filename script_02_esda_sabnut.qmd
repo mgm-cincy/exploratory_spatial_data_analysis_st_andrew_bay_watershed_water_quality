@@ -13,12 +13,14 @@ library(janitor)
 library(leaflet)
 library(leafpop) # for popups in 
 library(leafsync) # sync mapview maps
+library(leafem) # add labels to map
 library(patchwork)
 library(nhdplusTools)
 library(tmap)
 library(forcats)
 library(gifski) #for tmap animation
 library(plotly)
+library(webshot) # save mapview object
 ```
 
 ## Log
@@ -513,10 +515,9 @@ summary(sta_nr_coded1$date)
 summary(fl_lw1$date)
 # more recent dates 2018-12-07 to 2024-04-09
 
+mapview(sta_nr_coded1)
 
 mapview(fl_lw1) 
-
-mapview(sta_nr_coded1)
 
 mapview(fl_lw1, color = "magenta") + mapview(sta_nr_coded1, color = "green")
 
@@ -533,6 +534,30 @@ mapview(fl_lw1, color = "magenta") + mapview(sta_nr_coded1, color = "green")
 #   tm_symbols(size = 0.5, fill = "black")
 
 # mapview(DFobs3a, zcol = "vsci", at=seq(0, 90, 15), alpha.regions = .8, legend = TRUE,layer.name = 'Observed Sites VSCI', popup = popupTable(aug_d_predict1ws_vsci, zcol = c("station_id_2", "vsci"))) + mapview(vahusb_poly, zcol="subbasin")
+
+
+# mapview(sites_stratv2) %>%
+#   addStaticLabels(label = sites_stratv2$abbreviation,
+#                   noHide = TRUE,
+#                   direction = 'top',
+#                   textOnly = TRUE,
+#                   textsize = "20px")
+
+
+
+sta_nr_labels <- mapview(sta_nr_coded1) %>% 
+  addStaticLabels(label = sta_nr_coded1$sta_nr,
+                  noHide = TRUE,
+                  direction = 'top',
+                  textOnly = TRUE,
+                  textsize = "20px") 
+
+
+# https://stackoverflow.com/questions/31336898/how-to-save-leaflet-in-r-map-as-png-or-jpg-file
+# mapshot(sta_nr_labels, file =" ~/output_maps/sta_nr_labels.png")
+# getting error about install_phantomjs
+
+# in Viewer selected Export as webpage and put in output_maps
 
 
 tm_1 <- mapview(fl_lw1, color = "magenta") + mapview(subbay_1)
