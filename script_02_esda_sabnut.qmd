@@ -25,6 +25,8 @@ library(webshot) # save mapview object
 
 ## Log
 
+2026-03-05 try merging np_ds1 and bw_id1 by long/lat as data frames then make into sf object seeing as st_join, st_intersection, etc. are not working
+
 2026-02-03 got synced mapview maps of old and recent Lakewatch stations
 
 2026-02-01 looked at FDEP WATERSHED ASSESSMENT SECTION data
@@ -572,6 +574,7 @@ Baywatch Station IDs provided by Ryann Rossi.
 ```{r baywatch_ids}
 
 bw_id1 <- read_csv("C:/Users/atweg/Documents/Mike/SASJBEP/Baywatch_documents/baywatch_station_ids.csv")
+bw_kd1 <- clean_names(bw_id1)
 
 glimpse(bw_id1)
 
@@ -603,10 +606,10 @@ distinct(fl_lw1, monitoring_location_name) %>%
   print(n=Inf)
 # returns 37 location names
 
-bw_sf2 <- st_join(bw_sf1, fl_lw1, left = FALSE)
+bw_sf2 <- st_join(fl_lw1, bw_sf1, join = st_covers)
 
 names(bw_sf2)
-
+head(bw_sf2)
 ```
 
 
