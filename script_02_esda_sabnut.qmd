@@ -510,10 +510,10 @@ ggplot(fl_lw1, aes(x = date, y = chl)) + geom_point() +
 sta_nr_coded1 <- filter(sub_np_stations, !is.na(sta_nr))
 
 summary(sta_nr_coded1$date)
-# older dates 1990-02-11 to 2006-12-21
+# older dates 1990-02-11 to 2006-12-21 with sta_nr numeric coded
 
 summary(fl_lw1$date)
-# more recent dates 2018-12-07 to 2024-04-09
+# more recent dates 2018-12-07 to 2024-04-09 with sta_nr coded NA
 
 mapview(sta_nr_coded1)
 
@@ -567,6 +567,47 @@ tm_2 <- mapview(sta_nr_coded1, color = "green", popup =
 sync(tm_1, tm_2, ncol=1)
 ```
 
+## Baywatch Station IDs
+Baywatch Station IDs provided by Ryann Rossi.
+```{r baywatch_ids}
+
+bw_id1 <- read_csv("C:/Users/atweg/Documents/Mike/SASJBEP/Baywatch_documents/baywatch_station_ids.csv")
+
+glimpse(bw_id1)
+
+# create sf object
+coords <- data.frame(longitude  = bw_id1$Long, latitude = bw_id1$Lat)
+head(coords)
+
+# See Marc Weber workshop above about Coordinate Reference Systems (CRS)
+
+bw_sf1 <- st_as_sf(bw_id1, coords = c("Long", "Lat"), crs =4269) %>% st_transform((5070))
+
+mapview(bw_sf1)
+
+bw_sf1 <- bw_sf1 %>% st_transform(3087)
+st_crs(bw_sf1)
+st_crs(fl_lw1)
+
+bw_m1 <- mapview(bw_sf1, popup =
+                  popupTable(bw_sf1, zcol = "Station_Number"))
+
+
+lw_m1 <- mapview(fl_lw1, popup =
+                  popupTable(fl_lw1, zcol = "sta_nr"))
+
+sync(bw_m1, lw_m1, ncol = 1)
+
+distinct(fl_lw1, monitoring_location_name) %>% 
+  arrange(.) %>% 
+  print(n=Inf)
+# returns 37 location names
+
+bw_sf2 <- st_join(bw_sf1, fl_lw1, left = FALSE)
+
+names(bw_sf2)
+
+```
 
 
 ## Subbay Stations
