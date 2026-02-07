@@ -44,7 +44,7 @@ library(webshot) # save mapview object
 One csv file, win_baywatch_sabnut.csv, uploaded by Ryann Rossi, SASJBEP, on December 23, 2025. Ryan pulled the data from WIN and did some data cleaning. Note activity_start_date comes in as character.
 
 Read in Bays_Bayous_Lakes_V1 shapefile that Rose uploaded to repository.
-
+Can I merge wq data, np_ds1, with Baywatch station IDs, bw_id1, by coordinates?
 ```{r data}
 np_ds1 <- read_csv("data/win_baywatch_sabnut.csv")
 names(np_ds1)
@@ -92,6 +92,10 @@ levels(np_ds1$yrmm_factor)
 np_ds1 <- filter(np_ds1, (!is.na(long)))
 # drops to 10,369 obs and summary(mp_ds2$lat) returns no NA
 
+
+
+bw_id1 <- read_csv("C:/Users/atweg/Documents/Mike/SASJBEP/Baywatch_documents/baywatch_station_ids.csv")
+bw_kd1 <- clean_names(bw_id1)
 ```
 
 ## Explore Duplicates and NAs
