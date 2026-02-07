@@ -95,7 +95,9 @@ np_ds1 <- filter(np_ds1, (!is.na(long)))
 
 
 bw_id1 <- read_csv("C:/Users/atweg/Documents/Mike/SASJBEP/Baywatch_documents/baywatch_station_ids.csv")
-bw_kd1 <- clean_names(bw_id1)
+bw_id1 <- clean_names(bw_id1)
+
+sta_coded1 <- left_join(np_ds1, bw_id1, join_by(long, lat)) 
 ```
 
 ## Explore Duplicates and NAs
