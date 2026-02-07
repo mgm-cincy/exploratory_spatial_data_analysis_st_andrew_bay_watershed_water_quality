@@ -92,12 +92,19 @@ levels(np_ds1$yrmm_factor)
 np_ds1 <- filter(np_ds1, (!is.na(long)))
 # drops to 10,369 obs and summary(mp_ds2$lat) returns no NA
 
+unique(np_ds1$organization_name)
+
+z1 <- filter(np_ds1, is.na(organization_name))
+# return 7,162 obs
+summary(z1$sta_nr) # code min 1.1 to max 9.5
+# believe having a numeric sta_nr code means this is a Lakewatch/Baywatch station and have long/lat coordinates for these stations
+
+z2 <- filter(np_ds1, organization_name == "FLORIDA LAKEWATCH")
+# return 2,380
+summary(z2$sta_nr) # returns all NAs
+# want to get numeric codes assigned to sta_nr, struggling to get that done
 
 
-bw_id1 <- read_csv("C:/Users/atweg/Documents/Mike/SASJBEP/Baywatch_documents/baywatch_station_ids.csv")
-bw_id1 <- clean_names(bw_id1)
-
-sta_coded1 <- left_join(np_ds1, bw_id1, join_by(long, lat)) 
 ```
 
 ## Explore Duplicates and NAs
