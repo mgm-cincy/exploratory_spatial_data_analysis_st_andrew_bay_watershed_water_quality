@@ -587,7 +587,7 @@ sync(tm_1, tm_2, ncol=1)
 Baywatch Station IDs provided by Ryann Rossi.
 ```{r baywatch_ids}
 
-bw_id1 <- read_csv("C:/Users/atweg/Documents/Mike/SASJBEP/Baywatch_documents/baywatch_station_ids.csv")
+bw_id1 <- read_csv("data/baywatch_station_ids.csv")
 bw_id1 <- clean_names(bw_id1)
 
 glimpse(bw_id1)
