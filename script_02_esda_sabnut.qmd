@@ -482,8 +482,9 @@ ggplot(fdep_was1, aes(x = date, y = chl)) + geom_point() +
 
 
 fl_lw1 <- filter(sub_np_stations, organization_name == "FLORIDA LAKEWATCH")
-# note sta_nr entries are NA for these 610 observations. But, do their coordinates put them on top of the other Lakewatch stations? Have 37 distinct station IDs. Dates spanning from 2018-12-07 to 2024-04-29
+# note sta_nr entries are NA for these 861 observations. But, do their coordinates put them on top of the other Lakewatch stations? Have 37 distinct station IDs. Dates spanning from 2018-12-07 to 2024-04-29
 
+summary(fl_lw1$sta_nr)
 summary(fl_lw1$tp)
 summary(fl_lw1$chl)
 summary(fl_lw1$tn)
@@ -587,17 +588,17 @@ Baywatch Station IDs provided by Ryann Rossi.
 ```{r baywatch_ids}
 
 bw_id1 <- read_csv("C:/Users/atweg/Documents/Mike/SASJBEP/Baywatch_documents/baywatch_station_ids.csv")
-bw_kd1 <- clean_names(bw_id1)
+bw_id1 <- clean_names(bw_id1)
 
 glimpse(bw_id1)
 
 # create sf object
-coords <- data.frame(longitude  = bw_id1$Long, latitude = bw_id1$Lat)
+coords <- data.frame(longitude  = bw_id1$long, latitude = bw_id1$lat)
 head(coords)
 
 # See Marc Weber workshop above about Coordinate Reference Systems (CRS)
 
-bw_sf1 <- st_as_sf(bw_id1, coords = c("Long", "Lat"), crs =4269) %>% st_transform((5070))
+bw_sf1 <- st_as_sf(bw_id1, coords = c("long", "lat"), crs =4269) %>% st_transform((5070))
 
 mapview(bw_sf1)
 
@@ -606,7 +607,7 @@ st_crs(bw_sf1)
 st_crs(fl_lw1)
 
 bw_m1 <- mapview(bw_sf1, popup =
-                  popupTable(bw_sf1, zcol = "Station_Number"))
+                  popupTable(bw_sf1, zcol = "station_number"))
 
 
 lw_m1 <- mapview(fl_lw1, popup =
@@ -619,10 +620,6 @@ distinct(fl_lw1, monitoring_location_name) %>%
   print(n=Inf)
 # returns 37 location names
 
-bw_sf2 <- st_join(fl_lw1, bw_sf1, join = st_covers)
-
-names(bw_sf2)
-head(bw_sf2)
 ```
 
 
