@@ -521,7 +521,7 @@ ggplot(fl_lw1, aes(x = date, y = chl)) + geom_point() +
 ```
 
 ## Compare sta_nr coded vs Lakewatch with sta_nr as NA
-```{r compare}
+```{r compare_synced_maps}
 
 sta_nr_coded1 <- filter(sub_np_stations, !is.na(sta_nr))
 
@@ -530,6 +530,13 @@ summary(sta_nr_coded1$date)
 
 summary(fl_lw1$date)
 # more recent dates 2018-12-07 to 2024-04-09 with sta_nr coded NA
+
+distinct(sta_nr_coded1, u_of_f_number) %>%  print(n = Inf)
+# returns 29 distinct u_of_f_number
+
+distinct(sta_nr_coded1, sta_nr) %>% arrange(.,sta_nr) %>% print(n = Inf)
+# returns 29 distinct sta_nr numeric codes from 1.1 to 9.5 with these
+# having extra digit 1.72, 2.73, 2.86, 3.68, and 4.66
 
 mapview(sta_nr_coded1)
 
