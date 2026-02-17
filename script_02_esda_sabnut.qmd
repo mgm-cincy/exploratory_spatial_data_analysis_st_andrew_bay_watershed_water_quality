@@ -599,6 +599,14 @@ bw_id1 <- clean_names(bw_id1)
 
 glimpse(bw_id1)
 
+unique(bw_id1$station_number)
+# 70 stations
+
+distinct(as.data.frame(bw_id1, station_number))
+
+str(bw_id1)
+class(bw_id1)
+
 # create sf object
 coords <- data.frame(longitude  = bw_id1$long, latitude = bw_id1$lat)
 head(coords)
@@ -607,14 +615,25 @@ head(coords)
 
 bw_sf1 <- st_as_sf(bw_id1, coords = c("long", "lat"), crs =4269) %>% st_transform((5070))
 
+class(bw_sf1)
+distinct(bw_sf1, station_number) %>% arrange(., station_number) %>% print(n = Inf)
+
 mapview(bw_sf1)
 
 bw_sf1 <- bw_sf1 %>% st_transform(3087)
 st_crs(bw_sf1)
 st_crs(fl_lw1)
 
-bw_m1 <- mapview(bw_sf1, popup =
-                  popupTable(bw_sf1, zcol = "station_number"))
+bw_sf2 <- st_intersection(bw_sf1, subbay_1)
+# drops to 32 stations
+
+distinct(bw_sf2, station_number) %>% arrange(., station_number) %>% print(n = Inf)
+
+
+mapview(bw_sf2)
+
+bw_m1 <- mapview(bw_sf2, popup =
+                  popupTable(bw_sf2, zcol = "station_number"))
 
 
 lw_m1 <- mapview(fl_lw1, popup =
@@ -627,6 +646,24 @@ distinct(fl_lw1, monitoring_location_name) %>%
   print(n=Inf)
 # returns 37 location names
 
+lw_loc1 <- dplyr::select(fl_lw1,monitoring_location_name)
+str(lw_loc1) # 861 https://github.com/r-spatial/sf/issues/669 and geom columns retained
+head(lw_loc1)
+class(lw_loc1)
+# https://github.com/r-spatial/sf/issues/669
+zlw_loc1 <- unique.data.frame(lw_loc1) # returns 37 obs/stations & geometries
+
+st_equals(zlw_loc1, bw_sf2, sparse = TRUE)
+
+
+#95.  Remove duplicate geometries/Keep unique geometries
+# want unique station_name and the geometry of the 165 stations
+station_sf1 <- sfobj_layer %>% dplyr::select(station_name)
+str(station_sf1) # 673 station_name and geom columns retained
+head(station_sf1)
+class(station_sf1)
+# https://github.com/r-spatial/sf/issues/669
+zstation_sf <- unique.data.frame(station_sf1) # returns 165 obs/stations & geometries
 ```
 
 
