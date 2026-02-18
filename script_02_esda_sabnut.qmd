@@ -25,7 +25,9 @@ library(webshot) # save mapview object
 
 ## Log
 
-2026-03-05 try merging np_ds1 and bw_id1 by long/lat as data frames then make into sf object seeing as st_join, st_intersection, etc. are not working
+2026-02-18 discovered bw_sf2 coordinates, obtained from st_geometry, do not match exactly to zlw_loc1 coordinates. Is the solution to put an x-meter buffer around bw_sf2 sites, which have a station number, and if the zlw_loc1 contained in that buffer then the zlw_loc1 site can be assigned that station number?
+
+2026-02-05 try merging np_ds1 and bw_id1 by long/lat as data frames then make into sf object seeing as st_join, st_intersection, etc. are not working
 
 2026-02-03 got synced mapview maps of old and recent Lakewatch stations
 
@@ -591,7 +593,7 @@ sync(tm_1, tm_2, ncol=1)
 ```
 
 ## Baywatch Station IDs
-Baywatch Station IDs provided by Ryann Rossi.
+Baywatch Station IDs provided by Ryann Rossi. Discovered Baywatch coordinates differ from Lakewatch coordinate when mapviewed both datasets and zoomed in to 20 meters.
 ```{r baywatch_ids}
 
 bw_id1 <- read_csv("data/baywatch_station_ids.csv")
@@ -653,17 +655,29 @@ class(lw_loc1)
 # https://github.com/r-spatial/sf/issues/669
 zlw_loc1 <- unique.data.frame(lw_loc1) # returns 37 obs/stations & geometries
 
-st_equals(zlw_loc1, bw_sf2, sparse = TRUE)
+head(bw_sf2)
+
+mapview(bw_sf2, color = "blue") + mapview(zlw_loc1, color = "red")
+# zoomed into 10 m see that station number 2.4, West Bay-4 from bwid does not match lw monitoring location name Bay-West Bay 4
+# zoomed into 100 m see that station number 3.4, u of f number St.Andrew Bay-12,location Davis Point from bwid no match lw monitoring location name of Bay-St. Andrew Bay-12
 
 
-#95.  Remove duplicate geometries/Keep unique geometries
-# want unique station_name and the geometry of the 165 stations
-station_sf1 <- sfobj_layer %>% dplyr::select(station_name)
-str(station_sf1) # 673 station_name and geom columns retained
-head(station_sf1)
-class(station_sf1)
-# https://github.com/r-spatial/sf/issues/669
-zstation_sf <- unique.data.frame(station_sf1) # returns 165 obs/stations & geometries
+# https://stackoverflow.com/questions/73406658/how-can-i-combine-two-sf-geometry-fields-into-a-single-geometry-field-of-type
+
+# https://www.jla-data.net/eng/merging-geometry-of-sf-objects-in-r/
+
+
+zmatrx_37x32 <-  ifelse(sf::st_intersects(zlw_loc1, bw_sf2, sparse = F), 
+                                 "Yes", 
+                                 "No")
+
+zgeom_bwsf2 <- st_geometry(bw_sf2)
+
+print(zgeom_bwsf2, n=32)
+
+zgeom_lwloc <- st_geometry(zlw_loc1)
+
+print(zgeom_lwloc, n=37)
 ```
 
 
