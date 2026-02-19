@@ -25,6 +25,8 @@ library(webshot) # save mapview object
 
 ## Log
 
+2026-02-19 put 100 m and 20 m buffers around bw_sf2 stations and Rose added Sites_for_Evaluation spreadsheet to data folder
+
 2026-02-18 discovered bw_sf2 coordinates, obtained from st_geometry, do not match exactly to zlw_loc1 coordinates. Is the solution to put an x-meter buffer around bw_sf2 sites, which have a station number, and if the zlw_loc1 contained in that buffer then the zlw_loc1 site can be assigned that station number?
 
 2026-02-05 try merging np_ds1 and bw_id1 by long/lat as data frames then make into sf object seeing as st_join, st_intersection, etc. are not working
