@@ -25,7 +25,9 @@ library(webshot) # save mapview object
 
 ## Log
 
-2026-03-05 try merging np_ds1 and bw_id1 by long/lat as data frames then make into sf object seeing as st_join, st_intersection, etc. are not working
+2026-02-18 discovered bw_sf2 coordinates, obtained from st_geometry, do not match exactly to zlw_loc1 coordinates. Is the solution to put an x-meter buffer around bw_sf2 sites, which have a station number, and if the zlw_loc1 contained in that buffer then the zlw_loc1 site can be assigned that station number?
+
+2026-02-05 try merging np_ds1 and bw_id1 by long/lat as data frames then make into sf object seeing as st_join, st_intersection, etc. are not working
 
 2026-02-03 got synced mapview maps of old and recent Lakewatch stations
 
@@ -521,7 +523,7 @@ ggplot(fl_lw1, aes(x = date, y = chl)) + geom_point() +
 ```
 
 ## Compare sta_nr coded vs Lakewatch with sta_nr as NA
-```{r compare}
+```{r compare_synced_maps}
 
 sta_nr_coded1 <- filter(sub_np_stations, !is.na(sta_nr))
 
@@ -530,6 +532,13 @@ summary(sta_nr_coded1$date)
 
 summary(fl_lw1$date)
 # more recent dates 2018-12-07 to 2024-04-09 with sta_nr coded NA
+
+distinct(sta_nr_coded1, u_of_f_number) %>%  print(n = Inf)
+# returns 29 distinct u_of_f_number
+
+distinct(sta_nr_coded1, sta_nr) %>% arrange(.,sta_nr) %>% print(n = Inf)
+# returns 29 distinct sta_nr numeric codes from 1.1 to 9.5 with these
+# having extra digit 1.72, 2.73, 2.86, 3.68, and 4.66
 
 mapview(sta_nr_coded1)
 
@@ -584,13 +593,21 @@ sync(tm_1, tm_2, ncol=1)
 ```
 
 ## Baywatch Station IDs
-Baywatch Station IDs provided by Ryann Rossi.
+Baywatch Station IDs provided by Ryann Rossi. Discovered Baywatch coordinates differ from Lakewatch coordinate when mapviewed both datasets and zoomed in to 20 meters.
 ```{r baywatch_ids}
 
-bw_id1 <- read_csv("C:/Users/atweg/Documents/Mike/SASJBEP/Baywatch_documents/baywatch_station_ids.csv")
+bw_id1 <- read_csv("data/baywatch_station_ids.csv")
 bw_id1 <- clean_names(bw_id1)
 
 glimpse(bw_id1)
+
+unique(bw_id1$station_number)
+# 70 stations
+
+distinct(as.data.frame(bw_id1, station_number))
+
+str(bw_id1)
+class(bw_id1)
 
 # create sf object
 coords <- data.frame(longitude  = bw_id1$long, latitude = bw_id1$lat)
@@ -600,14 +617,25 @@ head(coords)
 
 bw_sf1 <- st_as_sf(bw_id1, coords = c("long", "lat"), crs =4269) %>% st_transform((5070))
 
+class(bw_sf1)
+distinct(bw_sf1, station_number) %>% arrange(., station_number) %>% print(n = Inf)
+
 mapview(bw_sf1)
 
 bw_sf1 <- bw_sf1 %>% st_transform(3087)
 st_crs(bw_sf1)
 st_crs(fl_lw1)
 
-bw_m1 <- mapview(bw_sf1, popup =
-                  popupTable(bw_sf1, zcol = "station_number"))
+bw_sf2 <- st_intersection(bw_sf1, subbay_1)
+# drops to 32 stations
+
+distinct(bw_sf2, station_number) %>% arrange(., station_number) %>% print(n = Inf)
+
+
+mapview(bw_sf2)
+
+bw_m1 <- mapview(bw_sf2, popup =
+                  popupTable(bw_sf2, zcol = "station_number"))
 
 
 lw_m1 <- mapview(fl_lw1, popup =
@@ -620,6 +648,68 @@ distinct(fl_lw1, monitoring_location_name) %>%
   print(n=Inf)
 # returns 37 location names
 
+lw_loc1 <- dplyr::select(fl_lw1,monitoring_location_name)
+str(lw_loc1) # 861 https://github.com/r-spatial/sf/issues/669 and geom columns retained
+head(lw_loc1)
+class(lw_loc1)
+# https://github.com/r-spatial/sf/issues/669
+zlw_loc1 <- unique.data.frame(lw_loc1) # returns 37 obs/stations & geometries
+
+head(bw_sf2)
+
+mapview(bw_sf2, color = "blue") + mapview(zlw_loc1, color = "red")
+# zoomed into 10 m see that station number 2.4, West Bay-4 from bwid does not match lw monitoring location name Bay-West Bay 4
+# zoomed into 100 m see that station number 3.4, u of f number St.Andrew Bay-12,location Davis Point from bwid no match lw monitoring location name of Bay-St. Andrew Bay-12
+
+
+# https://stackoverflow.com/questions/73406658/how-can-i-combine-two-sf-geometry-fields-into-a-single-geometry-field-of-type
+
+# https://www.jla-data.net/eng/merging-geometry-of-sf-objects-in-r/
+
+
+zmatrx_37x32 <-  ifelse(sf::st_intersects(zlw_loc1, bw_sf2, sparse = F), 
+                                 "Yes", 
+                                 "No")
+# pull out projected coordinates of bw stations and lw stations
+zgeom_bwsf2 <- st_geometry(bw_sf2)
+
+print(zgeom_bwsf2, n=32)
+
+zgeom_lwloc <- st_geometry(zlw_loc1)
+
+print(zgeom_lwloc, n=37)
+```
+
+
+## Buffer Baywatch Stations
+```{r buffer}
+
+buff_100 <- st_buffer(bw_sf2, 100)
+names(buff_100)
+mapview(buff_100, alpha = 0)
+
+mapview(buff_100, color = "blue", alpha = 0.1) + mapview(zlw_loc1, color = "red")
+
+
+bw_sf2$close2_100lw <- ifelse(sf::st_intersects(zlw_loc1, buff_100, sparse = F), 
+                                 "Yes", 
+                                 "No")
+
+glimpse(bw_sf2)
+
+zlw_loc2 <- st_intersection(zlw_loc1, buff_100)
+# drop to 26 lw stations so 10 lw not in 100 m buffer from bw stations
+mapview(buff_100, color = "blue", alpha = 0.1) + mapview(zlw_loc2, color = "red")
+
+# eyeballing and see that bw stations 9.1, 9.4, 9.5 (all grand lagoon) and 2.88, 2.3, and 2.70 (west bay) with their 100 m buffers do not intersect lw stations
+
+# ggplot() +
+#   geom_sf(data = counties) +
+#   geom_sf(data = points, aes(color = name), show.legend = "point") +
+#   geom_sf(data = buffer, fill = NA, color = "red") +
+#   scale_color_viridis_d() +
+#   theme(legend.position = "bottom") +
+#   labs(color = "City name:")
 ```
 
 
