@@ -683,14 +683,14 @@ print(zgeom_lwloc, n=37)
 
 ## Buffer Baywatch Stations
 ```{r buffer}
-
+# 100 m buffer
 buff_100 <- st_buffer(bw_sf2, 100)
 names(buff_100)
 mapview(buff_100, alpha = 0)
 
 mapview(buff_100, color = "blue", alpha = 0.1) + mapview(zlw_loc1, color = "red")
 
-
+# get error b/c one sf has 37 entries and other sf has 32 entries
 bw_sf2$close2_100lw <- ifelse(sf::st_intersects(zlw_loc1, buff_100, sparse = F), 
                                  "Yes", 
                                  "No")
@@ -698,10 +698,22 @@ bw_sf2$close2_100lw <- ifelse(sf::st_intersects(zlw_loc1, buff_100, sparse = F),
 glimpse(bw_sf2)
 
 zlw_loc2 <- st_intersection(zlw_loc1, buff_100)
-# drop to 26 lw stations so 10 lw not in 100 m buffer from bw stations
+# drop to 26 lw stations so 11 lw not in 100 m buffer from bw stations
 mapview(buff_100, color = "blue", alpha = 0.1) + mapview(zlw_loc2, color = "red")
 
 # eyeballing and see that bw stations 9.1, 9.4, 9.5 (all grand lagoon) and 2.88, 2.3, and 2.70 (west bay) with their 100 m buffers do not intersect lw stations
+
+
+# 20 m buffer
+buff_20 <- st_buffer(bw_sf2, 20)
+names(buff_20)
+mapview(buff_20)
+
+mapview(buff_20, color = "blue", alpha = 0.1) + mapview(zlw_loc1, color = "red")
+
+zlw_loc3 <- st_intersection(zlw_loc1, buff_20)
+# drop to 25 lw stations so 12 lw not in 100 m buffer from bw stations
+mapview(buff_20, color = "blue", alpha = 0.1) + mapview(zlw_loc2, color = "red")
 
 # ggplot() +
 #   geom_sf(data = counties) +
