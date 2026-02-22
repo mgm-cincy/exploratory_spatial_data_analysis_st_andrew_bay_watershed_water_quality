@@ -630,9 +630,14 @@ st_crs(fl_lw1)
 
 bw_sf2 <- st_intersection(bw_sf1, subbay_1)
 # drops to 32 stations
+names(bw_sf2)
+distinct(bw_sf2, station_number) %>%
+  arrange(., station_number) %>% 
+  print(n = Inf)
 
-distinct(bw_sf2, station_number) %>% arrange(., station_number) %>% print(n = Inf)
-
+group_by(bw_sf2, SEGMENT_NA) %>%
+distinct(., station_number) %>%
+  print(n = Inf)
 
 mapview(bw_sf2)
 
@@ -649,6 +654,11 @@ distinct(fl_lw1, monitoring_location_name) %>%
   arrange(.) %>% 
   print(n=Inf)
 # returns 37 location names
+
+group_by(fl_lw1, SEGMENT_NA) %>%
+distinct(., monitoring_location_name) %>%
+  print(n = Inf)
+
 
 lw_loc1 <- dplyr::select(fl_lw1,monitoring_location_name)
 str(lw_loc1) # 861 https://github.com/r-spatial/sf/issues/669 and geom columns retained
@@ -684,26 +694,33 @@ print(zgeom_lwloc, n=37)
 
 
 ## Buffer Baywatch Stations
+Making 100 m and 20 m buffers around bw_sf2 32 stations. Note how bw_sf2 has geom of point, but buff_100 has geom of polygon. Goal is to get station numbers from bw_sf2 attached to their corresponding lake watch locations in zw_loc1.
 ```{r buffer}
 # 100 m buffer
 buff_100 <- st_buffer(bw_sf2, 100)
+head(buff_100)
 names(buff_100)
 mapview(buff_100, alpha = 0)
 
 mapview(buff_100, color = "blue", alpha = 0.1) + mapview(zlw_loc1, color = "red")
 
 # get error b/c one sf has 37 entries and other sf has 32 entries
-bw_sf2$close2_100lw <- ifelse(sf::st_intersects(zlw_loc1, buff_100, sparse = F), 
-                                 "Yes", 
-                                 "No")
+# bw_sf2$close2_100lw <- ifelse(sf::st_intersects(zlw_loc1, buff_100, sparse = F), 
+#                                 "Yes", 
+#                                 "No")
 
 glimpse(bw_sf2)
 
 zlw_loc2 <- st_intersection(zlw_loc1, buff_100)
+names(zlw_loc2)
+head(zlw_loc2)
+print(zlw_loc2, n=26)
 # drop to 26 lw stations so 11 lw not in 100 m buffer from bw stations
 mapview(buff_100, color = "blue", alpha = 0.1) + mapview(zlw_loc2, color = "red")
 
-# eyeballing and see that bw stations 9.1, 9.4, 9.5 (all grand lagoon) and 2.88, 2.3, and 2.70 (west bay) with their 100 m buffers do not intersect lw stations
+# eyeballing and see that 100 m buffers of bw stations 9.1, 9.4, 9.5 (all grand lagoon) and 2.88, 2.3, and 2.70 (west bay) do not intersect lw stations
+
+zlw_beyond100m <- !st_intersection(zlw_loc1, buff_100)
 
 
 # 20 m buffer
