@@ -21,9 +21,12 @@ library(forcats)
 library(gifski) #for tmap animation
 library(plotly)
 library(webshot) # save mapview object
+library(nngeo)
 ```
 
 ## Log
+
+2026-02-23 trying st_nn function to identify closest station between 29 stations from older baywatch stations to 37 stations from more recent baywatch stations
 
 2026-02-19 put 100 m and 20 m buffers around bw_sf2 stations and Rose added Sites_for_Evaluation spreadsheet to data folder
 
@@ -592,6 +595,33 @@ tm_2 <- mapview(sta_nr_coded1, color = "green", popup =
                   popupTable(sta_nr_coded1, zcol = "sta_nr")) + mapview(subbay_1)
 
 sync(tm_1, tm_2, ncol=1)
+
+
+
+stanr_loc1 <- dplyr::select(sta_nr_coded1,sta_nr, monitoring_location_name)
+str(stanr_loc1) # 861 https://github.com/r-spatial/sf/issues/669 and geom columns retained
+head(stanr_loc1)
+class(stanr_loc1)
+# https://github.com/r-spatial/sf/issues/669
+zstanr_loc1 <- unique.data.frame(stanr_loc1) # returns 29 obs/stations & geometries
+
+mapview(stanr_loc1)
+```
+
+## Do 29 stations stanr_loc1 match 37 stations zlw_loc1?
+Comparing older 29 baywatch stations to more recent 37 stations.
+```{r}
+
+
+mapview(stanr_loc1, color = "blue") + mapview(zlw_loc1, color = "red")
+# eyeballing and at 10 m sta_nr 2.1 does not intersect Bay-West Bay 1, likewise sta_nr 1.1 does not intersect Bay-North Bay-1
+
+zdist <- st_nn(stanr_loc1, zlw_loc1, k =1, returnDist = TRUE)
+
+
+# https://michaeldorman.github.io/nngeo/
+
+
 ```
 
 ## Baywatch Station IDs
