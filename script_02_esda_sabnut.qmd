@@ -613,15 +613,58 @@ Comparing older 29 baywatch stations to more recent 37 stations.
 ```{r}
 
 
-mapview(stanr_loc1, color = "blue") + mapview(zlw_loc1, color = "red")
+mapview(zstanr_loc1, color = "blue") + mapview(zlw_loc1, color = "red")
 # eyeballing and at 10 m sta_nr 2.1 does not intersect Bay-West Bay 1, likewise sta_nr 1.1 does not intersect Bay-North Bay-1
 
-zdist <- st_nn(stanr_loc1, zlw_loc1, k =1, returnDist = TRUE)
+zdist1 <- (st_nn(zstanr_loc1, zlw_loc1, k =1, sparse = TRUE, returnDist = TRUE))
+names(zdist1)
+head(zdist1$nn)
+head(zdist1$dist)
+str(zdist1)
+# from first list access first element
+zdist1[[1]][[1]]
+# from the second list access the first element
+zdist1[[2]][[1]]
+zdist2 <- as.data.frame(dplyr::bind_rows(zdist1$nn, zdist1$dist))
 
+
+
+
+znn1 <- st_join(zstanr_loc1, zlw_loc1, join = st_nn, k = 1)
+head(znn1)
+
+l = st_connect(cities, towns, ids = nn, progress = FALSE)
+plot(l, col = NA)  # For setting the extent
+plot(st_geometry(towns), col = "darkgrey", add = TRUE)
+plot(st_geometry(cities), col = "red", add = TRUE)
+plot(l, add = TRUE)
+
+# st_join(cities, towns, join = st_nn, k = 3, progress = FALSE)
+
+# l = st_connect(cities, towns, ids = nn, progress = FALSE)
+# plot(l, col = NA)  # For setting the extent
+# plot(st_geometry(towns), col = "darkgrey", add = TRUE)
+# plot(st_geometry(cities), col = "red", add = TRUE)
+# plot(l, add = TRUE)
 
 # https://michaeldorman.github.io/nngeo/
 
+zdistmat1 <- st_distance(zstanr_loc1, zlw_loc1,by_element = FALSE)
 
+dim(zdistmat1) # get the dimensions of the distance matrix
+zrdistmat1 <- zdistmat1[29:37, ] # change to match # sites/rows
+zrdistmat2_hab <- as.vector(zrdistmat1)
+
+round(summary(zrdistmat2[zrdistmat2!=0]))
+
+
+??st_nearest_feature
+
+st_nearest_feature(zstanr_loc1, zlw_loc1)
+# for each feature (geometry) in x the index of the nearest feature (geometry) in set y, or in the remaining set of x if y is missing; empty geometries result in NA indexes
+
+
+znrest_pt <- st_nearest_points(zstanr_loc1, zlw_loc1)
 ```
 
 ## Baywatch Station IDs
