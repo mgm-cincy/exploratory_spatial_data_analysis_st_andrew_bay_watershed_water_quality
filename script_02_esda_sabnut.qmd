@@ -26,6 +26,8 @@ library(nngeo)
 
 ## Log
 
+2026-02-24 nngeo vignette showed how to calculate and join nearest neighbor distances
+
 2026-02-23 trying st_nn function to identify closest station between 29 stations from older baywatch stations to 37 stations from more recent baywatch stations
 
 2026-02-19 put 100 m and 20 m buffers around bw_sf2 stations and Rose added Sites_for_Evaluation spreadsheet to data folder
@@ -524,6 +526,13 @@ ggplot(fl_lw1, aes(x = date, y = chl)) + geom_point() +
 ggplot(fl_lw1, aes(x = date, y = chl)) + geom_point() + 
   facet_wrap(vars(monitoring_location_name), scales = "free_y")
 
+# pull out only locations/geometry of more recent baywatch stations
+lw_loc1 <- dplyr::select(fl_lw1,monitoring_location_name)
+str(lw_loc1) # 861 https://github.com/r-spatial/sf/issues/669 and geom columns retained
+head(lw_loc1)
+class(lw_loc1)
+# https://github.com/r-spatial/sf/issues/669
+zlw_loc1 <- unique.data.frame(lw_loc1) # returns 37 obs/stations & geometries
 
 ```
 
@@ -605,7 +614,11 @@ class(stanr_loc1)
 # https://github.com/r-spatial/sf/issues/669
 zstanr_loc1 <- unique.data.frame(stanr_loc1) # returns 29 obs/stations & geometries
 
-mapview(stanr_loc1)
+
+bw_older <- mapview(zstanr_loc1)
+bw_recent <-mapview(zlw_loc1)
+
+sync(bw_older, bw_recent, ncol=1)
 ```
 
 ## Do 29 stations stanr_loc1 match 37 stations zlw_loc1?
@@ -666,6 +679,31 @@ st_nearest_feature(zstanr_loc1, zlw_loc1)
 
 znrest_pt <- st_nearest_points(zstanr_loc1, zlw_loc1)
 ```
+
+## Nearest Neighbor Distances
+Getting nearest neighbor distance of older 29 Baywatch stations to more recent 37 Baywatch stations. Vignette from nngeo shows how to get these distances.
+```{r knn1}
+# get closest neighbor
+distnn_or1 = st_join(zstanr_loc1, zlw_loc1, join = st_nn, k = 1, progress = FALSE)
+class(distnn_or1)
+str(distnn_or1)
+
+# calculate distance to closest neighbor
+dist_or1 = st_nn(zstanr_loc1, zlw_loc1, k = 1, returnDist = TRUE, progress = FALSE)
+str(dist_or1)
+head(dist_or1)
+
+# this code goes to 2nd list, the distances, and pulls first element from that list
+dists = sapply(dist_or1[[2]], "[", 1)
+dists
+
+distnn_or1$dist = dists
+
+distnn_or1
+print(distnn_or1, n = 29)
+```
+
+
 
 ## Baywatch Station IDs
 Baywatch Station IDs provided by Ryann Rossi. Discovered Baywatch coordinates differ from Lakewatch coordinate when mapviewed both datasets and zoomed in to 20 meters.
