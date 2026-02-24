@@ -706,7 +706,9 @@ print(distnn_or1, n = 29)
 
 
 ## Baywatch Station IDs
-Baywatch Station IDs provided by Ryann Rossi. Discovered Baywatch coordinates differ from Lakewatch coordinate when mapviewed both datasets and zoomed in to 20 meters.
+Baywatch Station IDs provided by Ryann Rossi. The pdf file is RMA_Baywatch_Active_Stations_Revised_112015. Discovered these Baywatch coordinates differ from recent Baywatch coordinates in zlw_loc1 when mapviewed both datasets and zoomed in to 20 meters.
+
+Also, spatial intersection of recent Baywatch coordinates returned 37 observations/stations. But, spatial intersection of Baywatch station ids, bw_sf2, returns 32 observations/stations.
 ```{r baywatch_ids}
 
 bw_id1 <- read_csv("data/baywatch_station_ids.csv")
