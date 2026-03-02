@@ -615,70 +615,12 @@ class(stanr_loc1)
 zstanr_loc1 <- unique.data.frame(stanr_loc1) # returns 29 obs/stations & geometries
 
 
-bw_older <- mapview(zstanr_loc1)
-bw_recent <-mapview(zlw_loc1)
+bw_older <- mapview(zstanr_loc1) #29 obs
+bw_recent <-mapview(zlw_loc1) #37 obs
 
 sync(bw_older, bw_recent, ncol=1)
 ```
 
-## Do 29 stations stanr_loc1 match 37 stations zlw_loc1?
-Comparing older 29 baywatch stations to more recent 37 stations.
-```{r}
-
-
-mapview(zstanr_loc1, color = "blue") + mapview(zlw_loc1, color = "red")
-# eyeballing and at 10 m sta_nr 2.1 does not intersect Bay-West Bay 1, likewise sta_nr 1.1 does not intersect Bay-North Bay-1
-
-zdist1 <- (st_nn(zstanr_loc1, zlw_loc1, k =1, sparse = TRUE, returnDist = TRUE))
-names(zdist1)
-head(zdist1$nn)
-head(zdist1$dist)
-str(zdist1)
-# from first list access first element
-zdist1[[1]][[1]]
-# from the second list access the first element
-zdist1[[2]][[1]]
-zdist2 <- as.data.frame(dplyr::bind_rows(zdist1$nn, zdist1$dist))
-
-
-
-
-znn1 <- st_join(zstanr_loc1, zlw_loc1, join = st_nn, k = 1)
-head(znn1)
-
-l = st_connect(cities, towns, ids = nn, progress = FALSE)
-plot(l, col = NA)  # For setting the extent
-plot(st_geometry(towns), col = "darkgrey", add = TRUE)
-plot(st_geometry(cities), col = "red", add = TRUE)
-plot(l, add = TRUE)
-
-# st_join(cities, towns, join = st_nn, k = 3, progress = FALSE)
-
-# l = st_connect(cities, towns, ids = nn, progress = FALSE)
-# plot(l, col = NA)  # For setting the extent
-# plot(st_geometry(towns), col = "darkgrey", add = TRUE)
-# plot(st_geometry(cities), col = "red", add = TRUE)
-# plot(l, add = TRUE)
-
-# https://michaeldorman.github.io/nngeo/
-
-zdistmat1 <- st_distance(zstanr_loc1, zlw_loc1,by_element = FALSE)
-
-dim(zdistmat1) # get the dimensions of the distance matrix
-zrdistmat1 <- zdistmat1[29:37, ] # change to match # sites/rows
-zrdistmat2_hab <- as.vector(zrdistmat1)
-
-round(summary(zrdistmat2[zrdistmat2!=0]))
-
-
-??st_nearest_feature
-
-st_nearest_feature(zstanr_loc1, zlw_loc1)
-# for each feature (geometry) in x the index of the nearest feature (geometry) in set y, or in the remaining set of x if y is missing; empty geometries result in NA indexes
-
-
-znrest_pt <- st_nearest_points(zstanr_loc1, zlw_loc1)
-```
 
 ## Nearest Neighbor Distances
 Getting nearest neighbor distance of older 29 Baywatch stations to more recent 37 Baywatch stations. Vignette from nngeo shows how to get these distances.
@@ -702,7 +644,6 @@ distnn_or1$dist = dists
 distnn_or1
 print(distnn_or1, n = 29)
 ```
-
 
 
 ## Baywatch Station IDs
@@ -741,27 +682,37 @@ bw_sf1 <- bw_sf1 %>% st_transform(3087)
 st_crs(bw_sf1)
 st_crs(fl_lw1)
 
-bw_sf2 <- st_intersection(bw_sf1, subbay_1)
+zbw_sf2 <- st_intersection(bw_sf1, subbay_1)
 # drops to 32 stations
-names(bw_sf2)
-distinct(bw_sf2, station_number) %>%
+names(zbw_sf2)
+
+distinct(zbw_sf2, station_number) %>%
   arrange(., station_number) %>% 
   print(n = Inf)
 
-group_by(bw_sf2, SEGMENT_NA) %>%
+group_by(zbw_sf2, SEGMENT_NA) %>%
 distinct(., station_number) %>%
   print(n = Inf)
 
-mapview(bw_sf2)
+mapview(zbw_sf2)
 
-bw_m1 <- mapview(bw_sf2, popup =
+bw_m1 <- mapview(zbw_sf2, popup =
                   popupTable(bw_sf2, zcol = "station_number"))
 
 
-lw_m1 <- mapview(fl_lw1, popup =
-                  popupTable(fl_lw1, zcol = "sta_nr"))
+# lw_m1 <- mapview(fl_lw1, popup =
+                  #popupTable(fl_lw1, zcol = "sta_nr"))
 
-sync(bw_m1, lw_m1, ncol = 1)
+sync(bw_m1, bw_older, ncol = 1) # zbw_sf2 has 32 obs vs 29 obs in zstanr_loc1
+# with 3 extra stations in zbw_sf2 being in North Bay, Upper Goose Bayou and 
+# Goose Bayou station numbers 1.87 and 1.88, respectively. In St. Andrew Bay
+# the station number is 3.40 St. Andrew Bay-12, Davis Point
+
+
+sync(bw_m1, bw_recent, ncol = 1) # station locations in Grand Lagoon differ between
+# bw_m1 and bw_recent. bw_recent has more sites than bw_m1
+# zbw_sf2 has 32 obs vs 37 obs in zlw_loc1
+# would a nearest neighbor distances of bw_recent to bw_m1 identify 5 extra stations?
 
 distinct(fl_lw1, monitoring_location_name) %>% 
   arrange(.) %>% 
@@ -772,13 +723,13 @@ group_by(fl_lw1, SEGMENT_NA) %>%
 distinct(., monitoring_location_name) %>%
   print(n = Inf)
 
-
-lw_loc1 <- dplyr::select(fl_lw1,monitoring_location_name)
-str(lw_loc1) # 861 https://github.com/r-spatial/sf/issues/669 and geom columns retained
-head(lw_loc1)
-class(lw_loc1)
-# https://github.com/r-spatial/sf/issues/669
-zlw_loc1 <- unique.data.frame(lw_loc1) # returns 37 obs/stations & geometries
+# moved this code to earlier chunk
+# lw_loc1 <- dplyr::select(fl_lw1,monitoring_location_name)
+# str(lw_loc1) # 861 https://github.com/r-spatial/sf/issues/669 and geom columns retained
+# head(lw_loc1)
+# class(lw_loc1)
+# # https://github.com/r-spatial/sf/issues/669
+# zlw_loc1 <- unique.data.frame(lw_loc1) # returns 37 obs/stations & geometries
 
 head(bw_sf2)
 
