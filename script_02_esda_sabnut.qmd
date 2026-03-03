@@ -622,10 +622,10 @@ sync(bw_older, bw_recent, ncol=1)
 ```
 
 
-## Nearest Neighbor Distances
+## Nearest Neighbor Distances: older to more recent datasets
 Getting nearest neighbor distance of older 29 Baywatch stations to more recent 37 Baywatch stations. Vignette from nngeo shows how to get these distances.
-```{r knn1}
-# get closest neighbor
+```{r knn1_older_recent}
+# get closest neighbor of older to more recent stations
 distnn_or1 = st_join(zstanr_loc1, zlw_loc1, join = st_nn, k = 1, progress = FALSE)
 class(distnn_or1)
 str(distnn_or1)
@@ -697,7 +697,7 @@ distinct(., station_number) %>%
 mapview(zbw_sf2)
 
 bw_m1 <- mapview(zbw_sf2, popup =
-                  popupTable(bw_sf2, zcol = "station_number"))
+                  popupTable(zbw_sf2, zcol = "station_number"))
 
 
 # lw_m1 <- mapview(fl_lw1, popup =
@@ -731,9 +731,9 @@ distinct(., monitoring_location_name) %>%
 # # https://github.com/r-spatial/sf/issues/669
 # zlw_loc1 <- unique.data.frame(lw_loc1) # returns 37 obs/stations & geometries
 
-head(bw_sf2)
+head(zbw_sf2)
 
-mapview(bw_sf2, color = "blue") + mapview(zlw_loc1, color = "red")
+mapview(zbw_sf2, color = "blue") + mapview(zlw_loc1, color = "red")
 # zoomed into 10 m see that station number 2.4, West Bay-4 from bwid does not match lw monitoring location name Bay-West Bay 4
 # zoomed into 100 m see that station number 3.4, u of f number St.Andrew Bay-12,location Davis Point from bwid no match lw monitoring location name of Bay-St. Andrew Bay-12
 
@@ -743,17 +743,39 @@ mapview(bw_sf2, color = "blue") + mapview(zlw_loc1, color = "red")
 # https://www.jla-data.net/eng/merging-geometry-of-sf-objects-in-r/
 
 
-zmatrx_37x32 <-  ifelse(sf::st_intersects(zlw_loc1, bw_sf2, sparse = F), 
+zmatrx_37x32 <-  ifelse(sf::st_intersects(zlw_loc1, zbw_sf2, sparse = F), 
                                  "Yes", 
                                  "No")
 # pull out projected coordinates of bw stations and lw stations
-zgeom_bwsf2 <- st_geometry(bw_sf2)
+zgeom_bwsf2 <- st_geometry(zbw_sf2)
 
 print(zgeom_bwsf2, n=32)
 
 zgeom_lwloc <- st_geometry(zlw_loc1)
 
 print(zgeom_lwloc, n=37)
+```
+
+## Nearest Neighbors of Recent Baywatch (n=37) to Baywatch ID (n=32)
+```{r knn1_recent_bwid}
+# get closest neighbor of more recent stations to bw ID
+distnn_rid1 = st_join(zlw_loc1, zbw_sf2, join = st_nn, k = 1, progress = FALSE)
+class(distnn_rid1)
+str(distnn_rid1)
+
+# calculate distance to closest neighbor
+dist_rid1 = st_nn(zlw_loc1, zbw_sf2,k = 1, returnDist = TRUE, progress = FALSE)
+str(dist_rid1)
+head(dist_rid1)
+
+# this code goes to 2nd list, the distances, and pulls first element from that list
+dists = sapply(dist_rid1[[2]], "[", 1)
+dists
+
+distnn_rid1$dist = dists
+
+distnn_rid1
+print(distnn_rid1, n = 37)
 ```
 
 
