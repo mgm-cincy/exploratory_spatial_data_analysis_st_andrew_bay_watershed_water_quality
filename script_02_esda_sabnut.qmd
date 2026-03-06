@@ -757,6 +757,7 @@ print(zgeom_lwloc, n=37)
 ```
 
 ## Nearest Neighbors of Recent Baywatch (n=37) to Baywatch ID (n=32)
+Crosswalk station distance to nearest neighbors and between monitoring location names and station numbers.
 ```{r knn1_recent_bwid}
 # get closest neighbor of more recent stations to bw ID
 distnn_rid1 = st_join(zlw_loc1, zbw_sf2, join = st_nn, k = 1, progress = FALSE)
@@ -776,6 +777,11 @@ distnn_rid1$dist = dists
 
 distnn_rid1
 print(distnn_rid1, n = 37)
+```
+
+### Sync 3 Maps:  Older, Baywatch ID, and More Recent
+```{r sync3maps}
+sync(bw_older, bw_m1, bw_recent, ncol = 1)
 ```
 
 
