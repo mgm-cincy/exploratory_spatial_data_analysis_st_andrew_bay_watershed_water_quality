@@ -623,7 +623,7 @@ sync(bw_older, bw_recent, ncol=1)
 
 
 ## Nearest Neighbor Distances: older to more recent datasets
-Getting nearest neighbor distance of older 29 Baywatch stations to more recent 37 Baywatch stations. Vignette from nngeo shows how to get these distances. Do the crosswalking  of station numbers, monitoring location names and distances by viewing synced maps and popping out the data frame containing the distances and sorting that by station number.
+Getting nearest neighbor distance of older 29 Baywatch stations to more recent 37 Baywatch stations. Vignette from nngeo shows how to get these distances. Do the crosswalking  of station numbers, monitoring location names and distances by viewing synced maps of older and more recent data (in chunk 12 above) and popping out the data frame containing the distances, which is made in chunk 13 below, and sorting that by station number.
 ```{r knn1_older_recent}
 # get closest neighbor of older to more recent stations
 distnn_or1 = st_join(zstanr_loc1, zlw_loc1, join = st_nn, k = 1, progress = FALSE)
@@ -643,6 +643,9 @@ distnn_or1$dist = dists
 
 distnn_or1
 print(distnn_or1, n = 29)
+
+View(distnn_or1)
+# click show in window icon, which is next to the filter icon of distnn_or1 df tab
 ```
 
 
@@ -777,6 +780,7 @@ distnn_rid1$dist = dists
 
 distnn_rid1
 print(distnn_rid1, n = 37)
+
 ```
 
 ## Sync 3 Maps:  Older, Baywatch ID, and More Recent
