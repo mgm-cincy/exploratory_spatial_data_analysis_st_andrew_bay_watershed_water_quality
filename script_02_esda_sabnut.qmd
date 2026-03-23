@@ -1404,3 +1404,34 @@ ggplot(sub_np_stations, aes(tn, color = SEGMENT_NA)) + stat_ecdf() + facet_wrap(
 
 ```
 
+#RH to convert old and recent bay watch stations to lat/long and export for use in GIS
+```{r}
+library(sf)
+
+bw_older_export <- zstanr_loc1 %>%
+  st_transform(4326) %>%  # convert to lat/long
+  mutate(
+    Long = st_coordinates(.)[,1],
+    Lat  = st_coordinates(.)[,2]
+  ) %>%
+  st_drop_geometry()
+
+bw_recent_export <- zlw_loc1 %>%
+  st_transform(4326) %>%
+  mutate(
+    Long = st_coordinates(.)[,1],
+    Lat  = st_coordinates(.)[,2]
+  ) %>%
+  st_drop_geometry()
+
+bw_recent_export <- zlw_loc1 %>%
+  st_transform(4326) %>%
+  mutate(
+    Long = st_coordinates(.)[,1],
+    Lat  = st_coordinates(.)[,2]
+  ) %>%
+  st_drop_geometry()
+
+write_csv(bw_older_export, "bw_older.csv")
+write_csv(bw_recent_export, "bw_recent.csv")
+```
