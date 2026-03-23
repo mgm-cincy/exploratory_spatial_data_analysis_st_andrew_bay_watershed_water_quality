@@ -21,9 +21,16 @@ library(forcats)
 library(gifski) #for tmap animation
 library(plotly)
 library(webshot) # save mapview object
+library(nngeo)
 ```
 
 ## Log
+
+2026-02-24 nngeo vignette showed how to calculate and join nearest neighbor distances
+
+2026-02-23 trying st_nn function to identify closest station between 29 stations from older baywatch stations to 37 stations from more recent baywatch stations
+
+2026-02-19 put 100 m and 20 m buffers around bw_sf2 stations and Rose added Sites_for_Evaluation spreadsheet to data folder
 
 2026-02-18 discovered bw_sf2 coordinates, obtained from st_geometry, do not match exactly to zlw_loc1 coordinates. Is the solution to put an x-meter buffer around bw_sf2 sites, which have a station number, and if the zlw_loc1 contained in that buffer then the zlw_loc1 site can be assigned that station number?
 
@@ -519,6 +526,13 @@ ggplot(fl_lw1, aes(x = date, y = chl)) + geom_point() +
 ggplot(fl_lw1, aes(x = date, y = chl)) + geom_point() + 
   facet_wrap(vars(monitoring_location_name), scales = "free_y")
 
+# pull out only locations/geometry of more recent baywatch stations
+lw_loc1 <- dplyr::select(fl_lw1,monitoring_location_name)
+str(lw_loc1) # 861 https://github.com/r-spatial/sf/issues/669 and geom columns retained
+head(lw_loc1)
+class(lw_loc1)
+# https://github.com/r-spatial/sf/issues/669
+zlw_loc1 <- unique.data.frame(lw_loc1) # returns 37 obs/stations & geometries
 
 ```
 
@@ -590,10 +604,55 @@ tm_2 <- mapview(sta_nr_coded1, color = "green", popup =
                   popupTable(sta_nr_coded1, zcol = "sta_nr")) + mapview(subbay_1)
 
 sync(tm_1, tm_2, ncol=1)
+
+
+
+stanr_loc1 <- dplyr::select(sta_nr_coded1,sta_nr, monitoring_location_name)
+str(stanr_loc1) # 861 https://github.com/r-spatial/sf/issues/669 and geom columns retained
+head(stanr_loc1)
+class(stanr_loc1)
+# https://github.com/r-spatial/sf/issues/669
+zstanr_loc1 <- unique.data.frame(stanr_loc1) # returns 29 obs/stations & geometries
+
+
+bw_older <- mapview(zstanr_loc1) #29 obs
+bw_recent <-mapview(zlw_loc1) #37 obs
+
+sync(bw_older, bw_recent, ncol=1)
 ```
 
+
+## Nearest Neighbor Distances: older to more recent datasets
+Getting nearest neighbor distance of older 29 Baywatch stations to more recent 37 Baywatch stations. Vignette from nngeo shows how to get these distances. Do the crosswalking  of station numbers, monitoring location names and distances by viewing synced maps of older and more recent data (in chunk 12 above) and popping out the data frame containing the distances, which is made in chunk 13 below, and sorting that by station number.
+```{r knn1_older_recent}
+# get closest neighbor of older to more recent stations
+distnn_or1 = st_join(zstanr_loc1, zlw_loc1, join = st_nn, k = 1, progress = FALSE)
+class(distnn_or1)
+str(distnn_or1)
+
+# calculate distance to closest neighbor
+dist_or1 = st_nn(zstanr_loc1, zlw_loc1, k = 1, returnDist = TRUE, progress = FALSE)
+str(dist_or1)
+head(dist_or1)
+
+# this code goes to 2nd list, the distances, and pulls first element from that list
+dists = sapply(dist_or1[[2]], "[", 1)
+dists
+
+distnn_or1$dist = dists
+
+distnn_or1
+print(distnn_or1, n = 29)
+
+View(distnn_or1)
+# click show in window icon, which is next to the filter icon of distnn_or1 df tab
+```
+
+
 ## Baywatch Station IDs
-Baywatch Station IDs provided by Ryann Rossi. Discovered Baywatch coordinates differ from Lakewatch coordinate when mapviewed both datasets and zoomed in to 20 meters.
+Baywatch Station IDs provided by Ryann Rossi. The pdf file is RMA_Baywatch_Active_Stations_Revised_112015. Discovered these Baywatch coordinates differ from recent Baywatch coordinates in zlw_loc1 when mapviewed both datasets and zoomed in to 20 meters.
+
+Also, spatial intersection of recent Baywatch coordinates returned 37 observations/stations. But, spatial intersection of Baywatch station ids, bw_sf2, returns 32 observations/stations.
 ```{r baywatch_ids}
 
 bw_id1 <- read_csv("data/baywatch_station_ids.csv")
@@ -626,38 +685,58 @@ bw_sf1 <- bw_sf1 %>% st_transform(3087)
 st_crs(bw_sf1)
 st_crs(fl_lw1)
 
-bw_sf2 <- st_intersection(bw_sf1, subbay_1)
+zbw_sf2 <- st_intersection(bw_sf1, subbay_1)
 # drops to 32 stations
+names(zbw_sf2)
 
-distinct(bw_sf2, station_number) %>% arrange(., station_number) %>% print(n = Inf)
+distinct(zbw_sf2, station_number) %>%
+  arrange(., station_number) %>% 
+  print(n = Inf)
+
+group_by(zbw_sf2, SEGMENT_NA) %>%
+distinct(., station_number) %>%
+  print(n = Inf)
+
+mapview(zbw_sf2)
+
+bw_m1 <- mapview(zbw_sf2, popup =
+                  popupTable(zbw_sf2, zcol = "station_number"))
 
 
-mapview(bw_sf2)
+# lw_m1 <- mapview(fl_lw1, popup =
+                  #popupTable(fl_lw1, zcol = "sta_nr"))
 
-bw_m1 <- mapview(bw_sf2, popup =
-                  popupTable(bw_sf2, zcol = "station_number"))
+sync(bw_m1, bw_older, ncol = 1) # zbw_sf2 has 32 obs vs 29 obs in zstanr_loc1
+# with 3 extra stations in zbw_sf2 being in North Bay, Upper Goose Bayou and 
+# Goose Bayou station numbers 1.87 and 1.88, respectively. In St. Andrew Bay
+# the station number is 3.40 St. Andrew Bay-12, Davis Point
 
 
-lw_m1 <- mapview(fl_lw1, popup =
-                  popupTable(fl_lw1, zcol = "sta_nr"))
-
-sync(bw_m1, lw_m1, ncol = 1)
+sync(bw_m1, bw_recent, ncol = 1) # station locations in Grand Lagoon differ between
+# bw_m1 and bw_recent. bw_recent has more sites than bw_m1
+# zbw_sf2 has 32 obs vs 37 obs in zlw_loc1
+# would a nearest neighbor distances of bw_recent to bw_m1 identify 5 extra stations?
 
 distinct(fl_lw1, monitoring_location_name) %>% 
   arrange(.) %>% 
   print(n=Inf)
 # returns 37 location names
 
-lw_loc1 <- dplyr::select(fl_lw1,monitoring_location_name)
-str(lw_loc1) # 861 https://github.com/r-spatial/sf/issues/669 and geom columns retained
-head(lw_loc1)
-class(lw_loc1)
-# https://github.com/r-spatial/sf/issues/669
-zlw_loc1 <- unique.data.frame(lw_loc1) # returns 37 obs/stations & geometries
+group_by(fl_lw1, SEGMENT_NA) %>%
+distinct(., monitoring_location_name) %>%
+  print(n = Inf)
 
-head(bw_sf2)
+# moved this code to earlier chunk
+# lw_loc1 <- dplyr::select(fl_lw1,monitoring_location_name)
+# str(lw_loc1) # 861 https://github.com/r-spatial/sf/issues/669 and geom columns retained
+# head(lw_loc1)
+# class(lw_loc1)
+# # https://github.com/r-spatial/sf/issues/669
+# zlw_loc1 <- unique.data.frame(lw_loc1) # returns 37 obs/stations & geometries
 
-mapview(bw_sf2, color = "blue") + mapview(zlw_loc1, color = "red")
+head(zbw_sf2)
+
+mapview(zbw_sf2, color = "blue") + mapview(zlw_loc1, color = "red")
 # zoomed into 10 m see that station number 2.4, West Bay-4 from bwid does not match lw monitoring location name Bay-West Bay 4
 # zoomed into 100 m see that station number 3.4, u of f number St.Andrew Bay-12,location Davis Point from bwid no match lw monitoring location name of Bay-St. Andrew Bay-12
 
@@ -667,11 +746,11 @@ mapview(bw_sf2, color = "blue") + mapview(zlw_loc1, color = "red")
 # https://www.jla-data.net/eng/merging-geometry-of-sf-objects-in-r/
 
 
-zmatrx_37x32 <-  ifelse(sf::st_intersects(zlw_loc1, bw_sf2, sparse = F), 
+zmatrx_37x32 <-  ifelse(sf::st_intersects(zlw_loc1, zbw_sf2, sparse = F), 
                                  "Yes", 
                                  "No")
 # pull out projected coordinates of bw stations and lw stations
-zgeom_bwsf2 <- st_geometry(bw_sf2)
+zgeom_bwsf2 <- st_geometry(zbw_sf2)
 
 print(zgeom_bwsf2, n=32)
 
@@ -680,28 +759,76 @@ zgeom_lwloc <- st_geometry(zlw_loc1)
 print(zgeom_lwloc, n=37)
 ```
 
+## Nearest Neighbors of Recent Baywatch (n=37) to Baywatch ID (n=32)
+Crosswalk station distance to nearest neighbors and between monitoring location names and station numbers. Do the crosswalking by viewing synced maps and popping out the data frame containing the distances and sort that by station number.
+```{r knn1_recent_bwid}
+# get closest neighbor of more recent stations to bw ID
+distnn_rid1 = st_join(zlw_loc1, zbw_sf2, join = st_nn, k = 1, progress = FALSE)
+class(distnn_rid1)
+str(distnn_rid1)
+
+# calculate distance to closest neighbor
+dist_rid1 = st_nn(zlw_loc1, zbw_sf2,k = 1, returnDist = TRUE, progress = FALSE)
+str(dist_rid1)
+head(dist_rid1)
+
+# this code goes to 2nd list, the distances, and pulls first element from that list
+dists = sapply(dist_rid1[[2]], "[", 1)
+dists
+
+distnn_rid1$dist = dists
+
+distnn_rid1
+print(distnn_rid1, n = 37)
+
+```
+
+## Sync 3 Maps:  Older, Baywatch ID, and More Recent
+```{r sync3maps}
+sync(bw_older, bw_m1, bw_recent, ncol = 1)
+```
+
 
 ## Buffer Baywatch Stations
+Making 100 m and 20 m buffers around bw_sf2 32 stations. Note how bw_sf2 has geom of point, but buff_100 has geom of polygon. Goal is to get station numbers from bw_sf2 attached to their corresponding lake watch locations in zw_loc1.
 ```{r buffer}
-
+# 100 m buffer
 buff_100 <- st_buffer(bw_sf2, 100)
+head(buff_100)
 names(buff_100)
 mapview(buff_100, alpha = 0)
 
 mapview(buff_100, color = "blue", alpha = 0.1) + mapview(zlw_loc1, color = "red")
 
-
-bw_sf2$close2_100lw <- ifelse(sf::st_intersects(zlw_loc1, buff_100, sparse = F), 
-                                 "Yes", 
-                                 "No")
+# get error b/c one sf has 37 entries and other sf has 32 entries
+# bw_sf2$close2_100lw <- ifelse(sf::st_intersects(zlw_loc1, buff_100, sparse = F), 
+#                                 "Yes", 
+#                                 "No")
 
 glimpse(bw_sf2)
 
 zlw_loc2 <- st_intersection(zlw_loc1, buff_100)
-# drop to 26 lw stations so 10 lw not in 100 m buffer from bw stations
+names(zlw_loc2)
+head(zlw_loc2)
+print(zlw_loc2, n=26)
+# drop to 26 lw stations so 11 lw not in 100 m buffer from bw stations
 mapview(buff_100, color = "blue", alpha = 0.1) + mapview(zlw_loc2, color = "red")
 
-# eyeballing and see that bw stations 9.1, 9.4, 9.5 (all grand lagoon) and 2.88, 2.3, and 2.70 (west bay) with their 100 m buffers do not intersect lw stations
+# eyeballing and see that 100 m buffers of bw stations 9.1, 9.4, 9.5 (all grand lagoon) and 2.88, 2.3, and 2.70 (west bay) do not intersect lw stations
+
+zlw_beyond100m <- !st_intersection(zlw_loc1, buff_100)
+
+
+# 20 m buffer
+buff_20 <- st_buffer(bw_sf2, 20)
+names(buff_20)
+mapview(buff_20)
+
+mapview(buff_20, color = "blue", alpha = 0.1) + mapview(zlw_loc1, color = "red")
+
+zlw_loc3 <- st_intersection(zlw_loc1, buff_20)
+# drop to 25 lw stations so 12 lw not in 100 m buffer from bw stations
+mapview(buff_20, color = "blue", alpha = 0.1) + mapview(zlw_loc2, color = "red")
 
 # ggplot() +
 #   geom_sf(data = counties) +
