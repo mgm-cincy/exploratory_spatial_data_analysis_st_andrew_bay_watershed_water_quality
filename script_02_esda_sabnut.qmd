@@ -26,6 +26,8 @@ library(nngeo)
 
 ## Log
 
+2026-04-08 downloaded Rose's Bays_Bayous_Lakes_v4.zip into data_gis folder
+
 2026-02-24 nngeo vignette showed how to calculate and join nearest neighbor distances
 
 2026-02-23 trying st_nn function to identify closest station between 29 stations from older baywatch stations to 37 stations from more recent baywatch stations
