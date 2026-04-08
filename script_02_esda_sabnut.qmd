@@ -645,7 +645,7 @@ distnn_or1
 print(distnn_or1, n = 29)
 
 View(distnn_or1)
-# click show in window icon, which is next to the filter icon of distnn_or1 df tab
+# click show in window icon, which is next to the filter icon of distnn_or1 df tab. That dataframe window can be placed next to the synced maps so a match can be made between a station number and a monitoring location name.
 ```
 
 
@@ -780,6 +780,8 @@ distnn_rid1$dist = dists
 
 distnn_rid1
 print(distnn_rid1, n = 37)
+View(distnn_rid1)
+# click show in window icon, which is next to the filter icon of distnn_or1 df tab. That dataframe window can be placed next to the synced maps so a match can be made between a station number and a monitoring location name.
 
 ```
 
