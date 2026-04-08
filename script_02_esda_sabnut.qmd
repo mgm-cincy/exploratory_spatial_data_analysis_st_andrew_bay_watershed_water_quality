@@ -1,4 +1,7 @@
 ---
+title: "ESDA of St. Andrew Bay Watershed Water Quality"
+author: "Mike McManus, Ryann Rossi and Ruth Horn"
+format: html
 output: html_document
 editor_options: 
   chunk_output_type: console
