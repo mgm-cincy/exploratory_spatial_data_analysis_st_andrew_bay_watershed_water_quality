@@ -29,6 +29,8 @@ library(nngeo)
 
 ## Log
 
+2026-04-09 moved old gis data to local gis_old folder
+
 2026-04-08 downloaded Rose's Bays_Bayous_Lakes_v4.zip into data_gis folder
 
 2026-02-24 nngeo vignette showed how to calculate and join nearest neighbor distances
@@ -171,13 +173,13 @@ mapview(np_sf1) + mapview(bbl_1)
 
 ```
 
-## Read Bays, Bayous and Lakes V2
+## Read Bays, Bayous and Lakes V4
 Rose Horn took 2 polygons for Alligator Bayou, which borders the U.S. Coast Guard Station on St. Andrew Bay, and splits them into separate sampling areas. Will stick with using version 1 for now.
 ```{r bbl_v2}
-# 
-# bbl_2 <- st_read("data_gis/Bays_Bayous_Lakes_V2/Bays_Bayous_Lakes_V2.shp")
-# 
-# mapview(bbl_2)
+
+bbl_4 <- st_read("data_gis/Bays_Bayous_Lakes_V4/Bays_Bayous_Lakes_V4.shp")
+
+mapview(bbl_4)
 
 
 
