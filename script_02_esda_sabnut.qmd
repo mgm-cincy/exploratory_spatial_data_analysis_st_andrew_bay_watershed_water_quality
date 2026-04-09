@@ -134,7 +134,7 @@ summary(z2$sta_nr) # returns all NAs
 
 
 ## Create sf object
-Have NA for some lat and long entries so remove these
+Have NA for some lat and long entries so remove these. Also, Numeric Nutrient Criteria (NNC) polygons omit bayous, creeks, and lakes, but includes intracoastal waterway and St. Joe Bay. But bayous, bays, and lakes does have all those polygons. Although, a Burnt Mill Creek station does not hit that polygon.
 ```{r create_sf}
 
 # create sf object
@@ -150,6 +150,12 @@ class(np_sf1)
 nnc_1 <- st_read("data_gis/NNC_Bay_Segments.shp")
 class(nnc_1)
 summary(nnc_1)
+distinct(nnc_1, SEGMENT_NA)
+distinct(nnc_1, WATERBODY_)
+
+mapview(nnc_1)
+# Numeric
+
 # see that espg code is 3087
 # asking do the two sf objects have the same CRS
 st_crs(np_sf1) == st_crs(nnc_1)
@@ -161,22 +167,23 @@ mapview(np_sf1) + mapview(nnc_1)
 
 # mapview(hab_sf1, zcol = "Depth", cex = "Depth", alpha.regions = .8, legend = TRUE, popup = popupTable(hab_sf1, zcol = c("Depth", "Site"))) + mapview(bigbend_seagrass)
 
-bbl_1 <- st_read("data_gis/Bays_Bayous_Lakes_V1.shp")
-class(bbl_1)
-summary(bbl_1)
+bbl_4 <- st_read("data_gis/Bays_Bayous_Lakes_V4/Bays_Bayous_Lakes_V4.shp")
+class(bbl_4)
+summary(bbl_4)
 
-bbl_1 <- bbl_1 %>% st_transform(3087)
+bbl_4 <- bbl_4 %>% st_transform(3087)
 
-mapview(bbl_1)
+mapview(bbl_4)
 
-mapview(np_sf1) + mapview(bbl_1)
+mapview(np_sf1) + mapview(bbl_4)
+# a burnt mill creek station from 2024-04-25 is off polygon
 
 ```
 
 ## Read Bays, Bayous and Lakes V4
 Rose Horn took 2 polygons for Alligator Bayou, which borders the U.S. Coast Guard Station on St. Andrew Bay, and splits them into separate sampling areas. Also, in version the new update reflects the removal of small edge portions of St. Andrew Bay that were along the edges of East Bay and Grand Lagoon. Looks like I should pick-up Upper and Lower Burnt Mill Creek Stations.
 
-Need to see if I have 6 polygon names for:  East Bay, Grand Lagoon, North Bay, St. Andrew Bay, West Bay, and West Bay Creeks as I want to use those 6 polygons in linked micromap.
+Need to see if I have 6 polygon names for:  East Bay, Grand Lagoon, North Bay, St. Andrew Bay, West Bay, and West Bay Creeks as I want to use those 6 polygons in linked micromap. Perhaps by using SEGMENT_NA and Major_Seg I can get the polygons I want.
 ```{r bbl_v2}
 
 bbl_4 <- st_read("data_gis/Bays_Bayous_Lakes_V4/Bays_Bayous_Lakes_V4.shp")
@@ -199,8 +206,7 @@ distinct(bbl_4, Major_Seg)
 
 Six distinct organizations collected monitoring data with Florida Lakewatch being a synonym for St. Andrew Baywatch. An NA organization is listed and missing is NWFWMD. Need to compare Ryann and Rose's queries. Get 1020 dates spanning 1998-07-10 to 2025-04-23. Have 130 distinct monitoring location IDs, including NA. Have 210 distinct monitoring location names. There are 7894 distinct coordinates/locations.
 
-But, I am wondering if DEP assigns coordinates that are not the actual locations of the monitoring station, but instead are always to same place (the centroid) of the spatial feature. Also, are there any analyte code remarks about questionable values?
-
+Interesting, that when run distinct(np_ds1, monitoring_location_name) %>% arrange(., monitoring_location_name) %>% print(n = Inf) get some exact duplicate names, which I think means those those duplicate names have different coordinates. Returns 130 monitoring location names. Also, clearly have Large Lakes (LL) from FDEP's status monitoring and these include Deer Point Lake and Lake Martin.
 ```{r data_structure}
 names(np_ds1)
 distinct(np_ds1, organization_name)
@@ -217,12 +223,13 @@ np_ds1 %>%
 distinct(np_ds1, monitoring_location_id) %>% arrange(., monitoring_location_id) %>% 
   print(n = Inf)
 
-distinct(np_ds1, monitoring_location_name) %>% arrange(., monitoring_location_name) %>% 
-  print(n = Inf)
+distinct(np_ds1, monitoring_location_name) %>% arrange(., monitoring_location_name) %>% print(n = Inf)
 
 distinct(np_ds1, chl) %>% arrange(., chl) %>% print(n = Inf)
 distinct(np_ds1, tn) %>% arrange(., tn) %>% print(n = Inf)
 distinct(np_ds1, tp) %>% arrange(., tp) %>% print(n = Inf)
+distinct(np_ds1, tide_code)
+# distinct tide_code includes 0, 1, 2, 3, 4, 20, and NA
 
 # distinct monitoring stations
 np_stations <- unique.data.frame(np_sf1) # returns 10,367 obs/stations & geometries
@@ -233,16 +240,20 @@ np_stations %>%
 
 # distinct bay
 distinct(np_ds1, bay) %>% print(n = Inf)
+# returns 35 bays, bayous, creeks, and lakes
 
 np_ds1 %>% 
   group_by(bay) %>% 
-  summarise(count = n_distinct(monitoring_location_name)) %>% 
-  print(n = Inf)
+  summarise(count = n_distinct(monitoring_location_name)) %>% dplyr::arrange(.,count) %>% print(n = Inf)
 
 ```
 
 Interesting that total phosphorus has monitoring names that include format of DEP's status survey of zone 1 (Z1) for NWFMD region followed by resource type large lake (LL), but that's not the case for total nitrogen.
 
+From St. Andrew Baywatch 2023 report have these sample sizes:
+Secchi Depth (n= 5896), Temperature (n=5898), DO (n=5899), Turbidity (n=5815), Salinity (n=5897), and pH (n=5897) from Table 1. No sample sizes are given for Fecal Coliform, Chlorophyll a, Total Phosphorous, and Total Nitrogen (Table 5)
+
+From summaries below, TN (n=10,369 witn na_count = 4947), TP (n=10.369, with na_count - 4,145), and chl (n = 10,369, with na_count = 4502).
 ```{r summaries}
 # tn
 dplyr::select(np_ds1, tn) %>% 
@@ -316,21 +327,28 @@ print(n = Inf)
 ```
 
 ## Spatial Intersect of Sub-bays
+On April 9, 2025 noticed that creation of subbay_1 mistakenly omitted SEGMENT_NA for Grand Lagoon. I corrected that adding Grand Lagoon so this changes sample size. I could use these 5 polgyons for linked micromap. How well do this 5 polygons compare to nnc_1 polygons?
 
 Does spatial intersection result in, for example, of upper Crooked Creek being excluded? Yes, it does. Do Rose and Ryann needed to include, possibly, NHDPlus polygons of Crooked Creek and Burnt Mill Creek so as not to "lose" stations in those locations?
-Spatial intersection with sub-bay drops obs to 5737 because excluding coastal dune lakes and areas outside of St. Andrew Bay.
+Spatial intersection with sub-bay drops obs to 6154 because excluding coastal dune lakes and areas outside of St. Andrew Bay.
 ```{r st_intersect}
 # four sub_bays
-subbay_1 <- dplyr::filter(bbl_1, SEGMENT_NA == "West Bay" | SEGMENT_NA == "North Bay" | SEGMENT_NA == "St. Andrew Bay" | SEGMENT_NA == "East Bay")
+subbay_1 <- dplyr::filter(bbl_4, SEGMENT_NA == "West Bay" | SEGMENT_NA == "North Bay" | SEGMENT_NA == "St. Andrew Bay" | SEGMENT_NA == "East Bay" | SEGMENT_NA == "Grand Lagoon")
 
 mapview(subbay_1)
 sub_np1 <- st_intersection(np_sf1, subbay_1)
 head(sub_np1)
 
 
-mapview(sub_np1) + mapview(bbl_1)
+mapview(sub_np1) + mapview(bbl_4)
 mapview(sub_np1) + mapview(subbay_1)
 
+mapview(nnc_1) + mapview(subbay_1, col.regions = "yellow")
+
+mapview(np_sf1) + mapview(subbay_1, col.regions = "yellow")
+
+mapview(np_sf1) + mapview(bbl_4, col.regions = "yellow")
+# if exclude Lake Powell and Lullwater stations from nps_sf1 and then intersect remaining stations to bbl_4 then that would give polygons that intersect most of the points
 ```
 
 ## Sub-bay Data Structure
