@@ -174,15 +174,24 @@ mapview(np_sf1) + mapview(bbl_1)
 ```
 
 ## Read Bays, Bayous and Lakes V4
-Rose Horn took 2 polygons for Alligator Bayou, which borders the U.S. Coast Guard Station on St. Andrew Bay, and splits them into separate sampling areas. Will stick with using version 1 for now.
+Rose Horn took 2 polygons for Alligator Bayou, which borders the U.S. Coast Guard Station on St. Andrew Bay, and splits them into separate sampling areas. Also, in version the new update reflects the removal of small edge portions of St. Andrew Bay that were along the edges of East Bay and Grand Lagoon. Looks like I should pick-up Upper and Lower Burnt Mill Creek Stations.
+
+Need to see if I have 6 polygon names for:  East Bay, Grand Lagoon, North Bay, St. Andrew Bay, West Bay, and West Bay Creeks as I want to use those 6 polygons in linked micromap.
 ```{r bbl_v2}
 
 bbl_4 <- st_read("data_gis/Bays_Bayous_Lakes_V4/Bays_Bayous_Lakes_V4.shp")
-
+summary(bbl_4)
 mapview(bbl_4)
 
+distinct(bbl_4, SEGMENT_NA)
+# have 190 distinct SEGMENT_NA, but 191 obs suggesting one polygon is sharing a name
+
+# Is Major_Seg a new field from Rose?
+distinct(bbl_4, Major_Seg)
 
 
+# z3 <- dplyr::filter(bbl_4, SEGMENT_NA == "West Bay" | SEGMENT_NA == "North Bay" | SEGMENT_NA == "St. Andrew Bay" | SEGMENT_NA == "East Bay" | SEGMENT_NA == "Burnt Mill Creek" | SEGMENT_NA == "Crooked Creek")
+# mapview(z3)
 ```
 
 
