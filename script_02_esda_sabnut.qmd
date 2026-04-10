@@ -25,6 +25,7 @@ library(gifski) #for tmap animation
 library(plotly)
 library(webshot) # save mapview object
 library(nngeo)
+library(micromap)
 ```
 
 ## Log
@@ -169,16 +170,6 @@ mapview(np_sf1) + mapview(nnc_1)
 
 # mapview(hab_sf1, zcol = "Depth", cex = "Depth", alpha.regions = .8, legend = TRUE, popup = popupTable(hab_sf1, zcol = c("Depth", "Site"))) + mapview(bigbend_seagrass)
 
-bbl_4 <- st_read("data_gis/Bays_Bayous_Lakes_V4/Bays_Bayous_Lakes_V4.shp")
-class(bbl_4)
-summary(bbl_4)
-
-bbl_4 <- bbl_4 %>% st_transform(3087)
-
-mapview(bbl_4)
-
-mapview(np_sf1) + mapview(bbl_4)
-# a burnt mill creek station from 2024-04-25 is off polygon
 
 ```
 
@@ -196,12 +187,21 @@ distinct(bbl_4, SEGMENT_NA) %>% dplyr::arrange(., SEGMENT_NA)
 # have 190 distinct SEGMENT_NA, but 191 obs suggesting one polygon is sharing a name
 
 # Is Major_Seg a new field from Rose?
-distinct(bbl_4, Major_Seg)
+distinct(bbl_4, Major_Seg) %>% dplyr::arrange(., Major_Seg)
 # returns 8 Major_Seg
 
+bbl_4 <- bbl_4 %>% st_transform(3087)
+
+mapview(np_sf1) + mapview(bbl_4)
+# a burnt mill creek station from 2024-04-25 is off polygon
+
 # these 8 polygons might be what I use for a linked micromap
-z3 <- dplyr::filter(bbl_4, SEGMENT_NA == "West Bay" | SEGMENT_NA == "North Bay" | SEGMENT_NA == "St. Andrew Bay" | SEGMENT_NA == "East Bay" | SEGMENT_NA == "Burnt Mill Creek" | SEGMENT_NA == "Crooked Creek" | SEGMENT_NA == "Grand Lagoon" |SEGMENT_NA == "Deer Point Lake")
-mapview(z3)
+polygons8 <- dplyr::filter(bbl_4, SEGMENT_NA == "West Bay" | SEGMENT_NA == "North Bay" | SEGMENT_NA == "St. Andrew Bay" | SEGMENT_NA == "East Bay" | SEGMENT_NA == "Burnt Mill Creek" | SEGMENT_NA == "Crooked Creek" | SEGMENT_NA == "Grand Lagoon" |SEGMENT_NA == "Deer Point Lake")
+
+mapview(polygons8)
+
+mapview(np_sf1) + mapview(polygons8)
+
 ```
 
 
@@ -1474,3 +1474,40 @@ bw_recent_export <- zlw_loc1 %>%
 write_csv(bw_older_export, "bw_older.csv")
 write_csv(bw_recent_export, "bw_recent.csv")
 ```
+
+## Stations for Linked Micromap
+Inconsistent data entry for Lake Marin or just Marin.
+
+```{r micromap_stations}
+
+mm_station1 <- dplyr::filter(np_sf1, bay != "Lake Powell" & bay != "Powell Creek" & bay != "Lullwater" & bay != "Lake Marin" & bay != "Marin")
+
+mapview(mm_station1)
+
+distinct(mm_station1, bay) %>% dplyr::arrange(., bay) %>% print(n=Inf) 
+
+mapview(mm_station1) + mapview(polygons8, col.regions = "yellow")
+
+```
+
+## Spatial Intersection of MM Stations to Polygons 8
+Spatial intersection so station points get polygon attributes, specifically SEGMENT_NA. For linked micromap the data frame of summary statistics has to have the same ID linking variable as in the polygon data frame. Note this intersection will drop many bayou and creek stations, but I am okay as this is just for a draft linked micromap.
+
+```{r mmstations_intersect_polygons}
+
+mm_station2 <- st_intersection(mm_station1, polygons8)
+
+mapview(mm_station2) + mapview(polygons8, col.regions = "yellow")
+
+names(mm_station2)
+
+distinct(mm_station2, SEGMENT_NA) %>% dplyr::arrange(., SEGMENT_NA)
+
+# get years that match St. Andrew Baywatch WQ Report
+mm_station3 <- filter(mm_station2, year >= "2019")
+
+distinct(mm_station3, organization_id)
+distinct(mm_station3, organization_name)
+
+```
+
