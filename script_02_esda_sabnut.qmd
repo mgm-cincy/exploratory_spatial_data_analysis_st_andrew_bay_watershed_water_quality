@@ -29,6 +29,8 @@ library(nngeo)
 
 ## Log
 
+2026-04-10 evaluating polygons from bbl_4 for linked micromap
+
 2026-04-09 moved old gis data to local gis_old folder
 
 2026-04-08 downloaded Rose's Bays_Bayous_Lakes_v4.zip into data_gis folder
@@ -190,15 +192,16 @@ bbl_4 <- st_read("data_gis/Bays_Bayous_Lakes_V4/Bays_Bayous_Lakes_V4.shp")
 summary(bbl_4)
 mapview(bbl_4)
 
-distinct(bbl_4, SEGMENT_NA)
+distinct(bbl_4, SEGMENT_NA) %>% dplyr::arrange(., SEGMENT_NA)
 # have 190 distinct SEGMENT_NA, but 191 obs suggesting one polygon is sharing a name
 
 # Is Major_Seg a new field from Rose?
 distinct(bbl_4, Major_Seg)
+# returns 8 Major_Seg
 
-
-# z3 <- dplyr::filter(bbl_4, SEGMENT_NA == "West Bay" | SEGMENT_NA == "North Bay" | SEGMENT_NA == "St. Andrew Bay" | SEGMENT_NA == "East Bay" | SEGMENT_NA == "Burnt Mill Creek" | SEGMENT_NA == "Crooked Creek")
-# mapview(z3)
+# these 8 polygons might be what I use for a linked micromap
+z3 <- dplyr::filter(bbl_4, SEGMENT_NA == "West Bay" | SEGMENT_NA == "North Bay" | SEGMENT_NA == "St. Andrew Bay" | SEGMENT_NA == "East Bay" | SEGMENT_NA == "Burnt Mill Creek" | SEGMENT_NA == "Crooked Creek" | SEGMENT_NA == "Grand Lagoon" |SEGMENT_NA == "Deer Point Lake")
+mapview(z3)
 ```
 
 
