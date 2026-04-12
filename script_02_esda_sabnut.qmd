@@ -177,7 +177,7 @@ mapview(np_sf1) + mapview(nnc_1)
 Rose Horn took 2 polygons for Alligator Bayou, which borders the U.S. Coast Guard Station on St. Andrew Bay, and splits them into separate sampling areas. Also, in version the new update reflects the removal of small edge portions of St. Andrew Bay that were along the edges of East Bay and Grand Lagoon. Looks like I should pick-up Upper and Lower Burnt Mill Creek Stations.
 
 Need to see if I have 6 polygon names for:  East Bay, Grand Lagoon, North Bay, St. Andrew Bay, West Bay, and West Bay Creeks as I want to use those 6 polygons in linked micromap. Perhaps by using SEGMENT_NA and Major_Seg I can get the polygons I want.
-```{r bbl_v2}
+```{r bbl_v4}
 
 bbl_4 <- st_read("data_gis/Bays_Bayous_Lakes_V4/Bays_Bayous_Lakes_V4.shp")
 summary(bbl_4)
@@ -1504,10 +1504,23 @@ names(mm_station2)
 distinct(mm_station2, SEGMENT_NA) %>% dplyr::arrange(., SEGMENT_NA)
 
 # get years that match St. Andrew Baywatch WQ Report
-mm_station3 <- filter(mm_station2, year >= "2019")
+mm_station3 <- dplyr::filter(mm_station2, sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.")
+# returns 1082 obs
 
 distinct(mm_station3, organization_id)
 distinct(mm_station3, organization_name)
+distinct(mm_station3, year)
+
+mm_stations3$yr <- as.factor(year)
+
+# note in 2018 facet no East Bay samples for tn, tp and chl
+# for chl all missing values in 2021 and some in 2023 and 2024
+tm_shape(polygons8) +
+  tm_polygons(fill = "white", lwd = 2) +
+  tm_title("Detectable and NA Entries of Chlorophyll (mg/L)")  + 
+  tm_shape(mm_station3) +
+  tm_symbols(fill = "chl") +
+  tm_facets(by = "year")
 
 ```
 
