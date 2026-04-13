@@ -1514,19 +1514,48 @@ names(mm_station2)
 
 mm_station2 %>% 
   group_by(SEGMENT_NA) %>% 
-  summarize(count = dplyr::n))
+  summarize(., count = dplyr::n())
+
+mm_station2 %>% 
+  group_by(SEGMENT_NA, year) %>% 
+  summarize(., count = dplyr::n()) %>% 
+  print(n=Inf)
 
 # np_ds1 %>% 
 #   group_by(organization_name) %>% 
 #   summarise(count = n_distinct(monitoring_location_name))
 
-
+# dplyr::select(sub_np_stations, tn, SEGMENT_NA) %>% 
+# group_by(., SEGMENT_NA) %>% 
+# summarize(., min = fivenum(tn)[1],
+#               q1 = fivenum(tn)[2],
+#               median = fivenum(tn)[3],
+#               q3 = fivenum(tn)[4],
+#               max = fivenum(tn)[5],
+#               count = dplyr::n(),
+#               mean = mean(tn, na.rm = TRUE),
+#               na_count = sum(is.na(tn))) %>% 
+# print(n = Inf)
 distinct(mm_station2, SEGMENT_NA) %>% dplyr::arrange(., SEGMENT_NA)
 
 distinct(mm_station2, organization_id)
 distinct(mm_station2, organization_name)
 distinct(mm_station2, year) %>% dplyr::arrange(., year) %>% print(n=Inf)
 distinct(mm_station2, sampling_agency_name)
+
+#2019-2023 covers St. Andrew Baywatch WQ report
+dplyr::filter(mm_station2, year == 2023 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.") %>% 
+dplyr::select(., tn, SEGMENT_NA) %>% 
+group_by(., SEGMENT_NA) %>% 
+summarize(., min = fivenum(tn)[1],
+              q1 = fivenum(tn)[2],
+              median = fivenum(tn)[3],
+              q3 = fivenum(tn)[4],
+              max = fivenum(tn)[5],
+              count = dplyr::n(),
+              mean = mean(tn, na.rm = TRUE),
+              na_count = sum(is.na(tn))) %>% 
+print(n = Inf)
 
 
 # get years that match St. Andrew Baywatch WQ Report
@@ -1544,9 +1573,9 @@ mm_stations3$yr <- as.factor(year)
 tm_shape(polygons8) +
   tm_polygons(fill = "white", lwd = 2) +
   tm_title("Detectable and NA Entries of Total Nitrogen (mg/L)")  + 
-  tm_shape(mm_station2) +
+  tm_shape(mm_station3) +
   tm_symbols(fill = "tn") +
-  tm_facets(by = "year")
+  tm_facets(by = "SEGMENT_NA")
 
 ```
 
