@@ -176,7 +176,7 @@ mapview(np_sf1) + mapview(nnc_1)
 ## Read Bays, Bayous and Lakes V4
 Rose Horn took 2 polygons for Alligator Bayou, which borders the U.S. Coast Guard Station on St. Andrew Bay, and splits them into separate sampling areas. Also, in version the new update reflects the removal of small edge portions of St. Andrew Bay that were along the edges of East Bay and Grand Lagoon. Looks like I should pick-up Upper and Lower Burnt Mill Creek Stations.
 
-Need to see if I have 6 polygon names for:  East Bay, Grand Lagoon, North Bay, St. Andrew Bay, West Bay, and West Bay Creeks as I want to use those 6 polygons in linked micromap. Perhaps by using SEGMENT_NA and Major_Seg I can get the polygons I want.
+Need to see if I have 8 polygon names for:  East Bay, Grand Lagoon, North Bay, St. Andrew Bay, West Bay, Crooked and Burnt Mill Creeks, and Deer Point Lake as I want to use those 6 polygons in linked micromap. Perhaps by using SEGMENT_NA and Major_Seg I can get the polygons I want.
 ```{r bbl_v4}
 
 bbl_4 <- st_read("data_gis/Bays_Bayous_Lakes_V4/Bays_Bayous_Lakes_V4.shp")
@@ -1482,9 +1482,15 @@ Inconsistent data entry for Lake Marin or just Marin.
 
 mm_station1 <- dplyr::filter(np_sf1, bay != "Lake Powell" & bay != "Powell Creek" & bay != "Lullwater" & bay != "Lake Marin" & bay != "Marin")
 
+names(mm_station1)
+
 mapview(mm_station1)
 
 distinct(mm_station1, bay) %>% dplyr::arrange(., bay) %>% print(n=Inf) 
+
+# np_ds1 %>% 
+#   group_by(organization_name) %>% 
+#   summarise(count = n_distinct(monitoring_location_name))
 
 mapview(mm_station1) + mapview(polygons8, col.regions = "yellow")
 
@@ -1497,11 +1503,31 @@ Spatial intersection so station points get polygon attributes, specifically SEGM
 
 mm_station2 <- st_intersection(mm_station1, polygons8)
 
+mm_stat1map <- mapview(mm_station1)
+mm_stat2map <- mapview(mm_station2, col.regions = "yellow")
+
+sync(mm_stat1map, mm_stat2map, ncol = 1)
+
 mapview(mm_station2) + mapview(polygons8, col.regions = "yellow")
 
 names(mm_station2)
 
+mm_station2 %>% 
+  group_by(SEGMENT_NA) %>% 
+  summarize(count = dplyr::n))
+
+# np_ds1 %>% 
+#   group_by(organization_name) %>% 
+#   summarise(count = n_distinct(monitoring_location_name))
+
+
 distinct(mm_station2, SEGMENT_NA) %>% dplyr::arrange(., SEGMENT_NA)
+
+distinct(mm_station2, organization_id)
+distinct(mm_station2, organization_name)
+distinct(mm_station2, year) %>% dplyr::arrange(., year) %>% print(n=Inf)
+distinct(mm_station2, sampling_agency_name)
+
 
 # get years that match St. Andrew Baywatch WQ Report
 mm_station3 <- dplyr::filter(mm_station2, sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.")
@@ -1517,9 +1543,9 @@ mm_stations3$yr <- as.factor(year)
 # for chl all missing values in 2021 and some in 2023 and 2024
 tm_shape(polygons8) +
   tm_polygons(fill = "white", lwd = 2) +
-  tm_title("Detectable and NA Entries of Chlorophyll (mg/L)")  + 
-  tm_shape(mm_station3) +
-  tm_symbols(fill = "chl") +
+  tm_title("Detectable and NA Entries of Total Nitrogen (mg/L)")  + 
+  tm_shape(mm_station2) +
+  tm_symbols(fill = "tn") +
   tm_facets(by = "year")
 
 ```
