@@ -1,0 +1,90 @@
+---
+title: "Linked Micromap"
+author: "Mike McManus"
+format: html
+editor: visual
+---
+
+## Libraries
+
+```{r library}
+library(micromap)
+```
+
+## Log
+2026-04-22 pasted workshop code
+
+## Data
+
+When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+
+```{r data}
+1 + 1
+```
+
+
+## Linked Micromap
+You can add options to executable code like this
+
+```{r linked_micromap}
+#Draft plot
+mmplot(stat.data=wv.data.ds1,
+       map.data=wv.map.table,
+       panel.types=c('dot_legend', 'labels', 'box_summary', 'dot_cl', 'map'),
+       panel.data=list(NA,
+                       'alt.name',
+                       list('cond_min', 'condq1', 'cond_med1', 'condq3', 'cond_max'),
+                       list('Cond_med', 'Cond_LCB95', 'Cond_UCB95'),                       
+                       NA),
+       ord.by='Cond_med', rev.ord=TRUE,
+       grouping=5, plot.pGrp.spacing=1,
+       median.row=FALSE,
+       map.link=c('Random_Wat', 'ID'))
+
+#Refined Plot
+mmplot(stat.data=wv.data.ds1,
+       map.data=wv.map.table,
+       panel.types=c('dot_legend', 'labels', 'box_summary', 'dot_cl', 'map'),
+       panel.data=list(NA,
+                       'alt.name',
+                       list('cond_min', 'condq1', 'cond_med1', 'condq3', 'cond_max'),
+                       list('Cond_med', 'Cond_LCB95', 'Cond_UCB95'),                       
+                       NA),
+       ord.by='Cond_med', rev.ord=TRUE,
+       grouping=5, plot.pGrp.spacing=1,
+       median.row=FALSE,
+       map.link=c('Random_Wat', 'ID'),
+       
+       plot.height=9, plot.width=6.8, #for poster use plot.height=6, plot.width=9,
+       colors=brewer.pal(5, "Spectral"), #for journal use plot.height=9, plot.width=6.8
+              
+       panel.att=list(list(1, panel.width=1, point.type=20, point.size=2,
+                           point.border=TRUE), 
+                      
+                      list(2, header='WVDEP\n Subbasins', panel.width=1.25,#increased panel.width to 1.1 from .8
+                           align='left', text.size=.8),
+                      
+                      list(3, header='Observed Conductivity \n 4th Order Streams or Less',
+                           graph.bgcolor='lightgray',
+                           xaxis.ticks=c(0, 1000, 2000, 3000, 4000, 5000),
+                           xaxis.labels=c(0, 1, 2, 3, 4, 5),
+                           xaxis.labels.size=1.25,
+                           #xaxis.labels.angle=90,
+                           xaxis.title='Conductivity (x1000)', xaxis.title.size=1.25, panel.width=2),
+                      
+                      list(4, header='Estimated Conductivity \n 4th Order Streams or Less',
+                           graph.bgcolor='lightgray',
+                           xaxis.ticks=list(0, 150, 300, 450, 600, 750),
+                           xaxis.labels=list(0, 150, 300, 450, 600, 750),
+                           xaxis.labels.size=1.25,
+                           xaxis.title='Conductivity',
+                           add.line=129, add.line.col="black", add.line.typ="dashed",
+                           xaxis.title.size=1.25,panel.width=2),
+                      
+                      list(5, header='Light Gray Means\n Highlighted Above',
+                           inactive.border.color=gray(.7), inactive.border.size=2,
+                            panel.width=1.5)))
+
+```
+
+The `echo: false` option disables the printing of code (only output is displayed).
