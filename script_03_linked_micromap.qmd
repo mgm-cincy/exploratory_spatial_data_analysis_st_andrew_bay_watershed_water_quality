@@ -8,6 +8,7 @@ editor: visual
 ## Libraries
 
 ```{r library}
+library(mapview)
 library(micromap)
 ```
 
@@ -19,7 +20,12 @@ library(micromap)
 When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
 
 ```{r data}
-1 + 1
+names(polygons8)
+View(polygons8)
+
+polygons6 <- filter(polygons8, SEGMENT_NA != "Crooked Creek" & SEGMENT_NA != "Burnt Mill Creek")
+
+tn_2019 <- filter(tn_2019, SEGMENT_NA != "Crooked Creek")
 ```
 
 
