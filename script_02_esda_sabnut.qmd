@@ -1476,7 +1476,7 @@ write_csv(bw_recent_export, "bw_recent.csv")
 ```
 
 ## Stations for Linked Micromap
-Inconsistent data entry for Lake Marin or just Marin.
+Inconsistent data entry for Lake Marin or just Marin. The "mm_" naming convention refers to getting the data structured for a linked micromap.
 
 ```{r micromap_stations}
 
@@ -1498,6 +1498,8 @@ mapview(mm_station1) + mapview(polygons8, col.regions = "yellow")
 
 ## Spatial Intersection of MM Stations to Polygons 8
 Spatial intersection so station points get polygon attributes, specifically SEGMENT_NA. For linked micromap the data frame of summary statistics has to have the same ID linking variable as in the polygon data frame. Note this intersection will drop many bayou and creek stations, but I am okay as this is just for a draft linked micromap.
+
+In West Bay, the spatial intersection omits the intracoastal waterway, and upper stations in Crooked and Burnt Mill Creeks. In North Bay, omit many of the bayous, and likewise for East Bay.
 
 ```{r mmstations_intersect_polygons}
 
@@ -1544,7 +1546,7 @@ distinct(mm_station2, year) %>% dplyr::arrange(., year) %>% print(n=Inf)
 distinct(mm_station2, sampling_agency_name)
 
 #2019-2023 covers St. Andrew Baywatch WQ report
-dplyr::filter(mm_station2, year == 2023 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.") %>% 
+dplyr::filter(mm_station2, year == 2019 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.") %>% 
 dplyr::select(., tn, SEGMENT_NA) %>% 
 group_by(., SEGMENT_NA) %>% 
 summarize(., min = fivenum(tn)[1],
@@ -1564,9 +1566,10 @@ mm_station3 <- dplyr::filter(mm_station2, sampling_agency_name == "ST. ANDREW BA
 
 distinct(mm_station3, organization_id)
 distinct(mm_station3, organization_name)
+distinct(mm_station3, sampling_agency_name)
 distinct(mm_station3, year)
 
-mm_stations3$yr <- as.factor(year)
+# mm_stations3$yr <- as.factor(year)
 
 # note in 2018 facet no East Bay samples for tn, tp and chl
 # for chl all missing values in 2021 and some in 2023 and 2024
@@ -1575,7 +1578,25 @@ tm_shape(polygons8) +
   tm_title("Detectable and NA Entries of Total Nitrogen (mg/L)")  + 
   tm_shape(mm_station3) +
   tm_symbols(fill = "tn") +
-  tm_facets(by = "SEGMENT_NA")
+  tm_facets(by = "year")
+
+
+# remove geometry from summary stats
+
+chla_2019 <- st_set_geometry(mm_station2, NULL) %>% 
+dplyr::filter(., year == 2019 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.") %>% 
+dplyr::select(., chl, SEGMENT_NA) %>% 
+group_by(., SEGMENT_NA) %>% 
+summarize(., min = fivenum(chl)[1],
+              q1 = fivenum(chl)[2],
+              median = fivenum(chl)[3],
+              q3 = fivenum(chl)[4],
+              max = fivenum(chl)[5],
+              count = dplyr::n(),
+              mean = mean(chl, na.rm = TRUE),
+              na_count = sum(is.na(chl))) %>% 
+print(n = Inf)
+
 
 ```
 
