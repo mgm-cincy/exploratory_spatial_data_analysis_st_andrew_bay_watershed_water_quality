@@ -3,6 +3,8 @@ title: "Linked Micromap"
 author: "Mike McManus"
 format: html
 editor: visual
+editor_options: 
+  chunk_output_type: console
 ---
 
 ## Libraries
@@ -13,6 +15,7 @@ library(micromap)
 ```
 
 ## Log
+
 2026-04-22 pasted workshop code
 
 ## Data
@@ -25,27 +28,32 @@ View(polygons8)
 
 polygons6 <- filter(polygons8, SEGMENT_NA != "Crooked Creek" & SEGMENT_NA != "Burnt Mill Creek")
 
-tn_2019 <- filter(tn_2019, SEGMENT_NA != "Crooked Creek")
+chla_2019v1 <- filter(chla_2019, SEGMENT_NA != "Crooked Creek")
+names(chla_2019v1)
+
+# list sf object first, then dataframe of stats to create polygons with stats
+chla_2019v2 <- merge(polygons6, chla_2019v1, by = "SEGMENT_NA" )
+summary(chla_2019v2)
+
 ```
 
-
 ## Linked Micromap
-You can add options to executable code like this
+Note cannot have a column called "median" in data.
+Also, for chla data need log transformation
+Getting 3 micromaps, one uncolored, one with 6 colors, and one all gray
 
 ```{r linked_micromap}
 #Draft plot
-mmplot(stat.data=wv.data.ds1,
-       map.data=wv.map.table,
-       panel.types=c('dot_legend', 'labels', 'box_summary', 'dot_cl', 'map'),
+mmplot(map.data=chla_2019v2,
+       panel.types=c('dot_legend', 'labels', 'box_summary', 'map'),
        panel.data=list(NA,
-                       'alt.name',
-                       list('cond_min', 'condq1', 'cond_med1', 'condq3', 'cond_max'),
-                       list('Cond_med', 'Cond_LCB95', 'Cond_UCB95'),                       
+                       'SEGMENT_NA',
+                       list('min', 'q1', 'med', 'q3', 'max'),
                        NA),
-       ord.by='Cond_med', rev.ord=TRUE,
-       grouping=5, plot.pGrp.spacing=1,
-       median.row=FALSE,
-       map.link=c('Random_Wat', 'ID'))
+       grouping = 6,
+       ord.by='med', rev.ord=TRUE,
+       median.row=FALSE)
+       #map.link=c('SEGMENT_NA'))
 
 #Refined Plot
 mmplot(stat.data=wv.data.ds1,
