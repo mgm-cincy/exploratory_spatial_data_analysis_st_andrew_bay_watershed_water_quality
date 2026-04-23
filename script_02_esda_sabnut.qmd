@@ -29,6 +29,7 @@ library(micromap)
 ```
 
 ## Log
+2026-04-23 need to work on get numeric codes assigned to sta_nr so can get distinct count of stations with in each polygon for linked micromap
 
 2026-04-10 evaluating polygons from bbl_4 for linked micromap
 
@@ -1523,6 +1524,17 @@ mm_station2 %>%
   summarize(., count = dplyr::n()) %>% 
   print(n=Inf)
 
+summary(mm_station2$sta_nr)
+# returns 1727 NAs so would likely need to do nearest neighbor analysis to get numeric codes assigned to sta_nr
+
+# na's for sta_nr appear in 2016 and later years
+# will need to work this out so can get an accurate count of distinct within each
+# of the polygons
+mm_station2 %>% 
+  group_by(SEGMENT_NA, year) %>% 
+  summarize(., na_count = sum(is.na(sta_nr))) %>% 
+print(n = Inf)
+
 # np_ds1 %>% 
 #   group_by(organization_name) %>% 
 #   summarise(count = n_distinct(monitoring_location_name))
@@ -1582,7 +1594,6 @@ tm_shape(polygons8) +
 
 
 # remove geometry from summary stats
-
 chla_2019 <- st_set_geometry(mm_station2, NULL) %>% 
 dplyr::filter(., year == 2019 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.") %>% 
 dplyr::select(., chl, SEGMENT_NA) %>% 
