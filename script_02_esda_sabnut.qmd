@@ -1594,27 +1594,67 @@ tm_shape(polygons8) +
   tm_shape(mm_station3) +
   tm_symbols(fill = "tn") +
   tm_facets(by = "year")
+```
 
-
+## Statistics for Linked Micromaps
+```{r stats_micromap}
 # remove geometry from summary stats
 chla_2019 <- st_set_geometry(mm_station2, NULL) %>% 
 dplyr::filter(., year == 2019 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.") %>% 
 dplyr::select(., chl, SEGMENT_NA) %>% 
 group_by(., SEGMENT_NA) %>% 
-summarize(., min = fivenum(chl)[1],
-              q1 = fivenum(chl)[2],
-              med = fivenum(chl)[3],
-              q3 = fivenum(chl)[4],
-              max = fivenum(chl)[5],
-              lmin = log(fivenum(chl)[1]),
-              lq1 = log(fivenum(chl)[2]),
-              lmed = log(fivenum(chl)[3]),
-              lq3 = log(fivenum(chl)[4]),
-              lmax = log(fivenum(chl)[5]),
-              count = dplyr::n(),
-              mean = mean(chl, na.rm = TRUE),
-              na_count = sum(is.na(chl))) %>% 
+summarize(., chla_min = fivenum(chl)[1],
+              chla_q1 = fivenum(chl)[2],
+              chla_med = fivenum(chl)[3],
+              chla_q3 = fivenum(chl)[4],
+              chla_max = fivenum(chl)[5],
+              chla_lmin = log(fivenum(chl)[1]),
+              chla_lq1 = log(fivenum(chl)[2]),
+              chla_lmed = log(fivenum(chl)[3]),
+              chla_lq3 = log(fivenum(chl)[4]),
+              chla_lmax = log(fivenum(chl)[5]),
+              chla_count = dplyr::n(),
+              chla_mean = mean(chl, na.rm = TRUE),
+              chla_na_count = sum(is.na(chl))) %>% 
 print(n = Inf)
+
+tn_2019 <- st_set_geometry(mm_station2, NULL) %>% 
+  dplyr::filter(., year == 2019 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.") %>% 
+  dplyr::select(., tn, SEGMENT_NA) %>% 
+  group_by(., SEGMENT_NA) %>% 
+  summarize(., tn_min = fivenum(tn)[1],
+            tn_q1 = fivenum(tn)[2],
+            tn_med = fivenum(tn)[3],
+            tn_q3 = fivenum(tn)[4],
+            tn_max = fivenum(tn)[5],
+            tn_lmin = log(fivenum(tn)[1]),
+            tn_lq1 = log(fivenum(tn)[2]),
+            tn_lmed = log(fivenum(tn)[3]),
+            tn_lq3 = log(fivenum(tn)[4]),
+            tn_lmax = log(fivenum(tn)[5]),
+            tn_count = dplyr::n(),
+            tn_mean = mean(tn, na.rm = TRUE),
+            tn_na_count = sum(is.na(tn))) %>% 
+  print(n = Inf)
+
+tp_2019 <- st_set_geometry(mm_station2, NULL) %>% 
+  dplyr::filter(., year == 2019 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.") %>% 
+  dplyr::select(., tp, SEGMENT_NA) %>% 
+  group_by(., SEGMENT_NA) %>% 
+  summarize(., tp_min = fivenum(tp)[1],
+            tp_q1 = fivenum(tp)[2],
+            tp_med = fivenum(tp)[3],
+            tp_q3 = fivenum(tp)[4],
+            tp_max = fivenum(tp)[5],
+            tp_lmin = log(fivenum(tp)[1]),
+            tp_lq1 = log(fivenum(tp)[2]),
+            tp_lmed = log(fivenum(tp)[3]),
+            tp_lq3 = log(fivenum(tp)[4]),
+            tp_lmax = log(fivenum(tp)[5]),
+            tp_count = dplyr::n(),
+            tp_mean = mean(tp, na.rm = TRUE),
+            tp_na_count = sum(is.na(tp))) %>% 
+  print(n = Inf)
 
 
 
