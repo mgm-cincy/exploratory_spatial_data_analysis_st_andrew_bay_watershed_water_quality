@@ -30,32 +30,68 @@ View(polygons8)
 
 polygons6 <- filter(polygons8, SEGMENT_NA != "Crooked Creek" & SEGMENT_NA != "Burnt Mill Creek")
 
+#chla
 chla_2019v1 <- filter(chla_2019, SEGMENT_NA != "Crooked Creek")
 names(chla_2019v1)
 
 # list sf object first, then dataframe of stats to create polygons with stats
 chla_2019v2 <- merge(polygons6, chla_2019v1, by = "SEGMENT_NA" )
 summary(chla_2019v2)
+# note that geometry is polygon
+
+# tn
+tn_2019v1 <- filter(tn_2019, SEGMENT_NA != "Crooked Creek")
+
+chlatn_2019v2 <- merge(chla_2019v2, tn_2019v1, by = "SEGMENT_NA" )
+
+# tp
+tp_2019v1 <- filter(tp_2019, SEGMENT_NA != "Crooked Creek")
+
+nutr_2019 <- merge(chlatn_2019v2, tp_2019v1, by = "SEGMENT_NA" )
 
 ```
 
 ## Linked Micromap
-Note cannot have a column called "median" in data.
-Also, for chla data need log transformation
-Getting 3 micromaps, one uncolored, one with 6 colors, and one all gray when grouping was 6. With grouping = 3 get 2 micromaps
+
+Note cannot have a column called "median" in data. Also, for chla data need log transformation Getting 3 micromaps, one uncolored, one with 6 colors, and one all gray when grouping was 6. With grouping = 3 get 2 micromaps
 
 ```{r linked_micromap}
 #Draft plot
-mmplot(map.data=chla_2019v2,
+mmplot(map.data=nutr_2019,
        panel.types=c('dot_legend', 'labels', 'box_summary', 'map'),
        panel.data=list(NA,
                        'SEGMENT_NA',
-                       list('lmin', 'lq1', 'lmed', 'lq3', 'lmax'),
+                       list('chla_lmin', 'chla_lq1', 'chla_lmed', 'chla_lq3', 'chla_lmax'),
                        NA),
        grouping = 3,
-       ord.by='med', rev.ord=TRUE,
+       ord.by='chla_lmed', rev.ord=TRUE,
        median.row=FALSE)
        #map.link=c('SEGMENT_NA'))
+
+mmplot(map.data=nutr_2019,
+       panel.types=c('dot_legend', 'labels', 'box_summary', 'map'),
+       panel.data=list(NA,
+                       'SEGMENT_NA',
+                       list('tn_lmin', 'tn_lq1', 'tn_lmed', 'tn_lq3', 'tn_lmax'),
+                       NA),
+       grouping = 3,
+       ord.by='tn_lmed', rev.ord=TRUE,
+       median.row=FALSE)
+
+
+mmplot(map.data=nutr_2019,
+       panel.types=c('dot_legend', 'labels', 'box_summary', 'map'),
+       panel.data=list(NA,
+                       'SEGMENT_NA',
+                       list('tp_lmin', 'tp_lq1', 'tp_lmed', 'tp_lq3', 'tp_lmax'),
+                       NA),
+       grouping = 3,
+       ord.by='tp_lmed', rev.ord=TRUE,
+       median.row=FALSE)
+
+
+
+
 
 #Refined Plot
 mmplot(stat.data=wv.data.ds1,
