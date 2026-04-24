@@ -29,6 +29,9 @@ library(micromap)
 ```
 
 ## Log
+
+2026-04-24 logged chla for linked micromap
+
 2026-04-23 need to work on get numeric codes assigned to sta_nr so can get distinct count of stations with in each polygon for linked micromap
 
 2026-04-10 evaluating polygons from bbl_4 for linked micromap
@@ -1603,6 +1606,11 @@ summarize(., min = fivenum(chl)[1],
               med = fivenum(chl)[3],
               q3 = fivenum(chl)[4],
               max = fivenum(chl)[5],
+              lmin = log(fivenum(chl)[1]),
+              lq1 = log(fivenum(chl)[2]),
+              lmed = log(fivenum(chl)[3]),
+              lq3 = log(fivenum(chl)[4]),
+              lmax = log(fivenum(chl)[5]),
               count = dplyr::n(),
               mean = mean(chl, na.rm = TRUE),
               na_count = sum(is.na(chl))) %>% 
