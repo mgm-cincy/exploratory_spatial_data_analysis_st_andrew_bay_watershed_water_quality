@@ -22,8 +22,7 @@ library(micromap)
 
 ## Data
 
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
-
+Edit data, both polygons and stats, to just the areas of interest. Also, merge the statistics to the polygon data.
 ```{r data}
 names(polygons8)
 View(polygons8)
@@ -34,6 +33,7 @@ polygons6 <- filter(polygons8, SEGMENT_NA != "Crooked Creek" & SEGMENT_NA != "Bu
 chla_2019v1 <- filter(chla_2019, SEGMENT_NA != "Crooked Creek")
 names(chla_2019v1)
 
+# merge polygon to chla stats
 # list sf object first, then dataframe of stats to create polygons with stats
 chla_2019v2 <- merge(polygons6, chla_2019v1, by = "SEGMENT_NA" )
 summary(chla_2019v2)
@@ -51,11 +51,13 @@ nutr_2019 <- merge(chlatn_2019v2, tp_2019v1, by = "SEGMENT_NA" )
 
 ```
 
-## Linked Micromap
+## Draft Linked Micromap
+Make draft linked micromaps to get code working, and note any statistical and spatial patterns.
 
-Note cannot have a column called "median" in data. Also, for chla data need log transformation Getting 3 micromaps, one uncolored, one with 6 colors, and one all gray when grouping was 6. With grouping = 3 get 2 micromaps
+Note cannot have a column called "median" in data. Also, for chla data needed log transformation, as did tn and tp.  Getting 3 micromaps, one uncolored, one with 6 colors, and one all gray when grouping was 6. With grouping = 3 get 2 micromaps corresponding to the 2 perceptual groups.
 
-```{r linked_micromap}
+For chla, interesting how little variation West Bay shows. For tn, Grand Lagoon has highest median and largest variation, and West Bay has an outlier that almost exceed Grand Lagoon. For tp, Grand Lagoon shows previous pattern similar to tn. Is tp, also showing a salinity graident correlation with high tp in higher salinity waters?
+```{r draft_linked_micromap}
 #Draft plot
 mmplot(map.data=nutr_2019,
        panel.types=c('dot_legend', 'labels', 'box_summary', 'map'),
@@ -87,55 +89,58 @@ mmplot(map.data=nutr_2019,
                        NA),
        grouping = 3,
        ord.by='tp_lmed', rev.ord=TRUE,
-       median.row=FALSE)
-
-
-
-
-
-#Refined Plot
-mmplot(stat.data=wv.data.ds1,
-       map.data=wv.map.table,
-       panel.types=c('dot_legend', 'labels', 'box_summary', 'dot_cl', 'map'),
-       panel.data=list(NA,
-                       'alt.name',
-                       list('cond_min', 'condq1', 'cond_med1', 'condq3', 'cond_max'),
-                       list('Cond_med', 'Cond_LCB95', 'Cond_UCB95'),                       
-                       NA),
-       ord.by='Cond_med', rev.ord=TRUE,
-       grouping=5, plot.pGrp.spacing=1,
        median.row=FALSE,
-       map.link=c('Random_Wat', 'ID'),
+       print.file="mm_tp2019.jpeg",res=100)
+
+```
+
+
+## Refine Linked Micromaps
+Use more detailed coding arguments to make better looking linked micromaps.
+```{r refine_micromap_tp}
+# TP Refined Plot
+mmplot(map.data=nutr_2019,
+       panel.types=c('dot_legend', 'labels', 'labels', 'box_summary', 'map'),
+       panel.data=list(NA,
+                       'SEGMENT_NA',
+                       'tp_count',
+                       list('tp_lmin', 'tp_lq1', 'tp_lmed', 'tp_lq3', 'tp_lmax'),
+                       NA),
+       grouping = 3,
+       ord.by='tp_lmed',
+       rev.ord=TRUE,
+       median.row=FALSE,
+       plot.pGrp.spacing=1,
        
-       plot.height=9, plot.width=6.8, #for poster use plot.height=6, plot.width=9,
+       plot.height=6, plot.width=9, #for poster use plot.height=6, plot.width=9,
        colors=brewer.pal(5, "Spectral"), #for journal use plot.height=9, plot.width=6.8
               
        panel.att=list(list(1, panel.width=1, point.type=20, point.size=2,
                            point.border=TRUE), 
                       
-                      list(2, header='WVDEP\n Subbasins', panel.width=1.25,#increased panel.width to 1.1 from .8
+                      list(2, header='St.Andrew Bay Segments', panel.width=1.2,#increased panel.width to 1.1 from .8
                            align='left', text.size=.8),
                       
-                      list(3, header='Observed Conductivity \n 4th Order Streams or Less',
+                      list(3, header='Samples',
+                           panel.width=.35,
+                           align='right',
+                           text.size=.8),
+                      
+                      list(4, header='2019 Detectable Total Phoshporous',
                            graph.bgcolor='lightgray',
-                           xaxis.ticks=c(0, 1000, 2000, 3000, 4000, 5000),
-                           xaxis.labels=c(0, 1, 2, 3, 4, 5),
+                           xaxis.ticks=c(-6.0, -5.0, -4.0, -3.0, -2.0),
+                           xaxis.labels=c(-6,-5, -4, -3, -2),
                            xaxis.labels.size=1.25,
+                           graph.bar.size = 0.5,
                            #xaxis.labels.angle=90,
-                           xaxis.title='Conductivity (x1000)', xaxis.title.size=1.25, panel.width=2),
+                           xaxis.title='Log(TP, mg/L)', xaxis.title.size=1.25, panel.width=2),
                       
-                      list(4, header='Estimated Conductivity \n 4th Order Streams or Less',
-                           graph.bgcolor='lightgray',
-                           xaxis.ticks=list(0, 150, 300, 450, 600, 750),
-                           xaxis.labels=list(0, 150, 300, 450, 600, 750),
-                           xaxis.labels.size=1.25,
-                           xaxis.title='Conductivity',
-                           add.line=129, add.line.col="black", add.line.typ="dashed",
-                           xaxis.title.size=1.25,panel.width=2),
-                      
-                      list(5, header='Light Gray Means\n Highlighted Above',
+                      list(5, header='Light Gray Means Highlighted Above',
                            inactive.border.color=gray(.7), inactive.border.size=2,
-                            panel.width=1.5)))
+                            panel.width=1.5)),
+print.file = "mmplot_tp2019.jpeg", res=100)
+
+
 
 ```
 
