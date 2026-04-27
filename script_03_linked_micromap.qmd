@@ -138,7 +138,7 @@ mmplot(map.data=nutr_2019,
                       list(5, header='Light Gray Means Highlighted Above',
                            inactive.border.color=gray(.7), inactive.border.size=2,
                             panel.width=1.5)),
-print.file = "mmplot_tp2019.jpeg", res=100)
+print.file = "output_micromap/mmplot_tp2019.jpeg", res=100)
 
 
 
