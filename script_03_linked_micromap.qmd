@@ -23,6 +23,7 @@ library(micromap)
 ## Data
 
 Edit data, both polygons and stats, to just the areas of interest. Also, merge the statistics to the polygon data.
+
 ```{r data}
 names(polygons8)
 View(polygons8)
@@ -52,11 +53,13 @@ nutr_2019 <- merge(chlatn_2019v2, tp_2019v1, by = "SEGMENT_NA" )
 ```
 
 ## Draft Linked Micromap
+
 Make draft linked micromaps to get code working, and note any statistical and spatial patterns.
 
-Note cannot have a column called "median" in data. Also, for chla data needed log transformation, as did tn and tp.  Getting 3 micromaps, one uncolored, one with 6 colors, and one all gray when grouping was 6. With grouping = 3 get 2 micromaps corresponding to the 2 perceptual groups.
+Note cannot have a column called "median" in data. Also, for chla data needed log transformation, as did tn and tp. Getting 3 micromaps, one uncolored, one with 6 colors, and one all gray when grouping was 6. With grouping = 3 get 2 micromaps corresponding to the 2 perceptual groups.
 
 For chla, interesting how little variation West Bay shows. For tn, Grand Lagoon has highest median and largest variation, and West Bay has an outlier that almost exceed Grand Lagoon. For tp, Grand Lagoon shows previous pattern similar to tn. Is tp, also showing a salinity graident correlation with high tp in higher salinity waters?
+
 ```{r draft_linked_micromap}
 #Draft plot
 mmplot(map.data=nutr_2019,
@@ -94,9 +97,10 @@ mmplot(map.data=nutr_2019,
 
 ```
 
-
 ## Refine Linked Micromaps
+
 Use more detailed coding arguments to make better looking linked micromaps.
+Refined TP
 ```{r refine_micromap_tp}
 # TP Refined Plot
 mmplot(map.data=nutr_2019,
@@ -144,4 +148,52 @@ print.file = "output_micromap/mmplot_tp2019.jpeg", res=100)
 
 ```
 
-The `echo: false` option disables the printing of code (only output is displayed).
+Refined TN
+```{r}
+# TN Refined Plot
+mmplot(map.data=nutr_2019,
+       panel.types=c('dot_legend', 'labels', 'labels', 'box_summary', 'map'),
+       panel.data=list(NA,
+                       'SEGMENT_NA',
+                       'tp_count',
+                       list('tn_lmin', 'tn_lq1', 'tn_lmed', 'tn_lq3', 'tn_lmax'),
+                       NA),
+       grouping = 3,
+       ord.by='tn_lmed',
+       rev.ord=TRUE,
+       median.row=FALSE,
+       plot.pGrp.spacing=1,
+       
+       plot.height=6, plot.width=9, #for poster use plot.height=6, plot.width=9,
+       colors=brewer.pal(5, "Spectral"), #for journal use plot.height=9, plot.width=6.8
+              
+       panel.att=list(list(1, panel.width=1, point.type=20, point.size=2,
+                           point.border=TRUE), 
+                      
+                      list(2, header='St.Andrew Bay Segments', panel.width=1.2,#increased panel.width to 1.1 from .8
+                           align='left', text.size=.8),
+                      
+                      list(3, header='Samples',
+                           panel.width=.35,
+                           align='right',
+                           text.size=.8),
+                      
+                      list(4, header='2019 Detectable Total Nitrogen',
+                           graph.bgcolor='lightgray',
+                           xaxis.ticks=c(-2.5, -2.0, -1.5, -1.0, -0.5, -0.0),
+                           xaxis.labels=c(-2.5, -2.0, -1.5, -1.0, -0.5, -0.0),
+                           xaxis.labels.size=1.25,
+                           graph.bar.size = 0.5,
+                           #xaxis.labels.angle=90,
+                           xaxis.title='Log(TN, mg/L)', xaxis.title.size=1.25, panel.width=2),
+                      
+                      list(5, header='Light Gray Means Highlighted Above',
+                           inactive.border.color=gray(.7), inactive.border.size=2,
+                            panel.width=1.5)),
+# to run so just appears in Plots pane have 3 parentheses after the last panel.width
+# to run and save the image delete 3rd parenthesis and insert comma       
+print.file = "output_micromap/mmplot_tn2019.jpeg", res=100)
+
+
+```
+
