@@ -307,6 +307,7 @@ tm_shape(polygons8) +
 ```
 
 ## Statistics for Linked Micromaps
+Get 5-number summary statistics to use in making boxplot for linked micromaps. Also, getting stats on log-transformed data.
 
 ```{r stats_micromap}
 # remove geometry from summary stats
@@ -373,9 +374,9 @@ tp_2019 <- st_set_geometry(mm_station2, NULL) %>%
 
 ## Edit Polygons and Stats
 
-Edit data, both polygons and stats, to just the areas of interest. Also, merge the statistics to the polygon data.
+Edit data, both polygons and stats, to just the areas of interest. Dropping Burnt Mill Creek and Crooked Creek polygons and stats as have too few observations. Also, merge the chlorophyll, tn, and tp statistics to the polygon data as a single sf object.
 
-```{r data}
+```{r polygons_stats}
 names(polygons8)
 View(polygons8)
 
@@ -422,7 +423,7 @@ mmplot(map.data=nutr_2019,
        grouping = 3,
        ord.by='chla_lmed', rev.ord=TRUE,
        median.row=FALSE)
-       #map.link=c('SEGMENT_NA'))
+       
 
 mmplot(map.data=nutr_2019,
        panel.types=c('dot_legend', 'labels', 'box_summary', 'map'),
@@ -443,8 +444,7 @@ mmplot(map.data=nutr_2019,
                        NA),
        grouping = 3,
        ord.by='tp_lmed', rev.ord=TRUE,
-       median.row=FALSE,
-       print.file="mm_tp2019.jpeg",res=100)
+       median.row=FALSE)
 
 ```
 
@@ -499,7 +499,7 @@ print.file = "output_micromap/mmplot_tp2019.jpeg", res=100)
 
 ```
 
-Refined Chla
+Refined TN
 
 ```{r}
 # TN Refined Plot
@@ -549,7 +549,8 @@ print.file = "output_micromap/mmplot_tn2019.jpeg", res=100)
 
 ```
 
-Refined Chlorophylla Note need to add column "\# of NA Samples".
+Refined Chlorophyll a
+Note need to add column "\# of NA Samples".
 
 ```{r}
 # Chla Refined Plot
