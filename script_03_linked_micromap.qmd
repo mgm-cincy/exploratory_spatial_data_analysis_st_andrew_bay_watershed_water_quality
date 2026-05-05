@@ -41,8 +41,8 @@ library(micromap)
 
 One csv file, win_baywatch_sabnut.csv, uploaded by Ryann Rossi, SASJBEP, on December 23, 2025. Ryan pulled the data from WIN and did some data cleaning. Note activity_start_date comes in as character.
 
-Read in Bays_Bayous_Lakes_V4 shapefile that Rose uploaded to repository.
-Can I merge wq data, np_ds1, with Baywatch station IDs, bw_id1, by coordinates?
+Read in Bays_Bayous_Lakes_V4 shapefile that Rose uploaded to repository. Can I merge wq data, np_ds1, with Baywatch station IDs, bw_id1, by coordinates?
+
 ```{r data}
 np_ds1 <- read_csv("data/win_baywatch_sabnut.csv")
 names(np_ds1)
@@ -106,6 +106,7 @@ summary(z2$sta_nr) # returns all NAs
 ```
 
 ## Explore Duplicates and NAs
+
 ```{r dupes_na}
 # z1 <- get_dupes(np_ds1)
 # 
@@ -114,9 +115,10 @@ summary(z2$sta_nr) # returns all NAs
 # z3 <- filter(np_ds1, is.na(tn))
 ```
 
-
 ## Create sf object
+
 Have NA for some lat and long entries so remove these. Also, Numeric Nutrient Criteria (NNC) polygons omit bayous, creeks, and lakes, but includes intracoastal waterway and St. Joe Bay. But bayous, bays, and lakes does have all those polygons. Although, a Burnt Mill Creek station does not hit that polygon.
+
 ```{r create_sf}
 
 # create sf object
@@ -153,9 +155,11 @@ mapview(np_sf1) + mapview(nnc_1)
 ```
 
 ## Read Bays, Bayous and Lakes V4
+
 Rose Horn took 2 polygons for Alligator Bayou, which borders the U.S. Coast Guard Station on St. Andrew Bay, and splits them into separate sampling areas. Also, in version the new update reflects the removal of small edge portions of St. Andrew Bay that were along the edges of East Bay and Grand Lagoon. Looks like I should pick-up Upper and Lower Burnt Mill Creek Stations.
 
-Need to see if I have 8 polygon names for:  East Bay, Grand Lagoon, North Bay, St. Andrew Bay, West Bay, Crooked and Burnt Mill Creeks, and Deer Point Lake as I want to use those 6 polygons in linked micromap. Perhaps by using SEGMENT_NA and Major_Seg I can get the polygons I want.
+Need to see if I have 8 polygon names for: East Bay, Grand Lagoon, North Bay, St. Andrew Bay, West Bay, Crooked and Burnt Mill Creeks, and Deer Point Lake as I want to use those 6 polygons in linked micromap. Perhaps by using SEGMENT_NA and Major_Seg I can get the polygons I want.
+
 ```{r bbl_v4}
 
 bbl_4 <- st_read("data_gis/Bays_Bayous_Lakes_V4/Bays_Bayous_Lakes_V4.shp")
@@ -184,7 +188,8 @@ mapview(np_sf1) + mapview(polygons8)
 ```
 
 ## Stations for Linked Micromap
-Inconsistent data entry for Lake Marin or just Marin. The "mm_" naming convention refers to getting the data structured for a linked micromap.
+
+Inconsistent data entry for Lake Marin or just Marin. The "mm\_" naming convention refers to getting the data structured for a linked micromap.
 
 ```{r micromap_stations}
 
@@ -205,6 +210,7 @@ mapview(mm_station1) + mapview(polygons8, col.regions = "yellow")
 ```
 
 ## Spatial Intersection of MM Stations to Polygons 8
+
 Spatial intersection so station points get polygon attributes, specifically SEGMENT_NA. For linked micromap the data frame of summary statistics has to have the same ID linking variable as in the polygon data frame. Note this intersection will drop many bayou and creek stations, but I am okay as this is just for a draft linked micromap.
 
 In West Bay, the spatial intersection omits the intracoastal waterway, and upper stations in Crooked and Burnt Mill Creeks. In North Bay, omit many of the bayous, and likewise for East Bay.
@@ -301,6 +307,7 @@ tm_shape(polygons8) +
 ```
 
 ## Statistics for Linked Micromaps
+
 ```{r stats_micromap}
 # remove geometry from summary stats
 chla_2019 <- st_set_geometry(mm_station2, NULL) %>% 
@@ -364,8 +371,8 @@ tp_2019 <- st_set_geometry(mm_station2, NULL) %>%
 
 ```
 
-
 ## Edit Polygons and Stats
+
 Edit data, both polygons and stats, to just the areas of interest. Also, merge the statistics to the polygon data.
 
 ```{r data}
