@@ -384,7 +384,7 @@ Edit data, both polygons and stats, to just the areas of interest. Dropping Burn
 
 ```{r polygons_stats}
 names(polygons8)
-View(polygons8)
+# View(polygons8)
 
 polygons6 <- filter(polygons8, SEGMENT_NA != "Crooked Creek" & SEGMENT_NA != "Burnt Mill Creek")
 
@@ -395,7 +395,7 @@ names(chla_2020v1)
 # merge polygon to chla stats
 # list sf object first, then dataframe of stats to create polygons with stats
 chla_2020v2 <- merge(polygons6, chla_2020v1, by = "SEGMENT_NA" )
-summary(chla_2019v2)
+summary(chla_2020v2)
 # note that geometry is polygon
 
 # tn
@@ -507,7 +507,7 @@ print.file = "output_micromap/mmplot_tp2019.jpeg", res=100)
 
 Refined TN
 
-```{r}
+```{r refined_micromap_tn}
 # TN Refined Plot
 mmplot(map.data=nutr_2019,
        panel.types=c('dot_legend', 'labels', 'labels', 'box_summary', 'map'),
@@ -557,7 +557,7 @@ print.file = "output_micromap/mmplot_tn2019.jpeg", res=100)
 
 Refined Chlorophyll a Note need to add column "\# of NA Samples".
 
-```{r}
+```{r refined_micromap_chla}
 # Chla Refined Plot
 mmplot(map.data=nutr_2019,
        panel.types=c('dot_legend', 'labels', 'labels', 'labels', 'box_summary', 'map'),
