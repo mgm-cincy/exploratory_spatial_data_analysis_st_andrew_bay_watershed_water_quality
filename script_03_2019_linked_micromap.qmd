@@ -1,5 +1,5 @@
 ---
-title: "Linked Micromap"
+title: "Linked Micromap 2019"
 author: "Mike McManus"
 format: html
 editor: visual
@@ -30,6 +30,8 @@ library(micromap)
 ```
 
 ## Log
+
+2026-05-06 renamed with YYYY in script name
 
 2026-05-04 bring over code chunks from script 02 to make this script 03, self-contained
 
@@ -307,6 +309,7 @@ tm_shape(polygons8) +
 ```
 
 ## Statistics for Linked Micromaps
+
 Get 5-number summary statistics to use in making boxplot for linked micromaps. Also, getting stats on log-transformed data.
 
 ```{r stats_micromap}
@@ -549,8 +552,7 @@ print.file = "output_micromap/mmplot_tn2019.jpeg", res=100)
 
 ```
 
-Refined Chlorophyll a
-Note need to add column "\# of NA Samples".
+Refined Chlorophyll a Note need to add column "\# of NA Samples".
 
 ```{r}
 # Chla Refined Plot
