@@ -3,6 +3,8 @@ title: "Linked Micromap 2020"
 author: "Mike McManus"
 format: html
 editor: visual
+editor_options: 
+  chunk_output_type: console
 ---
 
 ---
@@ -39,12 +41,6 @@ library(micromap)
 ## Log
 
 2026-05-06 renamed with YYYY in script name
-
-2026-05-04 bring over code chunks from script 02 to make this script 03, self-contained
-
-2026-04-24 linked micromap of logged chla with 2 perceptual groups
-
-2026-04-22 pasted workshop code
 
 ## Reading in Data and Formatting Date Variables
 
@@ -424,18 +420,8 @@ For chla, interesting how little variation West Bay shows. For tn, Grand Lagoon 
 
 ```{r draft_linked_micromap}
 #Draft plot
-mmplot(map.data=nutr_2019,
-       panel.types=c('dot_legend', 'labels', 'box_summary', 'map'),
-       panel.data=list(NA,
-                       'SEGMENT_NA',
-                       list('chla_lmin', 'chla_lq1', 'chla_lmed', 'chla_lq3', 'chla_lmax'),
-                       NA),
-       grouping = 3,
-       ord.by='chla_lmed', rev.ord=TRUE,
-       median.row=FALSE)
-       
 
-mmplot(map.data=nutr_2019,
+mmplot(map.data=nutr_2020,
        panel.types=c('dot_legend', 'labels', 'box_summary', 'map'),
        panel.data=list(NA,
                        'SEGMENT_NA',
@@ -446,7 +432,7 @@ mmplot(map.data=nutr_2019,
        median.row=FALSE)
 
 
-mmplot(map.data=nutr_2019,
+mmplot(map.data=nutr_2020,
        panel.types=c('dot_legend', 'labels', 'box_summary', 'map'),
        panel.data=list(NA,
                        'SEGMENT_NA',
@@ -454,6 +440,16 @@ mmplot(map.data=nutr_2019,
                        NA),
        grouping = 3,
        ord.by='tp_lmed', rev.ord=TRUE,
+       median.row=FALSE)
+
+mmplot(map.data=nutr_2020,
+       panel.types=c('dot_legend', 'labels', 'box_summary', 'map'),
+       panel.data=list(NA,
+                       'SEGMENT_NA',
+                       list('chla_lmin', 'chla_lq1', 'chla_lmed', 'chla_lq3', 'chla_lmax'),
+                       NA),
+       grouping = 3,
+       ord.by='chla_lmed', rev.ord=TRUE,
        median.row=FALSE)
 
 ```
