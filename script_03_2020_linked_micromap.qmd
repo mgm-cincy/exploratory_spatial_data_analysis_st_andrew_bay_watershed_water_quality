@@ -1,5 +1,5 @@
 ---
-title: "Linked Micromap"
+title: "Linked Micromap 2020"
 author: "Mike McManus"
 format: html
 editor: visual
@@ -31,11 +31,7 @@ library(micromap)
 
 ## Log
 
-2026-05-04 bring over code chunks from script 02 to make this script 03, self-contained
-
-2026-04-24 linked micromap of logged chla with 2 perceptual groups
-
-2026-04-22 pasted workshop code
+2026-05-06 renamed with YYYY in script name
 
 ## Reading in Data and Formatting Date Variables
 
@@ -271,7 +267,7 @@ distinct(mm_station2, year) %>% dplyr::arrange(., year) %>% print(n=Inf)
 distinct(mm_station2, sampling_agency_name)
 
 #2019-2023 covers St. Andrew Baywatch WQ report
-dplyr::filter(mm_station2, year == 2019 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.") %>% 
+dplyr::filter(mm_station2, year == 2020 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.") %>% 
 dplyr::select(., tn, SEGMENT_NA) %>% 
 group_by(., SEGMENT_NA) %>% 
 summarize(., min = fivenum(tn)[1],
@@ -308,10 +304,12 @@ tm_shape(polygons8) +
 
 ## Statistics for Linked Micromaps
 
+Get 5-number summary statistics to use in making boxplot for linked micromaps. Also, getting stats on log-transformed data.
+
 ```{r stats_micromap}
 # remove geometry from summary stats
-chla_2019 <- st_set_geometry(mm_station2, NULL) %>% 
-dplyr::filter(., year == 2019 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.") %>% 
+chla_2020 <- st_set_geometry(mm_station2, NULL) %>% 
+dplyr::filter(., year == 2020 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.") %>% 
 dplyr::select(., chl, SEGMENT_NA) %>% 
 group_by(., SEGMENT_NA) %>% 
 summarize(., chla_min = fivenum(chl)[1],
@@ -329,8 +327,8 @@ summarize(., chla_min = fivenum(chl)[1],
               chla_na_count = sum(is.na(chl))) %>% 
 print(n = Inf)
 
-tn_2019 <- st_set_geometry(mm_station2, NULL) %>% 
-  dplyr::filter(., year == 2019 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.") %>% 
+tn_2020 <- st_set_geometry(mm_station2, NULL) %>% 
+  dplyr::filter(., year == 2020 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.") %>% 
   dplyr::select(., tn, SEGMENT_NA) %>% 
   group_by(., SEGMENT_NA) %>% 
   summarize(., tn_min = fivenum(tn)[1],
@@ -348,8 +346,8 @@ tn_2019 <- st_set_geometry(mm_station2, NULL) %>%
             tn_na_count = sum(is.na(tn))) %>% 
   print(n = Inf)
 
-tp_2019 <- st_set_geometry(mm_station2, NULL) %>% 
-  dplyr::filter(., year == 2019 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.") %>% 
+tp_2020 <- st_set_geometry(mm_station2, NULL) %>% 
+  dplyr::filter(., year == 2020 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.") %>% 
   dplyr::select(., tp, SEGMENT_NA) %>% 
   group_by(., SEGMENT_NA) %>% 
   summarize(., tp_min = fivenum(tp)[1],
@@ -373,33 +371,33 @@ tp_2019 <- st_set_geometry(mm_station2, NULL) %>%
 
 ## Edit Polygons and Stats
 
-Edit data, both polygons and stats, to just the areas of interest. Also, merge the statistics to the polygon data.
+Edit data, both polygons and stats, to just the areas of interest. Dropping Burnt Mill Creek and Crooked Creek polygons and stats as have too few observations. Also, merge the chlorophyll, tn, and tp statistics to the polygon data as a single sf object.
 
-```{r data}
+```{r polygons_stats}
 names(polygons8)
-View(polygons8)
+# View(polygons8)
 
 polygons6 <- filter(polygons8, SEGMENT_NA != "Crooked Creek" & SEGMENT_NA != "Burnt Mill Creek")
 
 #chla
-chla_2019v1 <- filter(chla_2019, SEGMENT_NA != "Crooked Creek")
-names(chla_2019v1)
+chla_2020v1 <- filter(chla_2020, SEGMENT_NA != "Crooked Creek")
+names(chla_2020v1)
 
 # merge polygon to chla stats
 # list sf object first, then dataframe of stats to create polygons with stats
-chla_2019v2 <- merge(polygons6, chla_2019v1, by = "SEGMENT_NA" )
-summary(chla_2019v2)
+chla_2020v2 <- merge(polygons6, chla_2020v1, by = "SEGMENT_NA" )
+summary(chla_2020v2)
 # note that geometry is polygon
 
 # tn
-tn_2019v1 <- filter(tn_2019, SEGMENT_NA != "Crooked Creek")
+tn_2020v1 <- filter(tn_2020, SEGMENT_NA != "Crooked Creek")
 
-chlatn_2019v2 <- merge(chla_2019v2, tn_2019v1, by = "SEGMENT_NA" )
+chlatn_2020v2 <- merge(chla_2020v2, tn_2020v1, by = "SEGMENT_NA" )
 
 # tp
-tp_2019v1 <- filter(tp_2019, SEGMENT_NA != "Crooked Creek")
+tp_2020v1 <- filter(tp_2020, SEGMENT_NA != "Crooked Creek")
 
-nutr_2019 <- merge(chlatn_2019v2, tp_2019v1, by = "SEGMENT_NA" )
+nutr_2020 <- merge(chlatn_2020v2, tp_2020v1, by = "SEGMENT_NA" )
 
 ```
 
@@ -407,24 +405,22 @@ nutr_2019 <- merge(chlatn_2019v2, tp_2019v1, by = "SEGMENT_NA" )
 
 Make draft linked micromaps to get code working, and note any statistical and spatial patterns.
 
-Note cannot have a column called "median" in data. Also, for chla data needed log transformation, as did tn and tp. Getting 3 micromaps, one uncolored, one with 6 colors, and one all gray when grouping was 6. With grouping = 3 get 2 micromaps corresponding to the 2 perceptual groups.
-
-For chla, interesting how little variation West Bay shows. For tn, Grand Lagoon has highest median and largest variation, and West Bay has an outlier that almost exceed Grand Lagoon. For tp, Grand Lagoon shows previous pattern similar to tn. Is tp, also showing a salinity graident correlation with high tp in higher salinity waters?
+For 2020 data, tp, tn, and chla all have NA entries.
 
 ```{r draft_linked_micromap}
 #Draft plot
-mmplot(map.data=nutr_2019,
+
+mmplot(map.data=nutr_2020,
        panel.types=c('dot_legend', 'labels', 'box_summary', 'map'),
        panel.data=list(NA,
                        'SEGMENT_NA',
-                       list('chla_lmin', 'chla_lq1', 'chla_lmed', 'chla_lq3', 'chla_lmax'),
+                       list('tp_lmin', 'tp_lq1', 'tp_lmed', 'tp_lq3', 'tp_lmax'),
                        NA),
        grouping = 3,
-       ord.by='chla_lmed', rev.ord=TRUE,
+       ord.by='tp_lmed', rev.ord=TRUE,
        median.row=FALSE)
-       #map.link=c('SEGMENT_NA'))
 
-mmplot(map.data=nutr_2019,
+mmplot(map.data=nutr_2020,
        panel.types=c('dot_legend', 'labels', 'box_summary', 'map'),
        panel.data=list(NA,
                        'SEGMENT_NA',
@@ -435,30 +431,33 @@ mmplot(map.data=nutr_2019,
        median.row=FALSE)
 
 
-mmplot(map.data=nutr_2019,
+mmplot(map.data=nutr_2020,
        panel.types=c('dot_legend', 'labels', 'box_summary', 'map'),
        panel.data=list(NA,
                        'SEGMENT_NA',
-                       list('tp_lmin', 'tp_lq1', 'tp_lmed', 'tp_lq3', 'tp_lmax'),
+                       list('chla_lmin', 'chla_lq1', 'chla_lmed', 'chla_lq3', 'chla_lmax'),
                        NA),
        grouping = 3,
-       ord.by='tp_lmed', rev.ord=TRUE,
-       median.row=FALSE,
-       print.file="mm_tp2019.jpeg",res=100)
+       ord.by='chla_lmed', rev.ord=TRUE,
+       median.row=FALSE)
 
 ```
 
 ## Refine Linked Micromaps
 
-Use more detailed coding arguments to make better looking linked micromaps. Refined TP
+Use more detailed coding arguments to make better looking linked micromaps.
 
+
+Refined TP
+See if tp scale from 2019 also works for 2020, and 2019 scale works.
 ```{r refine_micromap_tp}
 # TP Refined Plot
-mmplot(map.data=nutr_2019,
-       panel.types=c('dot_legend', 'labels', 'labels', 'box_summary', 'map'),
+mmplot(map.data=nutr_2020,
+       panel.types=c('dot_legend', 'labels', 'labels', 'labels', 'box_summary', 'map'),
        panel.data=list(NA,
                        'SEGMENT_NA',
                        'tp_count',
+                       'tp_na_count',
                        list('tp_lmin', 'tp_lq1', 'tp_lmed', 'tp_lq3', 'tp_lmax'),
                        NA),
        grouping = 3,
@@ -476,38 +475,44 @@ mmplot(map.data=nutr_2019,
                       list(2, header='St.Andrew Bay Segments', panel.width=1.2,#increased panel.width to 1.1 from .8
                            align='left', text.size=.8),
                       
-                      list(3, header='Samples',
+                      list(3, header='Total #\n of Samples',
                            panel.width=.35,
                            align='right',
                            text.size=.8),
                       
-                      list(4, header='2019 Detectable Total Phoshporous',
+                      list(4, header='# of NA\n Samples',
+                           panel.width=.4,
+                           align='right',
+                           text.size=.8),
+                      
+                      list(5, header='2020 Detectable Total Phoshporous',
                            graph.bgcolor='lightgray',
                            xaxis.ticks=c(-6.0, -5.0, -4.0, -3.0, -2.0),
                            xaxis.labels=c(-6,-5, -4, -3, -2),
                            xaxis.labels.size=1.25,
                            graph.bar.size = 0.5,
                            #xaxis.labels.angle=90,
-                           xaxis.title='Log(TP, mg/L)', xaxis.title.size=1.25, panel.width=2),
+                           xaxis.title='Log(TP, mg/L)', xaxis.title.size=1.25, panel.width=1.75),
                       
-                      list(5, header='Light Gray Means Highlighted Above',
+                      list(6, header='Light Gray Means Highlighted Above',
                            inactive.border.color=gray(.7), inactive.border.size=2,
-                            panel.width=1.5)),
-print.file = "output_micromap/mmplot_tp2019.jpeg", res=100)
+                            panel.width=1.75)),
+print.file = "output_micromap/mmplot_tp2020.jpeg", res=100)
 
 
 
 ```
 
-Refined Chla
-
-```{r}
+Refined TN
+Looks like 2019 tn scale should work for 2020  tn data.
+```{r refined_micromap_tn}
 # TN Refined Plot
-mmplot(map.data=nutr_2019,
-       panel.types=c('dot_legend', 'labels', 'labels', 'box_summary', 'map'),
+mmplot(map.data=nutr_2020,
+       panel.types=c('dot_legend', 'labels', 'labels', 'labels', 'box_summary', 'map'),
        panel.data=list(NA,
                        'SEGMENT_NA',
-                       'tp_count',
+                       'tn_count',
+                       'tn_na_count',
                        list('tn_lmin', 'tn_lq1', 'tn_lmed', 'tn_lq3', 'tn_lmax'),
                        NA),
        grouping = 3,
@@ -525,35 +530,40 @@ mmplot(map.data=nutr_2019,
                       list(2, header='St.Andrew Bay Segments', panel.width=1.2,#increased panel.width to 1.1 from .8
                            align='left', text.size=.8),
                       
-                      list(3, header='Samples',
+                      list(3, header='Total #\n of Samples',
                            panel.width=.35,
                            align='right',
                            text.size=.8),
                       
-                      list(4, header='2019 Detectable Total Nitrogen',
+                      list(4, header='# of NA\n Samples',
+                           panel.width=.4,
+                           align='right',
+                           text.size=.8),
+                      
+                      list(5, header='2020 Detectable Total Nitrogen',
                            graph.bgcolor='lightgray',
                            xaxis.ticks=c(-2.5, -2.0, -1.5, -1.0, -0.5, -0.0),
                            xaxis.labels=c(-2.5, -2.0, -1.5, -1.0, -0.5, -0.0),
                            xaxis.labels.size=1.25,
                            graph.bar.size = 0.5,
                            #xaxis.labels.angle=90,
-                           xaxis.title='Log(TN, mg/L)', xaxis.title.size=1.25, panel.width=2),
+                           xaxis.title='Log(TN, mg/L)', xaxis.title.size=1.25, panel.width=1.75),
                       
-                      list(5, header='Light Gray Means Highlighted Above',
+                      list(6, header='Light Gray Means Highlighted Above',
                            inactive.border.color=gray(.7), inactive.border.size=2,
-                            panel.width=1.5)),
+                            panel.width=1.75)),
 # to run so just appears in Plots pane have 3 parentheses after the last panel.width
 # to run and save the image delete 3rd parenthesis and insert comma       
-print.file = "output_micromap/mmplot_tn2019.jpeg", res=100)
+print.file = "output_micromap/mmplot_tn2020.jpeg", res=100)
 
 
 ```
 
-Refined Chlorophylla Note need to add column "\# of NA Samples".
+Refined Chlorophyll a Note need to add column "\# of NA Samples".
 
-```{r}
+```{r refined_micromap_chla}
 # Chla Refined Plot
-mmplot(map.data=nutr_2019,
+mmplot(map.data=nutr_2020,
        panel.types=c('dot_legend', 'labels', 'labels', 'labels', 'box_summary', 'map'),
        panel.data=list(NA,
                        'SEGMENT_NA',
@@ -586,7 +596,7 @@ mmplot(map.data=nutr_2019,
                            align='right',
                            text.size=.8),
                       
-                      list(5, header='2019 Detectable\n Chlorophyll a',
+                      list(5, header='2020 Detectable\n Chlorophyll a',
                            graph.bgcolor='lightgray',
                            xaxis.ticks=c(0,1.5,3,4.5),
                            xaxis.labels=c(0,1.5,3,4.5),
@@ -600,7 +610,7 @@ mmplot(map.data=nutr_2019,
                             panel.width=1.75)),
 # to run so just appears in Plots pane have 3 parentheses after the last panel.width
 # to run and save the image replace 3rd parenthesis with comma       
-print.file = "output_micromap/mmplot_chla2019.jpeg", res=100)
+print.file = "output_micromap/mmplot_chla2020.jpeg", res=100)
 
 
 ```
