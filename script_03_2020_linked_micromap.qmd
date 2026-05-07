@@ -7,15 +7,6 @@ editor_options:
   chunk_output_type: console
 ---
 
----
-title: "Linked Micromap 2019"
-author: "Mike McManus"
-format: html
-editor: visual
-editor_options: 
-  chunk_output_type: console
----
-
 ## Libraries
 
 ```{r libraries}
@@ -456,12 +447,15 @@ mmplot(map.data=nutr_2020,
 
 ## Refine Linked Micromaps
 
-Use more detailed coding arguments to make better looking linked micromaps. Refined TP
+Use more detailed coding arguments to make better looking linked micromaps.
+
+
+Refined TP
 
 ```{r refine_micromap_tp}
 # TP Refined Plot
-mmplot(map.data=nutr_2019,
-       panel.types=c('dot_legend', 'labels', 'labels', 'box_summary', 'map'),
+mmplot(map.data=nutr_2020,
+       panel.types=c('dot_legend', 'labels', 'labels', 'labels', 'box_summary', 'map'),
        panel.data=list(NA,
                        'SEGMENT_NA',
                        'tp_count',
@@ -482,12 +476,17 @@ mmplot(map.data=nutr_2019,
                       list(2, header='St.Andrew Bay Segments', panel.width=1.2,#increased panel.width to 1.1 from .8
                            align='left', text.size=.8),
                       
-                      list(3, header='Samples',
+                      list(3, header='Total #\n of Samples',
                            panel.width=.35,
                            align='right',
                            text.size=.8),
                       
-                      list(4, header='2019 Detectable Total Phoshporous',
+                      list(4, header='# of NA\n Samples',
+                           panel.width=.4,
+                           align='right',
+                           text.size=.8),
+                      
+                      list(5, header='2020 Detectable Total Phoshporous',
                            graph.bgcolor='lightgray',
                            xaxis.ticks=c(-6.0, -5.0, -4.0, -3.0, -2.0),
                            xaxis.labels=c(-6,-5, -4, -3, -2),
@@ -496,10 +495,10 @@ mmplot(map.data=nutr_2019,
                            #xaxis.labels.angle=90,
                            xaxis.title='Log(TP, mg/L)', xaxis.title.size=1.25, panel.width=2),
                       
-                      list(5, header='Light Gray Means Highlighted Above',
+                      list(6, header='Light Gray Means Highlighted Above',
                            inactive.border.color=gray(.7), inactive.border.size=2,
                             panel.width=1.5)),
-print.file = "output_micromap/mmplot_tp2019.jpeg", res=100)
+print.file = "output_micromap/mmplot_tp2020.jpeg", res=100)
 
 
 
@@ -509,7 +508,7 @@ Refined TN
 
 ```{r refined_micromap_tn}
 # TN Refined Plot
-mmplot(map.data=nutr_2019,
+mmplot(map.data=nutr_2020,
        panel.types=c('dot_legend', 'labels', 'labels', 'box_summary', 'map'),
        panel.data=list(NA,
                        'SEGMENT_NA',
@@ -531,12 +530,17 @@ mmplot(map.data=nutr_2019,
                       list(2, header='St.Andrew Bay Segments', panel.width=1.2,#increased panel.width to 1.1 from .8
                            align='left', text.size=.8),
                       
-                      list(3, header='Samples',
+                      list(3, header='Total #\n of Samples',
                            panel.width=.35,
                            align='right',
                            text.size=.8),
                       
-                      list(4, header='2019 Detectable Total Nitrogen',
+                      list(4, header='# of NA\n Samples',
+                           panel.width=.4,
+                           align='right',
+                           text.size=.8),
+                      
+                      list(4, header='2020 Detectable Total Nitrogen',
                            graph.bgcolor='lightgray',
                            xaxis.ticks=c(-2.5, -2.0, -1.5, -1.0, -0.5, -0.0),
                            xaxis.labels=c(-2.5, -2.0, -1.5, -1.0, -0.5, -0.0),
@@ -550,7 +554,7 @@ mmplot(map.data=nutr_2019,
                             panel.width=1.5)),
 # to run so just appears in Plots pane have 3 parentheses after the last panel.width
 # to run and save the image delete 3rd parenthesis and insert comma       
-print.file = "output_micromap/mmplot_tn2019.jpeg", res=100)
+print.file = "output_micromap/mmplot_tn2020.jpeg", res=100)
 
 
 ```
@@ -559,7 +563,7 @@ Refined Chlorophyll a Note need to add column "\# of NA Samples".
 
 ```{r refined_micromap_chla}
 # Chla Refined Plot
-mmplot(map.data=nutr_2019,
+mmplot(map.data=nutr_2020,
        panel.types=c('dot_legend', 'labels', 'labels', 'labels', 'box_summary', 'map'),
        panel.data=list(NA,
                        'SEGMENT_NA',
@@ -592,7 +596,7 @@ mmplot(map.data=nutr_2019,
                            align='right',
                            text.size=.8),
                       
-                      list(5, header='2019 Detectable\n Chlorophyll a',
+                      list(5, header='2020 Detectable\n Chlorophyll a',
                            graph.bgcolor='lightgray',
                            xaxis.ticks=c(0,1.5,3,4.5),
                            xaxis.labels=c(0,1.5,3,4.5),
@@ -606,7 +610,7 @@ mmplot(map.data=nutr_2019,
                             panel.width=1.75)),
 # to run so just appears in Plots pane have 3 parentheses after the last panel.width
 # to run and save the image replace 3rd parenthesis with comma       
-print.file = "output_micromap/mmplot_chla2019.jpeg", res=100)
+print.file = "output_micromap/mmplot_chla2020.jpeg", res=100)
 
 
 ```
