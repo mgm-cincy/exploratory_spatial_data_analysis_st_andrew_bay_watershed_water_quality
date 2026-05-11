@@ -1,5 +1,5 @@
 ---
-title: "Linked Micromap 2020"
+title: "Linked Micromap 2021"
 author: "Mike McManus"
 format: html
 editor: visual
@@ -267,7 +267,7 @@ distinct(mm_station2, year) %>% dplyr::arrange(., year) %>% print(n=Inf)
 distinct(mm_station2, sampling_agency_name)
 
 #2019-2023 covers St. Andrew Baywatch WQ report
-dplyr::filter(mm_station2, year == 2020 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.") %>% 
+dplyr::filter(mm_station2, year == 2021 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.") %>% 
 dplyr::select(., tn, SEGMENT_NA) %>% 
 group_by(., SEGMENT_NA) %>% 
 summarize(., min = fivenum(tn)[1],
@@ -309,7 +309,7 @@ Get 5-number summary statistics to use in making boxplot for linked micromaps. A
 ```{r stats_micromap}
 # remove geometry from summary stats
 chla_2020 <- st_set_geometry(mm_station2, NULL) %>% 
-dplyr::filter(., year == 2020 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.") %>% 
+dplyr::filter(., year == 2021 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.") %>% 
 dplyr::select(., chl, SEGMENT_NA) %>% 
 group_by(., SEGMENT_NA) %>% 
 summarize(., chla_min = fivenum(chl)[1],
@@ -328,7 +328,7 @@ summarize(., chla_min = fivenum(chl)[1],
 print(n = Inf)
 
 tn_2020 <- st_set_geometry(mm_station2, NULL) %>% 
-  dplyr::filter(., year == 2020 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.") %>% 
+  dplyr::filter(., year == 2021 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.") %>% 
   dplyr::select(., tn, SEGMENT_NA) %>% 
   group_by(., SEGMENT_NA) %>% 
   summarize(., tn_min = fivenum(tn)[1],
@@ -347,7 +347,7 @@ tn_2020 <- st_set_geometry(mm_station2, NULL) %>%
   print(n = Inf)
 
 tp_2020 <- st_set_geometry(mm_station2, NULL) %>% 
-  dplyr::filter(., year == 2020 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.") %>% 
+  dplyr::filter(., year == 2021 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.") %>% 
   dplyr::select(., tp, SEGMENT_NA) %>% 
   group_by(., SEGMENT_NA) %>% 
   summarize(., tp_min = fivenum(tp)[1],
