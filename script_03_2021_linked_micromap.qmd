@@ -503,7 +503,7 @@ print.file = "output_micromap/mmplot_tp2021.jpeg", res=100)
 
 ```
 
-Refined TN Looks like 2019 tn scale should work for 2020 tn data.
+Refined TN Looks keeping 2019 scale, which is post-Michael, so can compare different years.
 
 ```{r refined_micromap_tn}
 # TN Refined Plot
