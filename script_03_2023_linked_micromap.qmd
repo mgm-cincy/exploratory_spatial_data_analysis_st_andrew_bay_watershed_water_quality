@@ -406,7 +406,7 @@ nutr_2023 <- merge(chlatn_2023v2, tp_2023v1, by = "SEGMENT_NA" )
 
 Make draft linked micromaps to get code working, and note any statistical and spatial patterns.
 
-For 2022 data, tp pattern consistent with Grand Lagoon highest median concentration.In 2022 tn very steady decreasing median concentrations from: Grand Lagoon, Deer Point Lake, East Bay, North Bay, West Bay, to St. Andrew Bay. Chlorophyll a has a range of concentrations in 2022, which differs from 2020 and 2021.
+For 2023 data, tp pattern consistent with Grand Lagoon highest median concentration, but have very large outlier for Deer Point Lake that even exceeds Grand Lagoon. In 2023 tn very steady decreasing median concentrations from: Grand Lagoon,  East Bay, , West Bay, Deer Point Lake, North Bay to St. Andrew Bay. Chlorophyll a has a range of concentrations in 2023.
 
 ```{r draft_linked_micromap}
 #Draft plot
@@ -452,7 +452,7 @@ Refined TP sticking with 2019 scale work, but may need to change for smaller 202
 
 ```{r refine_micromap_tp}
 # TP Refined Plot
-mmplot(map.data=nutr_2022,
+mmplot(map.data=nutr_2023,
        panel.types=c('dot_legend', 'labels', 'labels', 'labels', 'box_summary', 'map'),
        panel.data=list(NA,
                        'SEGMENT_NA',
@@ -485,7 +485,7 @@ mmplot(map.data=nutr_2022,
                            align='right',
                            text.size=.8),
                       
-                      list(5, header='2022 Detectable Total Phoshporous',
+                      list(5, header='2023 Detectable Total Phoshporous',
                            graph.bgcolor='lightgray',
                            xaxis.ticks=c(-6.0, -5.0, -4.0, -3.0, -2.0),
                            xaxis.labels=c(-6,-5, -4, -3, -2),
@@ -497,7 +497,7 @@ mmplot(map.data=nutr_2022,
                       list(6, header='Light Gray Means Highlighted Above',
                            inactive.border.color=gray(.7), inactive.border.size=2,
                             panel.width=1.75)),
-print.file = "output_micromap/mmplot_tp2022.jpeg", res=100)
+print.file = "output_micromap/mmplot_tp2023.jpeg", res=100)
 
 
 
@@ -507,7 +507,7 @@ Refined TN Looks keeping 2019 scale, which is post-Michael, so can compare diffe
 
 ```{r refined_micromap_tn}
 # TN Refined Plot
-mmplot(map.data=nutr_2022,
+mmplot(map.data=nutr_2023,
        panel.types=c('dot_legend', 'labels', 'labels', 'labels', 'box_summary', 'map'),
        panel.data=list(NA,
                        'SEGMENT_NA',
@@ -540,7 +540,7 @@ mmplot(map.data=nutr_2022,
                            align='right',
                            text.size=.8),
                       
-                      list(5, header='2022 Detectable Total Nitrogen',
+                      list(5, header='2023 Detectable Total Nitrogen',
                            graph.bgcolor='lightgray',
                            xaxis.ticks=c(-2.5, -2.0, -1.5, -1.0, -0.5, -0.0),
                            xaxis.labels=c(-2.5, -2.0, -1.5, -1.0, -0.5, -0.0),
@@ -554,7 +554,7 @@ mmplot(map.data=nutr_2022,
                             panel.width=1.75)),
 # to run so just appears in Plots pane have 3 parentheses after the last panel.width
 # to run and save the image delete 3rd parenthesis and insert comma       
-print.file = "output_micromap/mmplot_tn2022.jpeg", res=100)
+print.file = "output_micromap/mmplot_tn2023.jpeg", res=100)
 
 
 ```
@@ -563,7 +563,7 @@ Refined Chlorophyll a Note need to add column "\# of NA Samples". Keeping 2019 s
 
 ```{r refined_micromap_chla}
 # Chla Refined Plot
-mmplot(map.data=nutr_2022,
+mmplot(map.data=nutr_2023,
        panel.types=c('dot_legend', 'labels', 'labels', 'labels', 'box_summary', 'map'),
        panel.data=list(NA,
                        'SEGMENT_NA',
@@ -596,7 +596,7 @@ mmplot(map.data=nutr_2022,
                            align='right',
                            text.size=.8),
                       
-                      list(5, header='2022 Detectable\n Chlorophyll a',
+                      list(5, header='2023 Detectable\n Chlorophyll a',
                            graph.bgcolor='lightgray',
                            xaxis.ticks=c(0,1.5,3,4.5),
                            xaxis.labels=c(0,1.5,3,4.5),
@@ -610,7 +610,7 @@ mmplot(map.data=nutr_2022,
                             panel.width=1.75)),
 # to run so just appears in Plots pane have 3 parentheses after the last panel.width
 # to run and save the image replace 3rd parenthesis with comma       
-print.file = "output_micromap/mmplot_chla2022.jpeg", res=100)
+print.file = "output_micromap/mmplot_chla2023.jpeg", res=100)
 
 
 ```
