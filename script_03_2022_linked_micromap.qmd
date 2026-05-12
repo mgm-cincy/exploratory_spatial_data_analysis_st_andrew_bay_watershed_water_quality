@@ -1,0 +1,616 @@
+---
+title: "Linked Micromap 2022"
+author: "Mike McManus"
+format: html
+editor: visual
+editor_options: 
+  chunk_output_type: console
+---
+
+## Libraries
+
+```{r libraries}
+library(tidyverse)
+library(sf)
+library(mapview)
+library(janitor)
+library(leaflet)
+library(leafpop) # for popups in 
+library(leafsync) # sync mapview maps
+library(leafem) # add labels to map
+library(patchwork)
+library(nhdplusTools)
+library(tmap)
+library(forcats)
+library(gifski) #for tmap animation
+library(plotly)
+library(webshot) # save mapview object
+library(nngeo)
+library(micromap)
+```
+
+## Log
+
+2026-05-06 renamed with YYYY in script name
+
+## Reading in Data and Formatting Date Variables
+
+One csv file, win_baywatch_sabnut.csv, uploaded by Ryann Rossi, SASJBEP, on December 23, 2025. Ryan pulled the data from WIN and did some data cleaning. Note activity_start_date comes in as character.
+
+Read in Bays_Bayous_Lakes_V4 shapefile that Rose uploaded to repository. Can I merge wq data, np_ds1, with Baywatch station IDs, bw_id1, by coordinates?
+
+```{r data}
+np_ds1 <- read_csv("data/win_baywatch_sabnut.csv")
+names(np_ds1)
+np_ds1 <- clean_names(np_ds1)
+# spec(np_ds1)
+# names(np_ds1)
+
+
+# See Long and Lat in decimal degrees and date as character
+View(np_ds1) 
+str(np_ds1)
+glimpse(np_ds1)
+class(np_ds1$date)
+
+#zdates <- distinct(np_ds1, activity_start_date)
+#ym_ds1 <- lubridate::mdy(zdates$activity_start_date)
+#floor_date(ym_ds1, "month")
+#saveRDS(zdates, "zdates")
+
+# with activity start date still character have to assign factors
+# have to create activity start date as factor for tmap animation
+np_ds1$date_factor <- np_ds1$date
+np_ds1$yrmm_factor <- np_ds1$date
+
+# convert to date
+np_ds1$date <- lubridate::mdy(np_ds1$date)
+class(np_ds1$date)
+np_ds1$yrmm <- floor_date(np_ds1$date, "month")
+head(np_ds1$yrmm)
+class(np_ds1$yrmm)
+
+# have to create activity start date as factor for tmap animation
+np_ds1 <- arrange(np_ds1, date)
+np_ds1$date_factor <- as_factor(np_ds1$date_factor)
+head(np_ds1$date_factor)
+levels(np_ds1$date_factor)
+
+
+np_ds1$yrmm_factor <- as_factor(as.character(np_ds1$yrmm))
+head(np_ds1$yrmm_factor)
+levels(np_ds1$yrmm_factor)
+
+# filter(dg_sf1, (!is.na(log_n2o))
+
+np_ds1 <- filter(np_ds1, (!is.na(long)))
+# drops to 10,369 obs and summary(mp_ds2$lat) returns no NA
+
+unique(np_ds1$organization_name)
+
+z1 <- filter(np_ds1, is.na(organization_name))
+# return 7,162 obs
+summary(z1$sta_nr) # code min 1.1 to max 9.5
+# believe having a numeric sta_nr code means this is a Lakewatch/Baywatch station and have long/lat coordinates for these stations
+
+z2 <- filter(np_ds1, organization_name == "FLORIDA LAKEWATCH")
+# return 2,380
+summary(z2$sta_nr) # returns all NAs
+# want to get numeric codes assigned to sta_nr, struggling to get that done
+
+
+```
+
+## Explore Duplicates and NAs
+
+```{r dupes_na}
+# z1 <- get_dupes(np_ds1)
+# 
+# z2 <- filter(np_ds1, (is.na(tn) & !is.na(tp)))
+# 
+# z3 <- filter(np_ds1, is.na(tn))
+```
+
+## Create sf object
+
+Have NA for some lat and long entries so remove these. Also, Numeric Nutrient Criteria (NNC) polygons omit bayous, creeks, and lakes, but includes intracoastal waterway and St. Joe Bay. But bayous, bays, and lakes does have all those polygons. Although, a Burnt Mill Creek station does not hit that polygon.
+
+```{r create_sf}
+
+# create sf object
+coords <- data.frame(longitude  = np_ds1$long, latitude = np_ds1$lat)
+head(coords)
+
+# See Marc Weber workshop above about Coordinate Reference Systems (CRS)
+
+np_sf1 <- st_as_sf(np_ds1, coords = c("long", "lat"), crs =4269) %>% st_transform((5070))
+
+class(np_sf1)
+# read in shapefile
+nnc_1 <- st_read("data_gis/NNC_Bay_Segments.shp")
+class(nnc_1)
+summary(nnc_1)
+distinct(nnc_1, SEGMENT_NA)
+distinct(nnc_1, WATERBODY_)
+
+mapview(nnc_1)
+# Numeric
+
+# see that espg code is 3087
+# asking do the two sf objects have the same CRS
+st_crs(np_sf1) == st_crs(nnc_1)
+
+np_sf1 <- np_sf1 %>% st_transform(3087)
+st_crs(np_sf1) == st_crs(nnc_1)
+
+mapview(np_sf1) + mapview(nnc_1)
+
+# mapview(hab_sf1, zcol = "Depth", cex = "Depth", alpha.regions = .8, legend = TRUE, popup = popupTable(hab_sf1, zcol = c("Depth", "Site"))) + mapview(bigbend_seagrass)
+
+
+```
+
+## Read Bays, Bayous and Lakes V4
+
+Rose Horn took 2 polygons for Alligator Bayou, which borders the U.S. Coast Guard Station on St. Andrew Bay, and splits them into separate sampling areas. Also, in version the new update reflects the removal of small edge portions of St. Andrew Bay that were along the edges of East Bay and Grand Lagoon. Looks like I should pick-up Upper and Lower Burnt Mill Creek Stations.
+
+Need to see if I have 8 polygon names for: East Bay, Grand Lagoon, North Bay, St. Andrew Bay, West Bay, Crooked and Burnt Mill Creeks, and Deer Point Lake as I want to use those 6 polygons in linked micromap. Perhaps by using SEGMENT_NA and Major_Seg I can get the polygons I want.
+
+```{r bbl_v4}
+
+bbl_4 <- st_read("data_gis/Bays_Bayous_Lakes_V4/Bays_Bayous_Lakes_V4.shp")
+summary(bbl_4)
+mapview(bbl_4)
+
+distinct(bbl_4, SEGMENT_NA) %>% dplyr::arrange(., SEGMENT_NA)
+# have 190 distinct SEGMENT_NA, but 191 obs suggesting one polygon is sharing a name
+
+# Is Major_Seg a new field from Rose?
+distinct(bbl_4, Major_Seg) %>% dplyr::arrange(., Major_Seg)
+# returns 8 Major_Seg
+
+bbl_4 <- bbl_4 %>% st_transform(3087)
+
+mapview(np_sf1) + mapview(bbl_4)
+# a burnt mill creek station from 2024-04-25 is off polygon
+
+# these 8 polygons might be what I use for a linked micromap
+polygons8 <- dplyr::filter(bbl_4, SEGMENT_NA == "West Bay" | SEGMENT_NA == "North Bay" | SEGMENT_NA == "St. Andrew Bay" | SEGMENT_NA == "East Bay" | SEGMENT_NA == "Burnt Mill Creek" | SEGMENT_NA == "Crooked Creek" | SEGMENT_NA == "Grand Lagoon" |SEGMENT_NA == "Deer Point Lake")
+
+mapview(polygons8)
+
+mapview(np_sf1) + mapview(polygons8)
+
+```
+
+## Stations for Linked Micromap
+
+Inconsistent data entry for Lake Marin or just Marin. The "mm\_" naming convention refers to getting the data structured for a linked micromap.
+
+```{r micromap_stations}
+
+mm_station1 <- dplyr::filter(np_sf1, bay != "Lake Powell" & bay != "Powell Creek" & bay != "Lullwater" & bay != "Lake Marin" & bay != "Marin")
+
+names(mm_station1)
+
+mapview(mm_station1)
+
+distinct(mm_station1, bay) %>% dplyr::arrange(., bay) %>% print(n=Inf) 
+
+# np_ds1 %>% 
+#   group_by(organization_name) %>% 
+#   summarise(count = n_distinct(monitoring_location_name))
+
+mapview(mm_station1) + mapview(polygons8, col.regions = "yellow")
+
+```
+
+## Spatial Intersection of MM Stations to Polygons 8
+
+Spatial intersection so station points get polygon attributes, specifically SEGMENT_NA. For linked micromap the data frame of summary statistics has to have the same ID linking variable as in the polygon data frame. Note this intersection will drop many bayou and creek stations, but I am okay as this is just for a draft linked micromap.
+
+In West Bay, the spatial intersection omits the intracoastal waterway, and upper stations in Crooked and Burnt Mill Creeks. In North Bay, omit many of the bayous, and likewise for East Bay.
+
+```{r mmstations_intersect_polygons}
+
+mm_station2 <- st_intersection(mm_station1, polygons8)
+
+mm_stat1map <- mapview(mm_station1)
+mm_stat2map <- mapview(mm_station2, col.regions = "yellow")
+
+sync(mm_stat1map, mm_stat2map, ncol = 1)
+
+mapview(mm_station2) + mapview(polygons8, col.regions = "yellow")
+
+names(mm_station2)
+
+mm_station2 %>% 
+  group_by(SEGMENT_NA) %>% 
+  summarize(., count = dplyr::n())
+
+mm_station2 %>% 
+  group_by(SEGMENT_NA, year) %>% 
+  summarize(., count = dplyr::n()) %>% 
+  print(n=Inf)
+
+summary(mm_station2$sta_nr)
+# returns 1727 NAs so would likely need to do nearest neighbor analysis to get numeric codes assigned to sta_nr
+
+# na's for sta_nr appear in 2016 and later years
+# will need to work this out so can get an accurate count of distinct within each
+# of the polygons
+mm_station2 %>% 
+  group_by(SEGMENT_NA, year) %>% 
+  summarize(., na_count = sum(is.na(sta_nr))) %>% 
+print(n = Inf)
+
+# np_ds1 %>% 
+#   group_by(organization_name) %>% 
+#   summarise(count = n_distinct(monitoring_location_name))
+
+# dplyr::select(sub_np_stations, tn, SEGMENT_NA) %>% 
+# group_by(., SEGMENT_NA) %>% 
+# summarize(., min = fivenum(tn)[1],
+#               q1 = fivenum(tn)[2],
+#               median = fivenum(tn)[3],
+#               q3 = fivenum(tn)[4],
+#               max = fivenum(tn)[5],
+#               count = dplyr::n(),
+#               mean = mean(tn, na.rm = TRUE),
+#               na_count = sum(is.na(tn))) %>% 
+# print(n = Inf)
+distinct(mm_station2, SEGMENT_NA) %>% dplyr::arrange(., SEGMENT_NA)
+
+distinct(mm_station2, organization_id)
+distinct(mm_station2, organization_name)
+distinct(mm_station2, year) %>% dplyr::arrange(., year) %>% print(n=Inf)
+distinct(mm_station2, sampling_agency_name)
+
+#2019-2023 covers St. Andrew Baywatch WQ report
+dplyr::filter(mm_station2, year == 2022 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.") %>% 
+dplyr::select(., tn, SEGMENT_NA) %>% 
+group_by(., SEGMENT_NA) %>% 
+summarize(., min = fivenum(tn)[1],
+              q1 = fivenum(tn)[2],
+              median = fivenum(tn)[3],
+              q3 = fivenum(tn)[4],
+              max = fivenum(tn)[5],
+              count = dplyr::n(),
+              mean = mean(tn, na.rm = TRUE),
+              na_count = sum(is.na(tn))) %>% 
+print(n = Inf)
+
+
+# get years that match St. Andrew Baywatch WQ Report
+mm_station3 <- dplyr::filter(mm_station2, sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.")
+# returns 1082 obs
+
+distinct(mm_station3, organization_id)
+distinct(mm_station3, organization_name)
+distinct(mm_station3, sampling_agency_name)
+distinct(mm_station3, year)
+
+# mm_stations3$yr <- as.factor(year)
+
+# note in 2018 facet no East Bay samples for tn, tp and chl
+# for chl all missing values in 2021 and some in 2023 and 2024
+tm_shape(polygons8) +
+  tm_polygons(fill = "white", lwd = 2) +
+  tm_title("Detectable and NA Entries of Total Phosphorus (mg/L)")  + 
+  tm_shape(mm_station3) +
+  tm_symbols(fill = "tp") +
+  tm_facets(by = "year")
+```
+
+## Statistics for Linked Micromaps
+
+Get 5-number summary statistics to use in making boxplot for linked micromaps. Also, getting stats on log-transformed data. In 2021, very high number of NA observations. So high that I calculated proportion of chla observations that are NA. But, 2021 tn has no NA's, as is the case with 2021 tp.
+
+```{r stats_micromap}
+# remove geometry from summary stats
+chla_2022 <- st_set_geometry(mm_station2, NULL) %>% 
+dplyr::filter(., year == 2022 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.") %>% 
+dplyr::select(., chl, SEGMENT_NA) %>% 
+group_by(., SEGMENT_NA) %>% 
+summarize(., chla_min = fivenum(chl)[1],
+              chla_q1 = fivenum(chl)[2],
+              chla_med = fivenum(chl)[3],
+              chla_q3 = fivenum(chl)[4],
+              chla_max = fivenum(chl)[5],
+              chla_lmin = log(fivenum(chl)[1]),
+              chla_lq1 = log(fivenum(chl)[2]),
+              chla_lmed = log(fivenum(chl)[3]),
+              chla_lq3 = log(fivenum(chl)[4]),
+              chla_lmax = log(fivenum(chl)[5]),
+              chla_count = dplyr::n(),
+              chla_mean = mean(chl, na.rm = TRUE),
+              chla_na_count = sum(is.na(chl)),
+              chla_prop_na = (chla_na_count/chla_count)) %>% 
+print(n = Inf)
+
+tn_2022 <- st_set_geometry(mm_station2, NULL) %>% 
+  dplyr::filter(., year == 2022 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.") %>% 
+  dplyr::select(., tn, SEGMENT_NA) %>% 
+  group_by(., SEGMENT_NA) %>% 
+  summarize(., tn_min = fivenum(tn)[1],
+            tn_q1 = fivenum(tn)[2],
+            tn_med = fivenum(tn)[3],
+            tn_q3 = fivenum(tn)[4],
+            tn_max = fivenum(tn)[5],
+            tn_lmin = log(fivenum(tn)[1]),
+            tn_lq1 = log(fivenum(tn)[2]),
+            tn_lmed = log(fivenum(tn)[3]),
+            tn_lq3 = log(fivenum(tn)[4]),
+            tn_lmax = log(fivenum(tn)[5]),
+            tn_count = dplyr::n(),
+            tn_mean = mean(tn, na.rm = TRUE),
+            tn_na_count = sum(is.na(tn))) %>% 
+  print(n = Inf)
+
+tp_2022 <- st_set_geometry(mm_station2, NULL) %>% 
+  dplyr::filter(., year == 2022 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.") %>% 
+  dplyr::select(., tp, SEGMENT_NA) %>% 
+  group_by(., SEGMENT_NA) %>% 
+  summarize(., tp_min = fivenum(tp)[1],
+            tp_q1 = fivenum(tp)[2],
+            tp_med = fivenum(tp)[3],
+            tp_q3 = fivenum(tp)[4],
+            tp_max = fivenum(tp)[5],
+            tp_lmin = log(fivenum(tp)[1]),
+            tp_lq1 = log(fivenum(tp)[2]),
+            tp_lmed = log(fivenum(tp)[3]),
+            tp_lq3 = log(fivenum(tp)[4]),
+            tp_lmax = log(fivenum(tp)[5]),
+            tp_count = dplyr::n(),
+            tp_mean = mean(tp, na.rm = TRUE),
+            tp_na_count = sum(is.na(tp))) %>% 
+  print(n = Inf)
+
+
+
+```
+
+## Edit Polygons and Stats
+
+Edit data, both polygons and stats, to just the areas of interest. Dropping Burnt Mill Creek and Crooked Creek polygons and stats as have too few observations. Also, merge the chlorophyll, tn, and tp statistics to the polygon data as a single sf object.
+
+```{r polygons_stats}
+names(polygons8)
+# View(polygons8)
+
+polygons6 <- filter(polygons8, SEGMENT_NA != "Crooked Creek" & SEGMENT_NA != "Burnt Mill Creek")
+
+#chla
+chla_2022v1 <- filter(chla_2022, SEGMENT_NA != "Crooked Creek" & SEGMENT_NA != "Burnt Mill Creek")
+names(chla_2022v1)
+
+# merge polygon to chla stats
+# list sf object first, then dataframe of stats to create polygons with stats
+chla_2022v2 <- merge(polygons6, chla_2022v1, by = "SEGMENT_NA" )
+summary(chla_2022v2)
+# note that geometry is polygon
+
+# tn
+tn_2022v1 <- filter(tn_2022, SEGMENT_NA != "Crooked Creek" & SEGMENT_NA != "Burnt Mill Creek")
+
+chlatn_2022v2 <- merge(chla_2022v2, tn_2022v1, by = "SEGMENT_NA" )
+
+# tp
+tp_2022v1 <- filter(tp_2022, SEGMENT_NA != "Crooked Creek" & SEGMENT_NA != "Burnt Mill Creek")
+
+nutr_2022 <- merge(chlatn_2022v2, tp_2022v1, by = "SEGMENT_NA" )
+
+```
+
+## Draft Linked Micromap
+
+Make draft linked micromaps to get code working, and note any statistical and spatial patterns.
+
+For 2021 data, chla alot NA entries, but tp and tn do not. For tp, interesting outlier in SAB. For tn, Grand Lagoon and Deer Point Lake have highest and almost identical distributions, with Deer Point Lake having max tn. For chla, SAB, North Bay, and Deer Point Lake have only 1 or 2 values.
+
+```{r draft_linked_micromap}
+#Draft plot
+
+mmplot(map.data=nutr_2022,
+       panel.types=c('dot_legend', 'labels', 'box_summary', 'map'),
+       panel.data=list(NA,
+                       'SEGMENT_NA',
+                       list('tp_lmin', 'tp_lq1', 'tp_lmed', 'tp_lq3', 'tp_lmax'),
+                       NA),
+       grouping = 3,
+       ord.by='tp_lmed', rev.ord=TRUE,
+       median.row=FALSE)
+
+mmplot(map.data=nutr_2022,
+       panel.types=c('dot_legend', 'labels', 'box_summary', 'map'),
+       panel.data=list(NA,
+                       'SEGMENT_NA',
+                       list('tn_lmin', 'tn_lq1', 'tn_lmed', 'tn_lq3', 'tn_lmax'),
+                       NA),
+       grouping = 3,
+       ord.by='tn_lmed', rev.ord=TRUE,
+       median.row=FALSE)
+
+
+mmplot(map.data=nutr_2022,
+       panel.types=c('dot_legend', 'labels', 'box_summary', 'map'),
+       panel.data=list(NA,
+                       'SEGMENT_NA',
+                       list('chla_lmin', 'chla_lq1', 'chla_lmed', 'chla_lq3', 'chla_lmax'),
+                       NA),
+       grouping = 3,
+       ord.by='chla_lmed', rev.ord=TRUE,
+       median.row=FALSE)
+
+```
+
+## Refine Linked Micromaps
+
+Use more detailed coding arguments to make better looking linked micromaps.
+
+Refined TP See if tp scale from 2020 also works for 2021, and 2019 scale works.
+
+```{r refine_micromap_tp}
+# TP Refined Plot
+mmplot(map.data=nutr_2022,
+       panel.types=c('dot_legend', 'labels', 'labels', 'labels', 'box_summary', 'map'),
+       panel.data=list(NA,
+                       'SEGMENT_NA',
+                       'tp_count',
+                       'tp_na_count',
+                       list('tp_lmin', 'tp_lq1', 'tp_lmed', 'tp_lq3', 'tp_lmax'),
+                       NA),
+       grouping = 3,
+       ord.by='tp_lmed',
+       rev.ord=TRUE,
+       median.row=FALSE,
+       plot.pGrp.spacing=1,
+       
+       plot.height=6, plot.width=9, #for poster use plot.height=6, plot.width=9,
+       colors=brewer.pal(5, "Spectral"), #for journal use plot.height=9, plot.width=6.8
+              
+       panel.att=list(list(1, panel.width=1, point.type=20, point.size=2,
+                           point.border=TRUE), 
+                      
+                      list(2, header='St.Andrew Bay Segments', panel.width=1.2,#increased panel.width to 1.1 from .8
+                           align='left', text.size=.8),
+                      
+                      list(3, header='Total #\n of Samples',
+                           panel.width=.35,
+                           align='right',
+                           text.size=.8),
+                      
+                      list(4, header='# of NA\n Samples',
+                           panel.width=.4,
+                           align='right',
+                           text.size=.8),
+                      
+                      list(5, header='2022 Detectable Total Phoshporous',
+                           graph.bgcolor='lightgray',
+                           xaxis.ticks=c(-6.0, -5.0, -4.0, -3.0, -2.0),
+                           xaxis.labels=c(-6,-5, -4, -3, -2),
+                           xaxis.labels.size=1.25,
+                           graph.bar.size = 0.5,
+                           #xaxis.labels.angle=90,
+                           xaxis.title='Log(TP, mg/L)', xaxis.title.size=1.25, panel.width=1.75),
+                      
+                      list(6, header='Light Gray Means Highlighted Above',
+                           inactive.border.color=gray(.7), inactive.border.size=2,
+                            panel.width=1.75)),
+print.file = "output_micromap/mmplot_tp2022.jpeg", res=100)
+
+
+
+```
+
+Refined TN Looks keeping 2019 scale, which is post-Michael, so can compare different years.
+
+```{r refined_micromap_tn}
+# TN Refined Plot
+mmplot(map.data=nutr_2022,
+       panel.types=c('dot_legend', 'labels', 'labels', 'labels', 'box_summary', 'map'),
+       panel.data=list(NA,
+                       'SEGMENT_NA',
+                       'tn_count',
+                       'tn_na_count',
+                       list('tn_lmin', 'tn_lq1', 'tn_lmed', 'tn_lq3', 'tn_lmax'),
+                       NA),
+       grouping = 3,
+       ord.by='tn_lmed',
+       rev.ord=TRUE,
+       median.row=FALSE,
+       plot.pGrp.spacing=1,
+       
+       plot.height=6, plot.width=9, #for poster use plot.height=6, plot.width=9,
+       colors=brewer.pal(5, "Spectral"), #for journal use plot.height=9, plot.width=6.8
+              
+       panel.att=list(list(1, panel.width=1, point.type=20, point.size=2,
+                           point.border=TRUE), 
+                      
+                      list(2, header='St.Andrew Bay Segments', panel.width=1.2,#increased panel.width to 1.1 from .8
+                           align='left', text.size=.8),
+                      
+                      list(3, header='Total #\n of Samples',
+                           panel.width=.35,
+                           align='right',
+                           text.size=.8),
+                      
+                      list(4, header='# of NA\n Samples',
+                           panel.width=.4,
+                           align='right',
+                           text.size=.8),
+                      
+                      list(5, header='2022 Detectable Total Nitrogen',
+                           graph.bgcolor='lightgray',
+                           xaxis.ticks=c(-2.5, -2.0, -1.5, -1.0, -0.5, -0.0),
+                           xaxis.labels=c(-2.5, -2.0, -1.5, -1.0, -0.5, -0.0),
+                           xaxis.labels.size=1.25,
+                           graph.bar.size = 0.5,
+                           #xaxis.labels.angle=90,
+                           xaxis.title='Log(TN, mg/L)', xaxis.title.size=1.25, panel.width=1.75),
+                      
+                      list(6, header='Light Gray Means Highlighted Above',
+                           inactive.border.color=gray(.7), inactive.border.size=2,
+                            panel.width=1.75)),
+# to run so just appears in Plots pane have 3 parentheses after the last panel.width
+# to run and save the image delete 3rd parenthesis and insert comma       
+print.file = "output_micromap/mmplot_tn2022.jpeg", res=100)
+
+
+```
+
+Refined Chlorophyll a Note need to add column "\# of NA Samples". Keeping 2019 scale so can compare linked micromaps among different years
+
+```{r refined_micromap_chla}
+# Chla Refined Plot
+mmplot(map.data=nutr_2022,
+       panel.types=c('dot_legend', 'labels', 'labels', 'labels', 'box_summary', 'map'),
+       panel.data=list(NA,
+                       'SEGMENT_NA',
+                       'chla_count',
+                       'chla_na_count',
+                       list('chla_lmin', 'chla_lq1', 'chla_lmed', 'chla_lq3', 'chla_lmax'),
+                       NA),
+       grouping = 3,
+       ord.by='chla_lmed',
+       rev.ord=TRUE,
+       median.row=FALSE,
+       plot.pGrp.spacing=1,
+       
+       plot.height=6, plot.width=9, #for poster use plot.height=6, plot.width=9,
+       colors=brewer.pal(5, "Spectral"), #for journal use plot.height=9, plot.width=6.8
+              
+       panel.att=list(list(1, panel.width=1, point.type=20, point.size=2,
+                           point.border=TRUE), 
+                      
+                      list(2, header='St.Andrew \n Bay Segments', panel.width=1,#increased panel.width to 1.1 from .8
+                           align='left', text.size=.8),
+                      
+                      list(3, header='Total #\n of Samples',
+                           panel.width=.5,
+                           align='right',
+                           text.size=.8),
+                      
+                      list(4, header='# of NA\n Samples',
+                           panel.width=.4,
+                           align='right',
+                           text.size=.8),
+                      
+                      list(5, header='2022 Detectable\n Chlorophyll a',
+                           graph.bgcolor='lightgray',
+                           xaxis.ticks=c(0,1.5,3,4.5),
+                           xaxis.labels=c(0,1.5,3,4.5),
+                           xaxis.labels.size=1.25,
+                           graph.bar.size = 0.5,
+                           #xaxis.labels.angle=90,
+                           xaxis.title='Log(µg/L)', xaxis.title.size=1.25, panel.width=1.75),
+                      
+                      list(6, header='Light Gray Means\n Highlighted Above',
+                           inactive.border.color=gray(.7), inactive.border.size=2,
+                            panel.width=1.75)),
+# to run so just appears in Plots pane have 3 parentheses after the last panel.width
+# to run and save the image replace 3rd parenthesis with comma       
+print.file = "output_micromap/mmplot_chla2022.jpeg", res=100)
+
+
+```
