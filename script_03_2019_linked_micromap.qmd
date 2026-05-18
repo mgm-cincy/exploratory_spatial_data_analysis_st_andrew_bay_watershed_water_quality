@@ -453,7 +453,8 @@ mmplot(map.data=nutr_2019,
 
 ## Refine Linked Micromaps
 
-Use more detailed coding arguments to make better looking linked micromaps. Refined TP
+Use more detailed coding arguments to make better looking linked micromaps.
+Refined TP
 
 ```{r refine_micromap_tp}
 # TP Refined Plot
@@ -604,6 +605,57 @@ mmplot(map.data=nutr_2019,
 # to run so just appears in Plots pane have 3 parentheses after the last panel.width
 # to run and save the image replace 3rd parenthesis with comma       
 print.file = "output_micromap/mmplot_chla2019.jpeg", res=100)
+
+
+```
+
+## Add Numeric Nutrient Criteria Lines
+Apparently, can only add one line and no more in a panel. So, I added ln of 0.019 mg/L, which in the annual geometric mean for St. Andrew Bay, and the highest AGM among, East (0.016 mg/L), North (0.014 mg/L) and West (0.017 mg/L) Bays.
+```{r nnc_micromap_tp}
+# TP Refined Plot
+mmplot(map.data=nutr_2019,
+       panel.types=c('dot_legend', 'labels', 'labels', 'box_summary', 'map'),
+       panel.data=list(NA,
+                       'SEGMENT_NA',
+                       'tp_count',
+                       list('tp_lmin', 'tp_lq1', 'tp_lmed', 'tp_lq3', 'tp_lmax'),
+                       NA),
+       grouping = 3,
+       ord.by='tp_lmed',
+       rev.ord=TRUE,
+       median.row=FALSE,
+       plot.pGrp.spacing=1,
+       
+       plot.height=6, plot.width=9, #for poster use plot.height=6, plot.width=9,
+       colors=brewer.pal(5, "Spectral"), #for journal use plot.height=9, plot.width=6.8
+              
+       panel.att=list(list(1, panel.width=1, point.type=20, point.size=2,
+                           point.border=TRUE), 
+                      
+                      list(2, header='St.Andrew Bay Segments', panel.width=1.2,#increased panel.width to 1.1 from .8
+                           align='left', text.size=.8),
+                      
+                      list(3, header='Samples',
+                           panel.width=.35,
+                           align='right',
+                           text.size=.8),
+                      
+                      list(4, header='2019 Detectable Total Phoshporous',
+                           graph.bgcolor='lightgray',
+                           xaxis.ticks=c(-6.0, -5.0, -4.0, -3.0, -2.0),
+                           xaxis.labels=c(-6,-5, -4, -3, -2),
+                           xaxis.labels.size=1.25,
+                           graph.bar.size = 0.5,
+                           #add.line=-4.27, add.line.col="black", add.line.typ="dashed",
+                           add.line=-3.96, add.line.col="black", add.line.typ="solid",
+                           xaxis.title='Log(TP, mg/L)', xaxis.title.size=1.25, panel.width=2),
+                      
+                      list(5, header='Light Gray Means Highlighted Above',
+                           inactive.border.color=gray(.7), inactive.border.size=2,
+                            panel.width=1.5)))
+,
+print.file = "output_micromap/mmplot_tp2019v2.jpeg", res=100)
+
 
 
 ```
