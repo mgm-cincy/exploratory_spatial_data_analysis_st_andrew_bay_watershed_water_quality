@@ -453,8 +453,7 @@ mmplot(map.data=nutr_2019,
 
 ## Refine Linked Micromaps
 
-Use more detailed coding arguments to make better looking linked micromaps.
-Refined TP
+Use more detailed coding arguments to make better looking linked micromaps. Refined TP
 
 ```{r refine_micromap_tp}
 # TP Refined Plot
@@ -610,7 +609,9 @@ print.file = "output_micromap/mmplot_chla2019.jpeg", res=100)
 ```
 
 ## Add Numeric Nutrient Criteria Lines
+
 Apparently, can only add one line and no more in a panel. So, I added ln of 0.019 mg/L, which in the annual geometric mean for St. Andrew Bay, and the highest AGM among, East (0.016 mg/L), North (0.014 mg/L) and West (0.017 mg/L) Bays.
+
 ```{r nnc_micromap_tp}
 # TP Refined Plot
 mmplot(map.data=nutr_2019,
@@ -652,10 +653,116 @@ mmplot(map.data=nutr_2019,
                       
                       list(5, header='Light Gray Means Highlighted Above',
                            inactive.border.color=gray(.7), inactive.border.size=2,
-                            panel.width=1.5)))
-,
+                            panel.width=1.5)),
 print.file = "output_micromap/mmplot_tp2019v2.jpeg", res=100)
 
+
+
+```
+
+Added line for West Bay annual geometric mean threshold, which is 0.35mg/L, and on natura log scale is -1.050. West Bay AGM is maximum among the Bay segments.
+```{r nnc_tn_micromap}
+# TN Refined Plot
+mmplot(map.data=nutr_2019,
+       panel.types=c('dot_legend', 'labels', 'labels', 'box_summary', 'map'),
+       panel.data=list(NA,
+                       'SEGMENT_NA',
+                       'tn_count',
+                       list('tn_lmin', 'tn_lq1', 'tn_lmed', 'tn_lq3', 'tn_lmax'),
+                       NA),
+       grouping = 3,
+       ord.by='tn_lmed',
+       rev.ord=TRUE,
+       median.row=FALSE,
+       plot.pGrp.spacing=1,
+       
+       plot.height=6, plot.width=9, #for poster use plot.height=6, plot.width=9,
+       colors=brewer.pal(5, "Spectral"), #for journal use plot.height=9, plot.width=6.8
+              
+       panel.att=list(list(1, panel.width=1, point.type=20, point.size=2,
+                           point.border=TRUE), 
+                      
+                      list(2, header='St.Andrew Bay Segments', panel.width=1.2,#increased panel.width to 1.1 from .8
+                           align='left', text.size=.8),
+                      
+                      list(3, header='Samples',
+                           panel.width=.35,
+                           align='right',
+                           text.size=.8),
+                      
+                      list(4, header='2019 Detectable Total Nitrogen',
+                           graph.bgcolor='lightgray',
+                           xaxis.ticks=c(-2.5, -2.0, -1.5, -1.0, -0.5, -0.0),
+                           xaxis.labels=c(-2.5, -2.0, -1.5, -1.0, -0.5, -0.0),
+                           xaxis.labels.size=1.25,
+                           graph.bar.size = 0.5,
+                           add.line=-1.050, add.line.col="black", add.line.typ="solid",
+                           #xaxis.labels.angle=90,
+                           xaxis.title='Log(TN, mg/L)', xaxis.title.size=1.25, panel.width=2),
+                      
+                      list(5, header='Light Gray Means Highlighted Above',
+                           inactive.border.color=gray(.7), inactive.border.size=2,
+                            panel.width=1.5)),
+# to run so just appears in Plots pane have 3 parentheses after the last panel.width
+# to run and save the image delete 3rd parenthesis and insert comma       
+print.file = "output_micromap/mmplot_tn2019v2.jpeg", res=100)
+
+
+```
+
+Added East Bay annual geometric line of 3.9 micrograms/L, which is maximum AGM among Bay segments, and is 1.4 with natural log transformation.
+
+```{r nnc_chla_micromap}
+# Chla Refined Plot
+mmplot(map.data=nutr_2019,
+       panel.types=c('dot_legend', 'labels', 'labels', 'labels', 'box_summary', 'map'),
+       panel.data=list(NA,
+                       'SEGMENT_NA',
+                       'chla_count',
+                       'chla_na_count',
+                       list('chla_lmin', 'chla_lq1', 'chla_lmed', 'chla_lq3', 'chla_lmax'),
+                       NA),
+       grouping = 3,
+       ord.by='chla_lmed',
+       rev.ord=TRUE,
+       median.row=FALSE,
+       plot.pGrp.spacing=1,
+       
+       plot.height=6, plot.width=9, #for poster use plot.height=6, plot.width=9,
+       colors=brewer.pal(5, "Spectral"), #for journal use plot.height=9, plot.width=6.8
+              
+       panel.att=list(list(1, panel.width=1, point.type=20, point.size=2,
+                           point.border=TRUE), 
+                      
+                      list(2, header='St.Andrew \n Bay Segments', panel.width=1,#increased panel.width to 1.1 from .8
+                           align='left', text.size=.8),
+                      
+                      list(3, header='Total #\n of Samples',
+                           panel.width=.5,
+                           align='right',
+                           text.size=.8),
+                      
+                      list(4, header='# of NA\n Samples',
+                           panel.width=.4,
+                           align='right',
+                           text.size=.8),
+                      
+                      list(5, header='2019 Detectable\n Chlorophyll a',
+                           graph.bgcolor='lightgray',
+                           xaxis.ticks=c(0,1.5,3,4.5),
+                           xaxis.labels=c(0,1.5,3,4.5),
+                           xaxis.labels.size=1.25,
+                           graph.bar.size = 0.5,
+                           add.line=1.4, add.line.col="black", add.line.typ="solid",
+                           #xaxis.labels.angle=90,
+                           xaxis.title='Log(µg/L)', xaxis.title.size=1.25, panel.width=1.75),
+                      
+                      list(6, header='Light Gray Means\n Highlighted Above',
+                           inactive.border.color=gray(.7), inactive.border.size=2,
+                            panel.width=1.75)),
+# to run so just appears in Plots pane have 3 parentheses after the last panel.width
+# to run and save the image replace 3rd parenthesis with comma       
+print.file = "output_micromap/mmplot_chla2019v2.jpeg", res=100)
 
 
 ```
