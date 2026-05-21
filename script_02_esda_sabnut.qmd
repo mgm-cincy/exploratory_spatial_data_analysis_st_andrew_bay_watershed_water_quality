@@ -206,6 +206,18 @@ mapview(polygons8)
 
 mapview(np_sf1) + mapview(polygons8)
 
+bayous_nb1 <- dplyr::filter(bbl_4, SEGMENT_NA == "Fannin Bayou" | SEGMENT_NA == "Posten Bayou" | SEGMENT_NA == "Pretty Bayou" | SEGMENT_NA == "Robinson Bayou" | SEGMENT_NA == "Beatty Bayou" | SEGMENT_NA == "Mill Bayou" | SEGMENT_NA == "Goose Bayou")
+
+mapview(bayous_nb1)
+mapview(np_sf1) + mapview(bayous_nb1)
+
+
+mapview(polygons8) + mapview(bayous_nb1,col.regions = "yellow")
+
+bayous_wb1 <- dplyr::filter(bbl_4, SEGMENT_NA == "Burnt Mill Creek" | SEGMENT_NA == "Crooked Creek" | SEGMENT_NA == "Warren Bayou" | SEGMENT_NA == "Gulf ICWW between Choctawhatchee Bay and St. Andrew Bay")
+
+mapview(bayous_wb1)
+mapview(np_sf1) + mapview(bayous_wb1)
 ```
 
 
