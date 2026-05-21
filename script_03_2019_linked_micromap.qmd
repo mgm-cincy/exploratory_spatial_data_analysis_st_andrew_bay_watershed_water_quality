@@ -661,6 +661,7 @@ print.file = "output_micromap/mmplot_tp2019v2.jpeg", res=100)
 ```
 
 Added line for West Bay annual geometric mean threshold, which is 0.35mg/L, and on natura log scale is -1.050. West Bay AGM is maximum among the Bay segments.
+
 ```{r nnc_tn_micromap}
 # TN Refined Plot
 mmplot(map.data=nutr_2019,
