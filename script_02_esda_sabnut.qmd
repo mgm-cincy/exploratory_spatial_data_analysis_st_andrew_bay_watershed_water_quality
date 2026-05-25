@@ -30,6 +30,8 @@ library(micromap)
 
 ## Log
 
+2026-05-24 made West Bay creeks and bayou polygons
+
 2026-04-24 logged chla for linked micromap
 
 2026-04-23 need to work on get numeric codes assigned to sta_nr so can get distinct count of stations with in each polygon for linked micromap
