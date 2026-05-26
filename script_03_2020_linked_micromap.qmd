@@ -27,6 +27,7 @@ library(plotly)
 library(webshot) # save mapview object
 library(nngeo)
 library(micromap)
+library(tidyverse)
 ```
 
 ## Log
@@ -610,6 +611,136 @@ mmplot(map.data=nutr_2020,
 # to run so just appears in Plots pane have 3 parentheses after the last panel.width
 # to run and save the image replace 3rd parenthesis with comma       
 print.file = "output_micromap/mmplot_chla2020.jpeg", res=100)
+
+
+```
+
+## West Bay Bayous and Creeks
+
+Spatial intersection ends up omitting Bay-West Bay-3 from April 25, 2024 as that monitoring location does not intersect polygons for some reason. Need to think of summary statistics for Burnt Mill Creek, Crooked Creek and GICWW-West given their small sample sizes relative to West Bay main segment.
+
+```{r wb_bayous_creeks}
+
+bayous_wb1 <- dplyr::filter(bbl_4, SEGMENT_NA == "Burnt Mill Creek" | SEGMENT_NA == "Crooked Creek" | SEGMENT_NA == "Warren Bayou" | SEGMENT_NA == "Gulf ICWW between Choctawhatchee Bay and St. Andrew Bay" | SEGMENT_NA == "West Bay")
+
+mm_station1 <- dplyr::filter(np_sf1, bay != "Lake Powell" & bay != "Powell Creek" & bay != "Lullwater" & bay != "Lake Marin" & bay != "Marin")
+
+
+mm_wbstation2 <- st_intersection(mm_station1, bayous_wb1)
+
+mapview(mm_wbstation2) + mapview(bayous_wb1, col.regions = "yellow")
+
+names(mm_wbstation2)
+
+mm_wbstation2 %>% 
+  group_by(SEGMENT_NA) %>% 
+  summarize(., count = dplyr::n())
+
+mm_wbstation2 %>% 
+  group_by(SEGMENT_NA, year) %>% 
+  summarize(., count = dplyr::n()) %>% 
+  print(n=Inf)
+
+# uses 2020 data as have samples from all 4 polygons
+
+tp_wb2020 <- st_set_geometry(mm_wbstation2, NULL) %>% 
+  dplyr::filter(., year == 2020 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.") %>% 
+  dplyr::select(., tp, SEGMENT_NA) %>% 
+  group_by(., SEGMENT_NA) %>% 
+  summarize(., tp_min = fivenum(tp)[1],
+            tp_q1 = fivenum(tp)[2],
+            tp_med = fivenum(tp)[3],
+            tp_q3 = fivenum(tp)[4],
+            tp_max = fivenum(tp)[5],
+            tp_lmin = log(fivenum(tp)[1]),
+            tp_lq1 = log(fivenum(tp)[2]),
+            tp_lmed = log(fivenum(tp)[3]),
+            tp_lq3 = log(fivenum(tp)[4]),
+            tp_lmax = log(fivenum(tp)[5]),
+            tp_count = dplyr::n(),
+            tp_mean = mean(tp, na.rm = TRUE),
+            tp_na_count = sum(is.na(tp))) %>% 
+  print(n = Inf)
+
+tp_wb2020v2 <- merge(bayous_wb1, tp_wb2020, by = "SEGMENT_NA" )
+summary(tp_wb2020v2)
+
+tp_wb2020v3 <- tp_wb2020v2 |> 
+  mutate(
+  SEGMENT_NA = SEGMENT_NA |>
+    replace_values(
+      "Gulf ICWW between Choctawhatchee Bay and St. Andrew Bay" ~ "West Bay ICCW"
+    )
+  )  
+    
+      case_when(
+    revised_name = case_when(
+    SEGMENT_NA == "Gulf ICWW between Choctawhatchee Bay and St. Andrew Bay" ~ "West      Bay ICCW"),
+    TRUE ~ SEGMENT_NA
+  )
+)
+
+mmplot(map.data=tp_wb2020v2,
+       panel.types=c('dot_legend', 'labels', 'box_summary', 'map'),
+       panel.data=list(NA,
+                       'SEGMENT_NA',
+                       list('tp_lmin', 'tp_lq1', 'tp_lmed', 'tp_lq3', 'tp_lmax'),
+                       NA),
+       grouping = 1,
+       ord.by='tp_lmed', rev.ord=TRUE,
+       median.row=FALSE)
+
+
+# TP Refined Plot for West Bay Creeks and Bayous
+mmplot(map.data=tp_wb2020v2,
+       panel.types=c('dot_legend', 'labels', 'labels', 'labels', 'box_summary', 'map'),
+       panel.data=list(NA,
+                       'SEGMENT_NA',
+                       'tp_count',
+                       'tp_na_count',
+                       list('tp_lmin', 'tp_lq1', 'tp_lmed', 'tp_lq3', 'tp_lmax'),
+                       NA),
+       grouping = 2,
+       ord.by='tp_lmed',
+       rev.ord=TRUE,
+       median.row=FALSE,
+       plot.pGrp.spacing=1,
+       
+       plot.height=6, plot.width=9, #for poster use plot.height=6, plot.width=9,
+       colors=brewer.pal(4, "Spectral")) #for journal use plot.height=9, plot.width=6.8
+              
+       panel.att=list(list(1, panel.width=1, point.type=20, point.size=2,
+                           point.border=TRUE), 
+                      
+                      list(2, header='St.Andrew Bay Segments', panel.width=1.2,#increased panel.width to 1.1 from .8
+                           align='left', text.size=.8),
+                      
+                      list(3, header='Total #\n of Samples',
+                           panel.width=.35,
+                           align='right',
+                           text.size=.8),
+                      
+                      list(4, header='# of NA\n Samples',
+                           panel.width=.4,
+                           align='right',
+                           text.size=.8),
+                      
+                      list(5, header='2020 Detectable Total Phoshporous',
+                           graph.bgcolor='lightgray',
+                           xaxis.ticks=c(-6.0, -5.0, -4.0, -3.0, -2.0),
+                           xaxis.labels=c(-6,-5, -4, -3, -2),
+                           xaxis.labels.size=1.25,
+                           graph.bar.size = 0.5,
+                           #xaxis.labels.angle=90,
+                           add.line=-4.07, add.line.col="black",
+                           xaxis.title='Log(TP, mg/L)', xaxis.title.size=1.25, panel.width=1.75),
+                      
+                      list(6, header='Light Gray Means Highlighted Above',
+                           inactive.border.color=gray(.7), inactive.border.size=2,
+                            panel.width=1.75))
+       ,
+print.file = "output_micromap/mmplot_tp2020.jpeg", res=100)
+
 
 
 ```
