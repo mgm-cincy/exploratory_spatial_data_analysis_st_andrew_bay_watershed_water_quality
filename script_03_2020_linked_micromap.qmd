@@ -163,6 +163,8 @@ bbl_4 <- st_read("data_gis/Bays_Bayous_Lakes_V4/Bays_Bayous_Lakes_V4.shp")
 summary(bbl_4)
 mapview(bbl_4)
 
+bbl_4 <- bbl_4 %>% st_transform(3087)
+
 distinct(bbl_4, SEGMENT_NA) %>% dplyr::arrange(., SEGMENT_NA)
 # have 190 distinct SEGMENT_NA, but 191 obs suggesting one polygon is sharing a name
 
@@ -170,7 +172,6 @@ distinct(bbl_4, SEGMENT_NA) %>% dplyr::arrange(., SEGMENT_NA)
 distinct(bbl_4, Major_Seg) %>% dplyr::arrange(., Major_Seg)
 # returns 8 Major_Seg
 
-bbl_4 <- bbl_4 %>% st_transform(3087)
 
 mapview(np_sf1) + mapview(bbl_4)
 # a burnt mill creek station from 2024-04-25 is off polygon
@@ -673,14 +674,8 @@ tp_wb2020v3 <- tp_wb2020v2 |>
     )
   )  
     
-      case_when(
-    revised_name = case_when(
-    SEGMENT_NA == "Gulf ICWW between Choctawhatchee Bay and St. Andrew Bay" ~ "West      Bay ICCW"),
-    TRUE ~ SEGMENT_NA
-  )
-)
 
-mmplot(map.data=tp_wb2020v2,
+mmplot(map.data=tp_wb2020v3,
        panel.types=c('dot_legend', 'labels', 'box_summary', 'map'),
        panel.data=list(NA,
                        'SEGMENT_NA',
@@ -692,7 +687,7 @@ mmplot(map.data=tp_wb2020v2,
 
 
 # TP Refined Plot for West Bay Creeks and Bayous
-mmplot(map.data=tp_wb2020v2,
+mmplot(map.data=tp_wb2020v3,
        panel.types=c('dot_legend', 'labels', 'labels', 'labels', 'box_summary', 'map'),
        panel.data=list(NA,
                        'SEGMENT_NA',
@@ -707,12 +702,12 @@ mmplot(map.data=tp_wb2020v2,
        plot.pGrp.spacing=1,
        
        plot.height=6, plot.width=9, #for poster use plot.height=6, plot.width=9,
-       colors=brewer.pal(4, "Spectral")) #for journal use plot.height=9, plot.width=6.8
+       colors=brewer.pal(4, "Spectral"), #for journal use plot.height=9, plot.width=6.8
               
        panel.att=list(list(1, panel.width=1, point.type=20, point.size=2,
                            point.border=TRUE), 
                       
-                      list(2, header='St.Andrew Bay Segments', panel.width=1.2,#increased panel.width to 1.1 from .8
+                      list(2, header='West Bay Segment,\n Creeks & Bayous', panel.width=1.2,#increased panel.width to 1.1 from .8
                            align='left', text.size=.8),
                       
                       list(3, header='Total #\n of Samples',
@@ -737,9 +732,8 @@ mmplot(map.data=tp_wb2020v2,
                       
                       list(6, header='Light Gray Means Highlighted Above',
                            inactive.border.color=gray(.7), inactive.border.size=2,
-                            panel.width=1.75))
-       ,
-print.file = "output_micromap/mmplot_tp2020.jpeg", res=100)
+                            panel.width=1.75)),
+print.file = "output_micromap/mmplot_tp_wb2020.jpeg", res=100)
 
 
 
