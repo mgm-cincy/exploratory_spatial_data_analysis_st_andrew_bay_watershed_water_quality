@@ -620,6 +620,8 @@ print.file = "output_micromap/mmplot_chla2020.jpeg", res=100)
 
 Spatial intersection ends up omitting Bay-West Bay-3 from April 25, 2024 as that monitoring location does not intersect polygons for some reason. Need to think of summary statistics for Burnt Mill Creek, Crooked Creek and GICWW-West given their small sample sizes relative to West Bay main segment.
 
+Also, Warren Bayou falls in polygon of West Bay segment so that's why Warren Bayou not showing up in linked micromap.
+
 ```{r wb_bayous_creeks}
 
 bayous_wb1 <- dplyr::filter(bbl_4, SEGMENT_NA == "Burnt Mill Creek" | SEGMENT_NA == "Crooked Creek" | SEGMENT_NA == "Warren Bayou" | SEGMENT_NA == "Gulf ICWW between Choctawhatchee Bay and St. Andrew Bay" | SEGMENT_NA == "West Bay")
