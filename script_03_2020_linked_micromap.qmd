@@ -620,7 +620,9 @@ print.file = "output_micromap/mmplot_chla2020.jpeg", res=100)
 
 Spatial intersection ends up omitting Bay-West Bay-3 from April 25, 2024 as that monitoring location does not intersect polygons for some reason. Need to think of summary statistics for Burnt Mill Creek, Crooked Creek and GICWW-West given their small sample sizes relative to West Bay main segment.
 
-Also, Warren Bayou falls in polygon of West Bay segment so that's why Warren Bayou not showing up in linked micromap.
+Also, Warren Bayou falls in polygon of West Bay segment so that's why Warren Bayou not showing up in linked micromap. The spatial intersection I do puts the Warren Bayou point into the West Bay segment.
+
+
 
 ```{r wb_bayous_creeks}
 
@@ -629,7 +631,25 @@ bayous_wb1 <- dplyr::filter(bbl_4, SEGMENT_NA == "Burnt Mill Creek" | SEGMENT_NA
 mm_station1 <- dplyr::filter(np_sf1, bay != "Lake Powell" & bay != "Powell Creek" & bay != "Lullwater" & bay != "Lake Marin" & bay != "Marin")
 
 
+warren_v1 <- dplyr::filter(mm_station1, bay == "Warren Bayou")
+#returns 162 observations
+mapview(warren_v1)
+summary(warren_v1$tp)
+summary(warren_v1$tn)
+summary(warren_v1$chl)
+
+warren_v2 <- st_geometry(warren_v1) %>% unique.data.frame(.)
+class(warren_v2)
+
+
+
+# compute distance between pairs of nearest features:
+# st_distance(pts, circles[nearest], by_element = TRUE)
+
+st_distance(warren_v2, bayous_wb1[nearest], by_element = TRUE)
+
 mm_wbstation2 <- st_intersection(mm_station1, bayous_wb1)
+
 
 mapview(mm_wbstation2) + mapview(bayous_wb1, col.regions = "yellow")
 
