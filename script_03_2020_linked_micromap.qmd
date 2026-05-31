@@ -90,6 +90,7 @@ np_ds1 <- filter(np_ds1, (!is.na(long)))
 # drops to 10,369 obs and summary(mp_ds2$lat) returns no NA
 
 unique(np_ds1$organization_name)
+distinct(np_ds1,bay) %>%  dplyr::arrange(., bay) %>% print(n=Inf)
 
 z1 <- filter(np_ds1, is.na(organization_name))
 # return 7,162 obs
@@ -624,6 +625,7 @@ Spatial intersection ends up omitting Bay-West Bay-3 from April 25, 2024 as that
 
 Also, Warren Bayou falls in polygon of West Bay segment so that's why Warren Bayou not showing up in linked micromap. The spatial intersection I do puts the Warren Bayou point into the West Bay segment.
 
+Simple solution to avoid spatial intersection missing some stations is to filter station points by bays that match SEGMENT_NA), then do a five number summary based on those bays. Unfortunately, West Bay ICWW station is simply assigned bay equals West Bay. I could pull that station out by it monitoring location id, BAY-WEST-BAY-12, and then re-assign its bay value from West Bay to West Bay ICCW. If I did that then, I should be able to get five number summmary based on bay that matches SEGMENT_NA.
 ```{r wb_bayous_creeks}
 
 bayous_wb1 <- dplyr::filter(bbl_4, SEGMENT_NA == "Burnt Mill Creek" | SEGMENT_NA == "Crooked Creek" | SEGMENT_NA == "Warren Bayou" | SEGMENT_NA == "Gulf ICWW between Choctawhatchee Bay and St. Andrew Bay" | SEGMENT_NA == "West Bay")
