@@ -638,6 +638,7 @@ summary(warren_v1$tp)
 summary(warren_v1$tn)
 summary(warren_v1$chl)
 
+# pull out only geometry of Warren Bayou station
 warren_v2 <- st_geometry(warren_v1) %>% unique.data.frame(.)
 class(warren_v2)
 
@@ -645,7 +646,7 @@ st_crs(warren_v2) == st_crs(bayous_wb1)
 
 # https://stackoverflow.com/questions/46214479/distance-between-a-set-of-points-and-a-polygon-with-sf-in-r
 st_distance(warren_v2, bayous_wb1)
-# returns 5 distances for each of the 5 polygons in bayous_wb1 and distances are in order of the polygons. Have a 0 distance for West Bay as the warren_v2 point is in that polygon. The distance to the 3rd polygon, SEGMENT_NA is Warren Bayou, is 7.0
+# returns 5 distances for each of the 5 polygons in bayous_wb1 and distances are in order of the polygons. Have a 0 m distance for West Bay as the warren_v2 point is in that polygon. The distance to the 3rd polygon, SEGMENT_NA is Warren Bayou, is 7.0 m.
 
 mm_wbstation2 <- st_intersection(mm_station1, bayous_wb1)
 
