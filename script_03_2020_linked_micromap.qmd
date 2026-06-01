@@ -626,11 +626,23 @@ Spatial intersection ends up omitting Bay-West Bay-3 from April 25, 2024 as that
 Also, Warren Bayou falls in polygon of West Bay segment so that's why Warren Bayou not showing up in linked micromap. The spatial intersection I do puts the Warren Bayou point into the West Bay segment.
 
 Simple solution to avoid spatial intersection missing some stations is to filter station points by bays that match SEGMENT_NA), then do a five number summary based on those bays. Unfortunately, West Bay ICWW station is simply assigned bay equals West Bay. I could pull that station out by it monitoring location id, BAY-WEST-BAY-12, and then re-assign its bay value from West Bay to West Bay ICCW. If I did that then, I should be able to get five number summmary based on bay that matches SEGMENT_NA.
+
+Mapvview of mm_stations1 shows monitoring location id BAY-WE-STBAY-5 clearly in SAB, but its bay is labeled as West Bay
+```{r wb_stats_no_intersection}
+
+mm_station1 <- dplyr::filter(np_sf1, bay == "Crooked Creek" | bay == "Burnt Mill Creek" | bay == "Warren Bayou" | bay == "West Bay")
+
+distinct(mm_station1, monitoring_location_id) %>% arrange(., monitoring_location_id) %>% print(n=Inf)
+
+mapview(mm_station1) + bayous_wb1
+```
+
+
 ```{r wb_bayous_creeks}
 
 bayous_wb1 <- dplyr::filter(bbl_4, SEGMENT_NA == "Burnt Mill Creek" | SEGMENT_NA == "Crooked Creek" | SEGMENT_NA == "Warren Bayou" | SEGMENT_NA == "Gulf ICWW between Choctawhatchee Bay and St. Andrew Bay" | SEGMENT_NA == "West Bay")
 
-mm_station1 <- dplyr::filter(np_sf1, bay != "Lake Powell" & bay != "Powell Creek" & bay != "Lullwater" & bay != "Lake Marin" & bay != "Marin")
+# mm_station1 <- dplyr::filter(np_sf1, bay != "Lake Powell" & bay != "Powell Creek" & bay != "Lullwater" & bay != "Lake Marin" & bay != "Marin")
 
 
 warren_v1 <- dplyr::filter(mm_station1, bay == "Warren Bayou")
