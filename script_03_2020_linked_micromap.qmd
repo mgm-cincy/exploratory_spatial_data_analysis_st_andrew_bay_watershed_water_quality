@@ -91,6 +91,9 @@ np_ds1 <- filter(np_ds1, (!is.na(long)))
 
 unique(np_ds1$organization_name)
 distinct(np_ds1,bay) %>%  dplyr::arrange(., bay) %>% print(n=Inf)
+# 35 distinct bay entries
+distinct(np_ds1, monitoring_location_id) %>%  dplyr::arrange(., ) %>% print(n=Inf)
+# 130 distinct monitoring location id entries
 
 z1 <- filter(np_ds1, is.na(organization_name))
 # return 7,162 obs
@@ -627,16 +630,25 @@ Also, Warren Bayou falls in polygon of West Bay segment so that's why Warren Bay
 
 Simple solution to avoid spatial intersection missing some stations is to filter station points by bays that match SEGMENT_NA), then do a five number summary based on those bays. Unfortunately, West Bay ICWW station is simply assigned bay equals West Bay. I could pull that station out by it monitoring location id, BAY-WEST-BAY-12, and then re-assign its bay value from West Bay to West Bay ICCW. If I did that then, I should be able to get five number summmary based on bay that matches SEGMENT_NA.
 
-Mapvview of mm_stations1 shows monitoring location id BAY-WE-STBAY-5 clearly in SAB, but its bay is labeled as West Bay
+Mapvview of mm_stations1 shows monitoring location id BAY-WE-STBAY-5 clearly in SAB, but its bay is labeled as West Bay. Since December 1, 2018, BAY-WE-STBAY-5 has had either the wrong coordinate entered or the wrong bay or both, and it has 28 entries. 
+
+Note monitoring location id is all upper case so always use that. Monitoring location name is snake-cased so avoid it.
 ```{r wb_stats_no_intersection}
 
 mm_station1 <- dplyr::filter(np_sf1, bay == "Crooked Creek" | bay == "Burnt Mill Creek" | bay == "Warren Bayou" | bay == "West Bay")
+# return 1778 observations, of which 1418 observations have sta_nr numeric entry, and 360 have monitoring location id entry
 
 distinct(mm_station1, monitoring_location_id) %>% arrange(., monitoring_location_id) %>% print(n=Inf)
 
 mapview(mm_station1) + bayous_wb1
-```
 
+odd_coordinates <- dplyr::filter(mm_station1, monitoring_location_id == "BAY-WE-STBAY-3" | monitoring_location_id == "BAY-WE-STBAY-5")
+
+mapview(odd_coordinates) + bayous_wb1
+
+mm_station1 <- dplyr::filter(mm_station1, monitoring_location_id != "BAY-WE-STBAY-5")
+# believe this filtering also removes all NA entries for monitoring locationn id
+```
 
 ```{r wb_bayous_creeks}
 
