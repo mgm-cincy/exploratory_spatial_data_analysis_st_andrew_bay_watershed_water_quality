@@ -630,15 +630,17 @@ Also, Warren Bayou falls in polygon of West Bay segment so that's why Warren Bay
 
 Simple solution to avoid spatial intersection missing some stations is to filter station points by bays that match SEGMENT_NA), then do a five number summary based on those bays. Unfortunately, West Bay ICWW station is simply assigned bay equals West Bay. I could pull that station out by it monitoring location id, BAY-WEST-BAY-12, and then re-assign its bay value from West Bay to West Bay ICCW. If I did that then, I should be able to get five number summmary based on bay that matches SEGMENT_NA.
 
-Mapvview of mm_stations1 shows monitoring location id BAY-WE-STBAY-5 clearly in SAB, but its bay is labeled as West Bay. Since December 1, 2018, BAY-WE-STBAY-5 has had either the wrong coordinate entered or the wrong bay or both, and it has 28 entries. 
+Mapvview of mm_stations1 shows monitoring location id BAY-WE-STBAY-5 clearly in SAB, but its bay is labeled as West Bay. Since December 1, 2018, BAY-WE-STBAY-5 has had either the wrong coordinate entered or the wrong bay or both, and it has 28 entries.
 
-Note monitoring location id is all upper case so always use that. Monitoring location name is snake-cased so avoid it.
+Note monitoring location id is all upper case so always use that. Monitoring location name is snake-cased so avoid it. Note subtle behavior of filter and filter_out with NAs, <https://dplyr.tidyverse.org/reference/filter.html>.
+
 ```{r wb_stats_no_intersection}
 
 mm_station1 <- dplyr::filter(np_sf1, bay == "Crooked Creek" | bay == "Burnt Mill Creek" | bay == "Warren Bayou" | bay == "West Bay")
 # return 1778 observations, of which 1418 observations have sta_nr numeric entry, and 360 have monitoring location id entry
 
 distinct(mm_station1, monitoring_location_id) %>% arrange(., monitoring_location_id) %>% print(n=Inf)
+# returns 21 observations including NA, 3 Burnt Mill stations, 3 Crooked stations, 1 Warren Bayou, 11 BAY-WE-STBAY stations, 1 BAY-WEST-BAY-12, and 1 NWFYI0005
 
 mapview(mm_station1) + bayous_wb1
 
@@ -646,9 +648,131 @@ odd_coordinates <- dplyr::filter(mm_station1, monitoring_location_id == "BAY-WE-
 
 mapview(odd_coordinates) + bayous_wb1
 
-mm_station1 <- dplyr::filter(mm_station1, monitoring_location_id != "BAY-WE-STBAY-5")
-# believe this filtering also removes all NA entries for monitoring locationn id
+mm_station1 <- dplyr::filter_out(mm_station1, monitoring_location_id == "BAY-WE-STBAY-5")
+# believe this filtering out removes all 28 obs for monitoring location BAY-WE-STBAY-5 so now have 1750 obs
+
+distinct(mm_station1, monitoring_location_id) %>% arrange(., monitoring_location_id) %>% print(n=Inf)
+# now returns to 20 obs and no BAY-WE-STBAY-5 observation
+
+
+mm_station1 %>% 
+  group_by(bay) %>% 
+  summarize(., count = dplyr::n())
+# want to add a bay entry of "West Bay ICWW" for BAY-WEST BAY-12
+
+
+mm_station2 <- mm_station1 |>
+  mutate(
+    bay = case_when(monitoring_location_id == "BAY-WEST-BAY-12" ~ "West Bay ICWW",
+                       TRUE ~ bay
+                       )
+    )
+
+mm_station2 %>% 
+  group_by(bay) %>% 
+  summarize(., count = dplyr::n())
+
+bayous_wb1 <- dplyr::filter(bbl_4, SEGMENT_NA == "Burnt Mill Creek" | SEGMENT_NA == "Crooked Creek" | SEGMENT_NA == "Warren Bayou" | SEGMENT_NA == "Gulf ICWW between Choctawhatchee Bay and St. Andrew Bay" | SEGMENT_NA == "West Bay")
+
+
+# do replace values so SEGMENT_NA will match to bay in points data frame
+bayous_wb2 <- bayous_wb1 |> 
+  mutate(
+  SEGMENT_NA = SEGMENT_NA |>
+    replace_values(
+      "Gulf ICWW between Choctawhatchee Bay and St. Andrew Bay" ~ "West Bay ICWW"
+    )
+  )  
+
+# getting 5-number summary from points data
+tp_wb2020 <- st_set_geometry(mm_station2, NULL) %>% 
+  dplyr::filter(., year == 2020 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.") %>% 
+  dplyr::select(., tp, bay) %>% 
+  group_by(., bay) %>% 
+  summarize(., tp_min = fivenum(tp)[1],
+            tp_q1 = fivenum(tp)[2],
+            tp_med = fivenum(tp)[3],
+            tp_q3 = fivenum(tp)[4],
+            tp_max = fivenum(tp)[5],
+            tp_lmin = log(fivenum(tp)[1]),
+            tp_lq1 = log(fivenum(tp)[2]),
+            tp_lmed = log(fivenum(tp)[3]),
+            tp_lq3 = log(fivenum(tp)[4]),
+            tp_lmax = log(fivenum(tp)[5]),
+            tp_count = dplyr::n(),
+            tp_mean = mean(tp, na.rm = TRUE),
+            tp_na_count = sum(is.na(tp))) %>% 
+  print(n = Inf)
+
+
+tp_wb2020v2 <- merge(bayous_wb2, tp_wb2020, by.x = "SEGMENT_NA", by.y = "bay" )
+
+
+mmplot(map.data=tp_wb2020v2,
+       panel.types=c('dot_legend', 'labels', 'box_summary', 'map'),
+       panel.data=list(NA,
+                       'SEGMENT_NA',
+                       list('tp_lmin', 'tp_lq1', 'tp_lmed', 'tp_lq3', 'tp_lmax'),
+                       NA),
+       grouping = 1,
+       ord.by='tp_lmed', rev.ord=TRUE,
+       median.row=FALSE)
+
+
+# TP Refined Plot for West Bay Creeks and Bayous
+mmplot(map.data=tp_wb2020v2,
+       panel.types=c('dot_legend', 'labels', 'labels', 'labels', 'box_summary', 'map'),
+       panel.data=list(NA,
+                       'SEGMENT_NA',
+                       'tp_count',
+                       'tp_na_count',
+                       list('tp_lmin', 'tp_lq1', 'tp_lmed', 'tp_lq3', 'tp_lmax'),
+                       NA),
+       grouping = 2,
+       ord.by='tp_lmed',
+       rev.ord=TRUE,
+       median.row=FALSE,
+       plot.pGrp.spacing=1,
+       
+       plot.height=6, plot.width=9, #for poster use plot.height=6, plot.width=9,
+       colors=brewer.pal(4, "Spectral"), #for journal use plot.height=9, plot.width=6.8
+              
+       panel.att=list(list(1, panel.width=1, point.type=20, point.size=2,
+                           point.border=TRUE), 
+                      
+                      list(2, header='West Bay Segment,\n Creeks & Bayous', panel.width=1.2,#increased panel.width to 1.1 from .8
+                           align='left', text.size=.8),
+                      
+                      list(3, header='Total #\n of Samples',
+                           panel.width=.35,
+                           align='right',
+                           text.size=.8),
+                      
+                      list(4, header='# of NA\n Samples',
+                           panel.width=.4,
+                           align='right',
+                           text.size=.8),
+                      
+                      list(5, header='2020 Detectable Total Phoshporous',
+                           graph.bgcolor='lightgray',
+                           xaxis.ticks=c(-6.0, -5.0, -4.0, -3.0, -2.0),
+                           xaxis.labels=c(-6,-5, -4, -3, -2),
+                           xaxis.labels.size=1.25,
+                           graph.bar.size = 0.5,
+                           #xaxis.labels.angle=90,
+                           add.line=-4.07, add.line.col="black",
+                           xaxis.title='Log(TP, mg/L)', xaxis.title.size=1.25, panel.width=1.75),
+                      
+                      list(6, header='Light Gray Means Highlighted Above',
+                           inactive.border.color=gray(.7), inactive.border.size=2,
+                            panel.width=1.75)),
+print.file = "output_micromap/mmplot_tp_wb2020v2.jpeg", res=100)
+
+
+
 ```
+
+
 
 ```{r wb_bayous_creeks}
 
@@ -718,7 +842,7 @@ tp_wb2020v3 <- tp_wb2020v2 |>
   mutate(
   SEGMENT_NA = SEGMENT_NA |>
     replace_values(
-      "Gulf ICWW between Choctawhatchee Bay and St. Andrew Bay" ~ "West Bay ICCW"
+      "Gulf ICWW between Choctawhatchee Bay and St. Andrew Bay" ~ "West Bay ICWW"
     )
   )  
     
