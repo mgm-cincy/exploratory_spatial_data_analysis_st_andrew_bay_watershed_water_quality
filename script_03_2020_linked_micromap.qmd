@@ -624,17 +624,13 @@ print.file = "output_micromap/mmplot_chla2020.jpeg", res=100)
 
 ## West Bay Bayous and Creeks
 
-Spatial intersection ends up omitting Bay-West Bay-3 from April 25, 2024 as that monitoring location does not intersect polygons for some reason. Need to think of summary statistics for Burnt Mill Creek, Crooked Creek and GICWW-West given their small sample sizes relative to West Bay main segment.
-
-Also, Warren Bayou falls in polygon of West Bay segment so that's why Warren Bayou not showing up in linked micromap. The spatial intersection I do puts the Warren Bayou point into the West Bay segment.
-
-Simple solution to avoid spatial intersection missing some stations is to filter station points by bays that match SEGMENT_NA), then do a five number summary based on those bays. Unfortunately, West Bay ICWW station is simply assigned bay equals West Bay. I could pull that station out by it monitoring location id, BAY-WEST-BAY-12, and then re-assign its bay value from West Bay to West Bay ICCW. If I did that then, I should be able to get five number summmary based on bay that matches SEGMENT_NA.
+The two code chunks below illustrate 2 ways to format data to make linked micromaps. The first way involves filtering from the points/stations data so it only has points within the polygons of interest. Also, the filtered data need to have variable name, in this case "bay", to match to the polgyon names entered under SEGMENT_NA. A five-number summary is made of the WQ data grouped by bay. Next, the appropriate polygons are selected and, if needed, values under SEGMENT_NA are replaced to match the bay entries of the points. The polygon data and five-number summary data are merged using the shared variable names of SEGMENT_NA and bay.
 
 Mapvview of mm_stations1 shows monitoring location id BAY-WE-STBAY-5 clearly in SAB, but its bay is labeled as West Bay. Since December 1, 2018, BAY-WE-STBAY-5 has had either the wrong coordinate entered or the wrong bay or both, and it has 28 entries.
 
 Note monitoring location id is all upper case so always use that. Monitoring location name is snake-cased so avoid it. Note subtle behavior of filter and filter_out with NAs, <https://dplyr.tidyverse.org/reference/filter.html>.
 
-```{r wb_stats_no_intersection}
+```{r wb_stats_join_only}
 
 mm_station1 <- dplyr::filter(np_sf1, bay == "Crooked Creek" | bay == "Burnt Mill Creek" | bay == "Warren Bayou" | bay == "West Bay")
 # return 1778 observations, of which 1418 observations have sta_nr numeric entry, and 360 have monitoring location id entry
@@ -772,9 +768,13 @@ print.file = "output_micromap/mmplot_tp_wb2020v2.jpeg", res=100)
 
 ```
 
+The second way to format the data assumes the points and polgyon datasets are in exact alignment. That is every point/station is in its appropriate polygon. A spatial intersection is done of the points/stations to the polygons so that now all the polygon attributes, such as SEGMENT_NA, are assigned to the points. After this spatial intersection is done, then a five-number summary of the WQ data can be made and the linked micromaps created.
 
+Spatial intersection ends up omitting Bay-West Bay-3 from April 25, 2024 as that monitoring location does not intersect polygons for some reason. Need to think of summary statistics for Burnt Mill Creek, Crooked Creek and GICWW-West given their small sample sizes relative to West Bay main segment.
 
-```{r wb_bayous_creeks}
+Also, Warren Bayou falls in polygon of West Bay segment so that's why Warren Bayou not showing up in linked micromap. The spatial intersection I do puts the Warren Bayou point into the West Bay segment. Code is included to measure how far the Warren Bayou station is from the Warren Bayou polygon.
+
+```{r wb_stats_intersect_join}
 
 bayous_wb1 <- dplyr::filter(bbl_4, SEGMENT_NA == "Burnt Mill Creek" | SEGMENT_NA == "Crooked Creek" | SEGMENT_NA == "Warren Bayou" | SEGMENT_NA == "Gulf ICWW between Choctawhatchee Bay and St. Andrew Bay" | SEGMENT_NA == "West Bay")
 
