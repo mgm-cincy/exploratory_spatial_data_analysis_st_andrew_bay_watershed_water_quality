@@ -638,6 +638,8 @@ mm_station1 <- dplyr::filter(np_sf1, bay == "Crooked Creek" | bay == "Burnt Mill
 distinct(mm_station1, monitoring_location_id) %>% arrange(., monitoring_location_id) %>% print(n=Inf)
 # returns 21 observations including NA, 3 Burnt Mill stations, 3 Crooked stations, 1 Warren Bayou, 11 BAY-WE-STBAY stations, 1 BAY-WEST-BAY-12, and 1 NWFYI0005
 
+ggplot(mm_station1 |> filter(year >=2020), aes(x=yrmm_factor, y=log(tp))) + geom_point() + facet_wrap(vars(monitoring_location_id))
+
 mapview(mm_station1) + bayous_wb1
 
 odd_coordinates <- dplyr::filter(mm_station1, monitoring_location_id == "BAY-WE-STBAY-3" | monitoring_location_id == "BAY-WE-STBAY-5")
