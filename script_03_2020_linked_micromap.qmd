@@ -630,7 +630,7 @@ Mapvview of mm_stations1 shows monitoring location id BAY-WE-STBAY-5 clearly in 
 
 Note monitoring location id is all upper case so always use that. Monitoring location name is snake-cased so avoid it. Note subtle behavior of filter and filter_out with NAs, <https://dplyr.tidyverse.org/reference/filter.html>.
 
-```{r wb_stats_join_only}
+```{r wb_stats_spatial_join}
 
 mm_station1 <- dplyr::filter(np_sf1, bay == "Crooked Creek" | bay == "Burnt Mill Creek" | bay == "Warren Bayou" | bay == "West Bay")
 # return 1778 observations, of which 1418 observations have sta_nr numeric entry, and 360 have monitoring location id entry
@@ -774,7 +774,7 @@ Spatial intersection ends up omitting Bay-West Bay-3 from April 25, 2024 as that
 
 Also, Warren Bayou falls in polygon of West Bay segment so that's why Warren Bayou not showing up in linked micromap. The spatial intersection I do puts the Warren Bayou point into the West Bay segment. Code is included to measure how far the Warren Bayou station is from the Warren Bayou polygon.
 
-```{r wb_stats_intersect_join}
+```{r wb_stats_spatial_interseciton}
 
 bayous_wb1 <- dplyr::filter(bbl_4, SEGMENT_NA == "Burnt Mill Creek" | SEGMENT_NA == "Crooked Creek" | SEGMENT_NA == "Warren Bayou" | SEGMENT_NA == "Gulf ICWW between Choctawhatchee Bay and St. Andrew Bay" | SEGMENT_NA == "West Bay")
 
