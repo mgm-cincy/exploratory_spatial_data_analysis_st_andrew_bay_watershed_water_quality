@@ -622,7 +622,7 @@ print.file = "output_micromap/mmplot_chla2020.jpeg", res=100)
 
 ```
 
-## West Bay Bayous and Creeks
+## West Bay, Bayous, and Creeks
 
 The two code chunks below illustrate 2 ways to format data to make linked micromaps. The first way involves filtering from the points/stations data so it only has points within the polygons of interest. Also, the filtered data need to have variable name, in this case "bay", to match to the polgyon names entered under SEGMENT_NA. A five-number summary is made of the WQ data grouped by bay. Next, the appropriate polygons are selected and, if needed, values under SEGMENT_NA are replaced to match the bay entries of the points. The polygon data and five-number summary data are merged using the shared variable names of SEGMENT_NA and bay.
 
@@ -909,6 +909,10 @@ mmplot(map.data=tp_wb2020v3,
                             panel.width=1.75)),
 print.file = "output_micromap/mmplot_tp_wb2020.jpeg", res=100)
 
+```
 
+## North Bay and Bayous
+```{r nb_stats_spatial_join}
 
 ```
+
