@@ -30,6 +30,8 @@ library(micromap)
 
 ## Log
 
+2026-05-24 made West Bay creeks and bayou polygons
+
 2026-04-24 logged chla for linked micromap
 
 2026-04-23 need to work on get numeric codes assigned to sta_nr so can get distinct count of stations with in each polygon for linked micromap
@@ -181,6 +183,8 @@ mapview(np_sf1) + mapview(nnc_1)
 Rose Horn took 2 polygons for Alligator Bayou, which borders the U.S. Coast Guard Station on St. Andrew Bay, and splits them into separate sampling areas. Also, in version the new update reflects the removal of small edge portions of St. Andrew Bay that were along the edges of East Bay and Grand Lagoon. Looks like I should pick-up Upper and Lower Burnt Mill Creek Stations.
 
 Need to see if I have 8 polygon names for:  East Bay, Grand Lagoon, North Bay, St. Andrew Bay, West Bay, Crooked and Burnt Mill Creeks, and Deer Point Lake as I want to use those 6 polygons in linked micromap. Perhaps by using SEGMENT_NA and Major_Seg I can get the polygons I want.
+
+Made bayous_wb1 so has West Bay, Gulf ICWW-West, Crooked Creek, Burnt Mill Creek, and Warren Bayou polygons so that I can intersect those polygons to monitoring locations.
 ```{r bbl_v4}
 
 bbl_4 <- st_read("data_gis/Bays_Bayous_Lakes_V4/Bays_Bayous_Lakes_V4.shp")
@@ -206,6 +210,18 @@ mapview(polygons8)
 
 mapview(np_sf1) + mapview(polygons8)
 
+bayous_nb1 <- dplyr::filter(bbl_4, SEGMENT_NA == "Fannin Bayou" | SEGMENT_NA == "Posten Bayou" | SEGMENT_NA == "Pretty Bayou" | SEGMENT_NA == "Robinson Bayou" | SEGMENT_NA == "Beatty Bayou" | SEGMENT_NA == "Mill Bayou" | SEGMENT_NA == "Goose Bayou")
+
+mapview(bayous_nb1)
+mapview(np_sf1) + mapview(bayous_nb1)
+
+
+mapview(polygons8) + mapview(bayous_nb1,col.regions = "yellow")
+
+bayous_wb1 <- dplyr::filter(bbl_4, SEGMENT_NA == "Burnt Mill Creek" | SEGMENT_NA == "Crooked Creek" | SEGMENT_NA == "Warren Bayou" | SEGMENT_NA == "Gulf ICWW between Choctawhatchee Bay and St. Andrew Bay" | SEGMENT_NA == "West Bay")
+
+mapview(bayous_wb1)
+mapview(np_sf1) + mapview(bayous_wb1)
 ```
 
 

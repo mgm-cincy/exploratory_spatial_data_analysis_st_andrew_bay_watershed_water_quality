@@ -1,0 +1,33 @@
+---
+title: "Override table for stations"
+output: html_notebook
+---
+ 
+ This is code to ensure stations are assigned to the correct segment and major segment from the spatial datasets. The issues with the coordinates of the stations likely are due to poor resolution of the GPS units but the station names reflect what waterbody segment they are intending to monitor for and should be linked as such.
+
+```{r}
+overrides <- tibble::tribble(
+  ~`Monitoring Location Name`, ~SEGMENT_NA, ~Major_Seg,
+
+  "Sandy Creek @ Mouth", "Sandy Creek", "East Bay",
+  "Bay-Watson-Bayou-1", "Watson Bayou", "East Bay",
+  "Bay-Parker-Bayou-1", "Parker Bayou", "East Bay",
+  "Bay-Laird Bayou-3", "Laird Bayou", "East Bay",
+  "300 yards west of ICWW channel marker # 28", "Sandy Creek", "East Bay",
+  "Wetappo Creek", "Wetappo Creek", "East Bay",
+  "St. Joseph Bay 4", "St. Joseph Bay", "St. Joseph Bay",
+  "NWFMWD_297611", "Alligator Bayou", "Alligator Bayou",
+  "Bay-Posten-Bayou-1", "Posten Bayou", "St. Andrew Bay",
+  "Bay-Robinson-Bayou-1", "Robinson Bayou", "North Bay",
+  "Bay-Goose-Bayou-1", "Goose Bayou", "North Bay",
+  "Bay-Upper-Goose-Bayou-1", "Upper Goose Bayou", "North Bay",
+  "Bay-Fannin-Bayou-1", "Fannin Bayou", "North Bay",
+  "Bay-Warren-Bayou-1", "Waren Bayou", "West Bay",
+  "Bay-Burnt Mill Lower-1", "Burnt Mill Lower", "West Bay"
+)
+
+
+
+
+
+```

@@ -1,5 +1,5 @@
 ---
-title: "Linked Micromap 2020"
+title: "Linked Micromap 2023"
 author: "Mike McManus"
 format: html
 editor: visual
@@ -27,12 +27,9 @@ library(plotly)
 library(webshot) # save mapview object
 library(nngeo)
 library(micromap)
-library(tidyverse)
 ```
 
 ## Log
-
-2026-05-30 calculated distances from Warren Bayou point/station to polygons in bayous_wb1
 
 2026-05-06 renamed with YYYY in script name
 
@@ -90,10 +87,6 @@ np_ds1 <- filter(np_ds1, (!is.na(long)))
 # drops to 10,369 obs and summary(mp_ds2$lat) returns no NA
 
 unique(np_ds1$organization_name)
-distinct(np_ds1,bay) %>%  dplyr::arrange(., bay) %>% print(n=Inf)
-# 35 distinct bay entries
-distinct(np_ds1, monitoring_location_id) %>%  dplyr::arrange(., ) %>% print(n=Inf)
-# 130 distinct monitoring location id entries
 
 z1 <- filter(np_ds1, is.na(organization_name))
 # return 7,162 obs
@@ -169,8 +162,6 @@ bbl_4 <- st_read("data_gis/Bays_Bayous_Lakes_V4/Bays_Bayous_Lakes_V4.shp")
 summary(bbl_4)
 mapview(bbl_4)
 
-bbl_4 <- bbl_4 %>% st_transform(3087)
-
 distinct(bbl_4, SEGMENT_NA) %>% dplyr::arrange(., SEGMENT_NA)
 # have 190 distinct SEGMENT_NA, but 191 obs suggesting one polygon is sharing a name
 
@@ -178,6 +169,7 @@ distinct(bbl_4, SEGMENT_NA) %>% dplyr::arrange(., SEGMENT_NA)
 distinct(bbl_4, Major_Seg) %>% dplyr::arrange(., Major_Seg)
 # returns 8 Major_Seg
 
+bbl_4 <- bbl_4 %>% st_transform(3087)
 
 mapview(np_sf1) + mapview(bbl_4)
 # a burnt mill creek station from 2024-04-25 is off polygon
@@ -275,7 +267,7 @@ distinct(mm_station2, year) %>% dplyr::arrange(., year) %>% print(n=Inf)
 distinct(mm_station2, sampling_agency_name)
 
 #2019-2023 covers St. Andrew Baywatch WQ report
-dplyr::filter(mm_station2, year == 2020 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.") %>% 
+dplyr::filter(mm_station2, year == 2023 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.") %>% 
 dplyr::select(., tn, SEGMENT_NA) %>% 
 group_by(., SEGMENT_NA) %>% 
 summarize(., min = fivenum(tn)[1],
@@ -304,20 +296,20 @@ distinct(mm_station3, year)
 # for chl all missing values in 2021 and some in 2023 and 2024
 tm_shape(polygons8) +
   tm_polygons(fill = "white", lwd = 2) +
-  tm_title("Detectable and NA Entries of Total Nitrogen (mg/L)")  + 
+  tm_title("Detectable and NA Entries of Total Phosphorus (mg/L)")  + 
   tm_shape(mm_station3) +
-  tm_symbols(fill = "tn") +
+  tm_symbols(fill = "tp") +
   tm_facets(by = "year")
 ```
 
 ## Statistics for Linked Micromaps
 
-Get 5-number summary statistics to use in making boxplot for linked micromaps. Also, getting stats on log-transformed data.
+Get 5-number summary statistics to use in making boxplot for linked micromaps. Also, getting stats on log-transformed data. In 20221, very few NA's observed.
 
 ```{r stats_micromap}
 # remove geometry from summary stats
-chla_2020 <- st_set_geometry(mm_station2, NULL) %>% 
-dplyr::filter(., year == 2020 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.") %>% 
+chla_2023 <- st_set_geometry(mm_station2, NULL) %>% 
+dplyr::filter(., year == 2023 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.") %>% 
 dplyr::select(., chl, SEGMENT_NA) %>% 
 group_by(., SEGMENT_NA) %>% 
 summarize(., chla_min = fivenum(chl)[1],
@@ -332,11 +324,12 @@ summarize(., chla_min = fivenum(chl)[1],
               chla_lmax = log(fivenum(chl)[5]),
               chla_count = dplyr::n(),
               chla_mean = mean(chl, na.rm = TRUE),
-              chla_na_count = sum(is.na(chl))) %>% 
+              chla_na_count = sum(is.na(chl)),
+              chla_prop_na = (chla_na_count/chla_count)) %>% 
 print(n = Inf)
 
-tn_2020 <- st_set_geometry(mm_station2, NULL) %>% 
-  dplyr::filter(., year == 2020 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.") %>% 
+tn_2023 <- st_set_geometry(mm_station2, NULL) %>% 
+  dplyr::filter(., year == 2023 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.") %>% 
   dplyr::select(., tn, SEGMENT_NA) %>% 
   group_by(., SEGMENT_NA) %>% 
   summarize(., tn_min = fivenum(tn)[1],
@@ -354,8 +347,8 @@ tn_2020 <- st_set_geometry(mm_station2, NULL) %>%
             tn_na_count = sum(is.na(tn))) %>% 
   print(n = Inf)
 
-tp_2020 <- st_set_geometry(mm_station2, NULL) %>% 
-  dplyr::filter(., year == 2020 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.") %>% 
+tp_2023 <- st_set_geometry(mm_station2, NULL) %>% 
+  dplyr::filter(., year == 2023 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.") %>% 
   dplyr::select(., tp, SEGMENT_NA) %>% 
   group_by(., SEGMENT_NA) %>% 
   summarize(., tp_min = fivenum(tp)[1],
@@ -388,24 +381,24 @@ names(polygons8)
 polygons6 <- filter(polygons8, SEGMENT_NA != "Crooked Creek" & SEGMENT_NA != "Burnt Mill Creek")
 
 #chla
-chla_2020v1 <- filter(chla_2020, SEGMENT_NA != "Crooked Creek")
-names(chla_2020v1)
+chla_2023v1 <- filter(chla_2023, SEGMENT_NA != "Crooked Creek" & SEGMENT_NA != "Burnt Mill Creek")
+names(chla_2023v1)
 
 # merge polygon to chla stats
 # list sf object first, then dataframe of stats to create polygons with stats
-chla_2020v2 <- merge(polygons6, chla_2020v1, by = "SEGMENT_NA" )
-summary(chla_2020v2)
+chla_2023v2 <- merge(polygons6, chla_2023v1, by = "SEGMENT_NA" )
+summary(chla_2023v2)
 # note that geometry is polygon
 
 # tn
-tn_2020v1 <- filter(tn_2020, SEGMENT_NA != "Crooked Creek")
+tn_2023v1 <- filter(tn_2023, SEGMENT_NA != "Crooked Creek" & SEGMENT_NA != "Burnt Mill Creek")
 
-chlatn_2020v2 <- merge(chla_2020v2, tn_2020v1, by = "SEGMENT_NA" )
+chlatn_2023v2 <- merge(chla_2023v2, tn_2023v1, by = "SEGMENT_NA" )
 
 # tp
-tp_2020v1 <- filter(tp_2020, SEGMENT_NA != "Crooked Creek")
+tp_2023v1 <- filter(tp_2023, SEGMENT_NA != "Crooked Creek" & SEGMENT_NA != "Burnt Mill Creek")
 
-nutr_2020 <- merge(chlatn_2020v2, tp_2020v1, by = "SEGMENT_NA" )
+nutr_2023 <- merge(chlatn_2023v2, tp_2023v1, by = "SEGMENT_NA" )
 
 ```
 
@@ -413,12 +406,12 @@ nutr_2020 <- merge(chlatn_2020v2, tp_2020v1, by = "SEGMENT_NA" )
 
 Make draft linked micromaps to get code working, and note any statistical and spatial patterns.
 
-For 2020 data, tp, tn, and chla all have NA entries.
+For 2023 data, tp pattern consistent with Grand Lagoon highest median concentration, but have very large outlier for Deer Point Lake that even exceeds Grand Lagoon. In 2023 tn very steady decreasing median concentrations from: Grand Lagoon,  East Bay, , West Bay, Deer Point Lake, North Bay to St. Andrew Bay. Chlorophyll a has a range of concentrations in 2023.
 
 ```{r draft_linked_micromap}
 #Draft plot
 
-mmplot(map.data=nutr_2020,
+mmplot(map.data=nutr_2023,
        panel.types=c('dot_legend', 'labels', 'box_summary', 'map'),
        panel.data=list(NA,
                        'SEGMENT_NA',
@@ -428,7 +421,7 @@ mmplot(map.data=nutr_2020,
        ord.by='tp_lmed', rev.ord=TRUE,
        median.row=FALSE)
 
-mmplot(map.data=nutr_2020,
+mmplot(map.data=nutr_2023,
        panel.types=c('dot_legend', 'labels', 'box_summary', 'map'),
        panel.data=list(NA,
                        'SEGMENT_NA',
@@ -439,7 +432,7 @@ mmplot(map.data=nutr_2020,
        median.row=FALSE)
 
 
-mmplot(map.data=nutr_2020,
+mmplot(map.data=nutr_2023,
        panel.types=c('dot_legend', 'labels', 'box_summary', 'map'),
        panel.data=list(NA,
                        'SEGMENT_NA',
@@ -455,11 +448,11 @@ mmplot(map.data=nutr_2020,
 
 Use more detailed coding arguments to make better looking linked micromaps.
 
-Refined TP See if tp scale from 2019 also works for 2020, and 2019 scale works.
+Refined TP sticking with 2019 scale work, but may need to change for smaller 2022 range.
 
 ```{r refine_micromap_tp}
 # TP Refined Plot
-mmplot(map.data=nutr_2020,
+mmplot(map.data=nutr_2023,
        panel.types=c('dot_legend', 'labels', 'labels', 'labels', 'box_summary', 'map'),
        panel.data=list(NA,
                        'SEGMENT_NA',
@@ -492,7 +485,7 @@ mmplot(map.data=nutr_2020,
                            align='right',
                            text.size=.8),
                       
-                      list(5, header='2020 Detectable Total Phoshporous',
+                      list(5, header='2023 Detectable Total Phoshporous',
                            graph.bgcolor='lightgray',
                            xaxis.ticks=c(-6.0, -5.0, -4.0, -3.0, -2.0),
                            xaxis.labels=c(-6,-5, -4, -3, -2),
@@ -504,17 +497,17 @@ mmplot(map.data=nutr_2020,
                       list(6, header='Light Gray Means Highlighted Above',
                            inactive.border.color=gray(.7), inactive.border.size=2,
                             panel.width=1.75)),
-print.file = "output_micromap/mmplot_tp2020.jpeg", res=100)
+print.file = "output_micromap/mmplot_tp2023.jpeg", res=100)
 
 
 
 ```
 
-Refined TN Looks like 2019 tn scale should work for 2020 tn data.
+Refined TN Looks keeping 2019 scale, which is post-Michael, so can compare different years.
 
 ```{r refined_micromap_tn}
 # TN Refined Plot
-mmplot(map.data=nutr_2020,
+mmplot(map.data=nutr_2023,
        panel.types=c('dot_legend', 'labels', 'labels', 'labels', 'box_summary', 'map'),
        panel.data=list(NA,
                        'SEGMENT_NA',
@@ -547,7 +540,7 @@ mmplot(map.data=nutr_2020,
                            align='right',
                            text.size=.8),
                       
-                      list(5, header='2020 Detectable Total Nitrogen',
+                      list(5, header='2023 Detectable Total Nitrogen',
                            graph.bgcolor='lightgray',
                            xaxis.ticks=c(-2.5, -2.0, -1.5, -1.0, -0.5, -0.0),
                            xaxis.labels=c(-2.5, -2.0, -1.5, -1.0, -0.5, -0.0),
@@ -561,16 +554,16 @@ mmplot(map.data=nutr_2020,
                             panel.width=1.75)),
 # to run so just appears in Plots pane have 3 parentheses after the last panel.width
 # to run and save the image delete 3rd parenthesis and insert comma       
-print.file = "output_micromap/mmplot_tn2020.jpeg", res=100)
+print.file = "output_micromap/mmplot_tn2023.jpeg", res=100)
 
 
 ```
 
-Refined Chlorophyll a Note need to add column "\# of NA Samples". Try 2019 scale first, but might need to drop it down as max log of chla in 2020 is near 3.0
+Refined Chlorophyll a Note need to add column "\# of NA Samples". Keeping 2019 scale so can compare linked micromaps among different years
 
 ```{r refined_micromap_chla}
 # Chla Refined Plot
-mmplot(map.data=nutr_2020,
+mmplot(map.data=nutr_2023,
        panel.types=c('dot_legend', 'labels', 'labels', 'labels', 'box_summary', 'map'),
        panel.data=list(NA,
                        'SEGMENT_NA',
@@ -603,7 +596,7 @@ mmplot(map.data=nutr_2020,
                            align='right',
                            text.size=.8),
                       
-                      list(5, header='2020 Detectable\n Chlorophyll a',
+                      list(5, header='2023 Detectable\n Chlorophyll a',
                            graph.bgcolor='lightgray',
                            xaxis.ticks=c(0,1.5,3,4.5),
                            xaxis.labels=c(0,1.5,3,4.5),
@@ -617,302 +610,7 @@ mmplot(map.data=nutr_2020,
                             panel.width=1.75)),
 # to run so just appears in Plots pane have 3 parentheses after the last panel.width
 # to run and save the image replace 3rd parenthesis with comma       
-print.file = "output_micromap/mmplot_chla2020.jpeg", res=100)
+print.file = "output_micromap/mmplot_chla2023.jpeg", res=100)
 
 
 ```
-
-## West Bay, Bayous, and Creeks
-
-The two code chunks below illustrate 2 ways to format data to make linked micromaps. The first way involves filtering from the points/stations data so it only has points within the polygons of interest. Also, the filtered data need to have variable name, in this case "bay", to match to the polgyon names entered under SEGMENT_NA. A five-number summary is made of the WQ data grouped by bay. Next, the appropriate polygons are selected and, if needed, values under SEGMENT_NA are replaced to match the bay entries of the points. The polygon data and five-number summary data are merged using the shared variable names of SEGMENT_NA and bay.
-
-Mapvview of mm_stations1 shows monitoring location id BAY-WE-STBAY-5 clearly in SAB, but its bay is labeled as West Bay. Since December 1, 2018, BAY-WE-STBAY-5 has had either the wrong coordinate entered or the wrong bay or both, and it has 28 entries.
-
-Note monitoring location id is all upper case so always use that. Monitoring location name is snake-cased so avoid it. Note subtle behavior of filter and filter_out with NAs, <https://dplyr.tidyverse.org/reference/filter.html>.
-
-```{r wb_stats_spatial_join}
-
-mm_station1 <- dplyr::filter(np_sf1, bay == "Crooked Creek" | bay == "Burnt Mill Creek" | bay == "Warren Bayou" | bay == "West Bay")
-# return 1778 observations, of which 1418 observations have sta_nr numeric entry, and 360 have monitoring location id entry
-
-distinct(mm_station1, monitoring_location_id) %>% arrange(., monitoring_location_id) %>% print(n=Inf)
-# returns 21 observations including NA, 3 Burnt Mill stations, 3 Crooked stations, 1 Warren Bayou, 11 BAY-WE-STBAY stations, 1 BAY-WEST-BAY-12, and 1 NWFYI0005
-
-ggplot(mm_station1 |> filter(year >=2020), aes(x=yrmm_factor, y=log(tp))) + geom_point() + facet_wrap(vars(monitoring_location_id))
-
-mapview(mm_station1) + bayous_wb1
-
-odd_coordinates <- dplyr::filter(mm_station1, monitoring_location_id == "BAY-WE-STBAY-3" | monitoring_location_id == "BAY-WE-STBAY-5")
-
-mapview(odd_coordinates) + bayous_wb1
-
-mm_station1 <- dplyr::filter_out(mm_station1, monitoring_location_id == "BAY-WE-STBAY-5")
-# believe this filtering out removes all 28 obs for monitoring location BAY-WE-STBAY-5 so now have 1750 obs
-
-distinct(mm_station1, monitoring_location_id) %>% arrange(., monitoring_location_id) %>% print(n=Inf)
-# now returns to 20 obs and no BAY-WE-STBAY-5 observation
-
-
-mm_station1 %>% 
-  group_by(bay) %>% 
-  summarize(., count = dplyr::n())
-# want to add a bay entry of "West Bay ICWW" for BAY-WEST BAY-12
-
-
-mm_station2 <- mm_station1 |>
-  mutate(
-    bay = case_when(monitoring_location_id == "BAY-WEST-BAY-12" ~ "West Bay ICWW",
-                       TRUE ~ bay
-                       )
-    )
-
-mm_station2 %>% 
-  group_by(bay) %>% 
-  summarize(., count = dplyr::n())
-
-bayous_wb1 <- dplyr::filter(bbl_4, SEGMENT_NA == "Burnt Mill Creek" | SEGMENT_NA == "Crooked Creek" | SEGMENT_NA == "Warren Bayou" | SEGMENT_NA == "Gulf ICWW between Choctawhatchee Bay and St. Andrew Bay" | SEGMENT_NA == "West Bay")
-
-
-# do replace values so SEGMENT_NA will match to bay in points data frame
-bayous_wb2 <- bayous_wb1 |> 
-  mutate(
-  SEGMENT_NA = SEGMENT_NA |>
-    replace_values(
-      "Gulf ICWW between Choctawhatchee Bay and St. Andrew Bay" ~ "West Bay ICWW"
-    )
-  )  
-
-# getting 5-number summary from points data
-tp_wb2020 <- st_set_geometry(mm_station2, NULL) %>% 
-  dplyr::filter(., year == 2020 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.") %>% 
-  dplyr::select(., tp, bay) %>% 
-  group_by(., bay) %>% 
-  summarize(., tp_min = fivenum(tp)[1],
-            tp_q1 = fivenum(tp)[2],
-            tp_med = fivenum(tp)[3],
-            tp_q3 = fivenum(tp)[4],
-            tp_max = fivenum(tp)[5],
-            tp_lmin = log(fivenum(tp)[1]),
-            tp_lq1 = log(fivenum(tp)[2]),
-            tp_lmed = log(fivenum(tp)[3]),
-            tp_lq3 = log(fivenum(tp)[4]),
-            tp_lmax = log(fivenum(tp)[5]),
-            tp_count = dplyr::n(),
-            tp_mean = mean(tp, na.rm = TRUE),
-            tp_na_count = sum(is.na(tp))) %>% 
-  print(n = Inf)
-
-
-tp_wb2020v2 <- merge(bayous_wb2, tp_wb2020, by.x = "SEGMENT_NA", by.y = "bay" )
-
-
-mmplot(map.data=tp_wb2020v2,
-       panel.types=c('dot_legend', 'labels', 'box_summary', 'map'),
-       panel.data=list(NA,
-                       'SEGMENT_NA',
-                       list('tp_lmin', 'tp_lq1', 'tp_lmed', 'tp_lq3', 'tp_lmax'),
-                       NA),
-       grouping = 1,
-       ord.by='tp_lmed', rev.ord=TRUE,
-       median.row=FALSE)
-
-
-# TP Refined Plot for West Bay Creeks and Bayous
-mmplot(map.data=tp_wb2020v2,
-       panel.types=c('dot_legend', 'labels', 'labels', 'labels', 'box_summary', 'map'),
-       panel.data=list(NA,
-                       'SEGMENT_NA',
-                       'tp_count',
-                       'tp_na_count',
-                       list('tp_lmin', 'tp_lq1', 'tp_lmed', 'tp_lq3', 'tp_lmax'),
-                       NA),
-       grouping = 2,
-       ord.by='tp_lmed',
-       rev.ord=TRUE,
-       median.row=FALSE,
-       plot.pGrp.spacing=1,
-       
-       plot.height=6, plot.width=9, #for poster use plot.height=6, plot.width=9,
-       colors=brewer.pal(4, "Spectral"), #for journal use plot.height=9, plot.width=6.8
-              
-       panel.att=list(list(1, panel.width=1, point.type=20, point.size=2,
-                           point.border=TRUE), 
-                      
-                      list(2, header='West Bay Segment,\n Creeks & Bayous', panel.width=1.2,#increased panel.width to 1.1 from .8
-                           align='left', text.size=.8),
-                      
-                      list(3, header='Total #\n of Samples',
-                           panel.width=.35,
-                           align='right',
-                           text.size=.8),
-                      
-                      list(4, header='# of NA\n Samples',
-                           panel.width=.4,
-                           align='right',
-                           text.size=.8),
-                      
-                      list(5, header='2020 Detectable Total Phoshporous',
-                           graph.bgcolor='lightgray',
-                           xaxis.ticks=c(-6.0, -5.0, -4.0, -3.0, -2.0),
-                           xaxis.labels=c(-6,-5, -4, -3, -2),
-                           xaxis.labels.size=1.25,
-                           graph.bar.size = 0.5,
-                           #xaxis.labels.angle=90,
-                           add.line=-4.07, add.line.col="black",
-                           xaxis.title='Log(TP, mg/L)', xaxis.title.size=1.25, panel.width=1.75),
-                      
-                      list(6, header='Light Gray Means Highlighted Above',
-                           inactive.border.color=gray(.7), inactive.border.size=2,
-                            panel.width=1.75)),
-print.file = "output_micromap/mmplot_tp_wb2020v2.jpeg", res=100)
-
-
-
-```
-
-The second way to format the data assumes the points and polgyon datasets are in exact alignment. That is every point/station is in its appropriate polygon. A spatial intersection is done of the points/stations to the polygons so that now all the polygon attributes, such as SEGMENT_NA, are assigned to the points. After this spatial intersection is done, then a five-number summary of the WQ data can be made and the linked micromaps created.
-
-Spatial intersection ends up omitting Bay-West Bay-3 from April 25, 2024 as that monitoring location does not intersect polygons for some reason. Need to think of summary statistics for Burnt Mill Creek, Crooked Creek and GICWW-West given their small sample sizes relative to West Bay main segment.
-
-Also, Warren Bayou falls in polygon of West Bay segment so that's why Warren Bayou not showing up in linked micromap. The spatial intersection I do puts the Warren Bayou point into the West Bay segment. Code is included to measure how far the Warren Bayou station is from the Warren Bayou polygon.
-
-```{r wb_stats_spatial_interseciton}
-
-bayous_wb1 <- dplyr::filter(bbl_4, SEGMENT_NA == "Burnt Mill Creek" | SEGMENT_NA == "Crooked Creek" | SEGMENT_NA == "Warren Bayou" | SEGMENT_NA == "Gulf ICWW between Choctawhatchee Bay and St. Andrew Bay" | SEGMENT_NA == "West Bay")
-
-# mm_station1 <- dplyr::filter(np_sf1, bay != "Lake Powell" & bay != "Powell Creek" & bay != "Lullwater" & bay != "Lake Marin" & bay != "Marin")
-
-
-warren_v1 <- dplyr::filter(mm_station1, bay == "Warren Bayou")
-#returns 162 observations
-mapview(warren_v1)
-summary(warren_v1$tp)
-summary(warren_v1$tn)
-summary(warren_v1$chl)
-
-# pull out only geometry of Warren Bayou station
-warren_v2 <- st_geometry(warren_v1) %>% unique.data.frame(.)
-class(warren_v2)
-
-st_crs(warren_v2) == st_crs(bayous_wb1)
-
-# https://stackoverflow.com/questions/46214479/distance-between-a-set-of-points-and-a-polygon-with-sf-in-r
-st_distance(warren_v2, bayous_wb1)
-# returns 5 distances for each of the 5 polygons in bayous_wb1 and distances are in order of the polygons. Have a 0 m distance for West Bay as the warren_v2 point is in that polygon. The distance to the 3rd polygon, SEGMENT_NA is Warren Bayou, is 7.0 m.
-
-mm_wbstation2 <- st_intersection(mm_station1, bayous_wb1)
-
-
-mapview(mm_wbstation2) + mapview(bayous_wb1, col.regions = "yellow")
-
-names(mm_wbstation2)
-
-mm_wbstation2 %>% 
-  group_by(SEGMENT_NA) %>% 
-  summarize(., count = dplyr::n())
-
-mm_wbstation2 %>% 
-  group_by(SEGMENT_NA, year) %>% 
-  summarize(., count = dplyr::n()) %>% 
-  print(n=Inf)
-
-# uses 2020 data as have samples from all 4 polygons
-
-tp_wb2020 <- st_set_geometry(mm_wbstation2, NULL) %>% 
-  dplyr::filter(., year == 2020 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.") %>% 
-  dplyr::select(., tp, SEGMENT_NA) %>% 
-  group_by(., SEGMENT_NA) %>% 
-  summarize(., tp_min = fivenum(tp)[1],
-            tp_q1 = fivenum(tp)[2],
-            tp_med = fivenum(tp)[3],
-            tp_q3 = fivenum(tp)[4],
-            tp_max = fivenum(tp)[5],
-            tp_lmin = log(fivenum(tp)[1]),
-            tp_lq1 = log(fivenum(tp)[2]),
-            tp_lmed = log(fivenum(tp)[3]),
-            tp_lq3 = log(fivenum(tp)[4]),
-            tp_lmax = log(fivenum(tp)[5]),
-            tp_count = dplyr::n(),
-            tp_mean = mean(tp, na.rm = TRUE),
-            tp_na_count = sum(is.na(tp))) %>% 
-  print(n = Inf)
-
-tp_wb2020v2 <- merge(bayous_wb1, tp_wb2020, by = "SEGMENT_NA" )
-summary(tp_wb2020v2)
-
-tp_wb2020v3 <- tp_wb2020v2 |> 
-  mutate(
-  SEGMENT_NA = SEGMENT_NA |>
-    replace_values(
-      "Gulf ICWW between Choctawhatchee Bay and St. Andrew Bay" ~ "West Bay ICWW"
-    )
-  )  
-    
-
-mmplot(map.data=tp_wb2020v3,
-       panel.types=c('dot_legend', 'labels', 'box_summary', 'map'),
-       panel.data=list(NA,
-                       'SEGMENT_NA',
-                       list('tp_lmin', 'tp_lq1', 'tp_lmed', 'tp_lq3', 'tp_lmax'),
-                       NA),
-       grouping = 1,
-       ord.by='tp_lmed', rev.ord=TRUE,
-       median.row=FALSE)
-
-
-# TP Refined Plot for West Bay Creeks and Bayous
-mmplot(map.data=tp_wb2020v3,
-       panel.types=c('dot_legend', 'labels', 'labels', 'labels', 'box_summary', 'map'),
-       panel.data=list(NA,
-                       'SEGMENT_NA',
-                       'tp_count',
-                       'tp_na_count',
-                       list('tp_lmin', 'tp_lq1', 'tp_lmed', 'tp_lq3', 'tp_lmax'),
-                       NA),
-       grouping = 2,
-       ord.by='tp_lmed',
-       rev.ord=TRUE,
-       median.row=FALSE,
-       plot.pGrp.spacing=1,
-       
-       plot.height=6, plot.width=9, #for poster use plot.height=6, plot.width=9,
-       colors=brewer.pal(4, "Spectral"), #for journal use plot.height=9, plot.width=6.8
-              
-       panel.att=list(list(1, panel.width=1, point.type=20, point.size=2,
-                           point.border=TRUE), 
-                      
-                      list(2, header='West Bay Segment,\n Creeks & Bayous', panel.width=1.2,#increased panel.width to 1.1 from .8
-                           align='left', text.size=.8),
-                      
-                      list(3, header='Total #\n of Samples',
-                           panel.width=.35,
-                           align='right',
-                           text.size=.8),
-                      
-                      list(4, header='# of NA\n Samples',
-                           panel.width=.4,
-                           align='right',
-                           text.size=.8),
-                      
-                      list(5, header='2020 Detectable Total Phoshporous',
-                           graph.bgcolor='lightgray',
-                           xaxis.ticks=c(-6.0, -5.0, -4.0, -3.0, -2.0),
-                           xaxis.labels=c(-6,-5, -4, -3, -2),
-                           xaxis.labels.size=1.25,
-                           graph.bar.size = 0.5,
-                           #xaxis.labels.angle=90,
-                           add.line=-4.07, add.line.col="black",
-                           xaxis.title='Log(TP, mg/L)', xaxis.title.size=1.25, panel.width=1.75),
-                      
-                      list(6, header='Light Gray Means Highlighted Above',
-                           inactive.border.color=gray(.7), inactive.border.size=2,
-                            panel.width=1.75)),
-print.file = "output_micromap/mmplot_tp_wb2020.jpeg", res=100)
-
-```
-
-## North Bay and Bayous
-```{r nb_stats_spatial_join}
-
-```
-
