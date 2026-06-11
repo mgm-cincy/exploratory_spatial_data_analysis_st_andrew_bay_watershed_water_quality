@@ -912,7 +912,7 @@ print.file = "output_micromap/mmplot_tp_wb2020.jpeg", res=100)
 ```
 
 ## North Bay and Bayous
+
 ```{r nb_stats_spatial_join}
 
 ```
-
