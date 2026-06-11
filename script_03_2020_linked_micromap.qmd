@@ -916,3 +916,6 @@ print.file = "output_micromap/mmplot_tp_wb2020.jpeg", res=100)
 ```{r nb_stats_spatial_join}
 
 ```
+
+## Station Issues
+Specific follow-up needed for some stations, such as coordinates that put a station on land, monitoring location ID BAY-WE-STBAY-3 near Burnt Mill Creek. Also, monitoring location ID BAY-WE-STBAY-5 that has a bay assignment of West Bay but coordinates put it in St. Andrew Bay.
