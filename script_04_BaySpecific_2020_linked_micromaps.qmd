@@ -481,7 +481,7 @@ Also, Warren Bayou falls in polygon of West Bay segment so that's why Warren Bay
 ```
 
 ## North Bay and Bayous
-
+Seems looking Upper Goose Bay when I summarize by bay.
 ```{r nb_stats_spatial_join}
 nb_station1 <- dplyr::filter(np_sf1, bay == "Robinson Bayou" | bay == "Goose Bayou" | bay == "Upper Goose Bayou" | bay == "Upper Goose Bayou"| bay == "Fannin Bayou" |bay == "North Bay")
 # return 1148 observations, 
