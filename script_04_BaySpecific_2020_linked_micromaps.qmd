@@ -166,10 +166,12 @@ Need to see if I have 8 polygon names for: East Bay, Grand Lagoon, North Bay, St
 ```{r bbl_v4}
 
 bbl_4 <- st_read("data_gis/Bays_Bayous_Lakes_V4/Bays_Bayous_Lakes_V4.shp")
+
+bbl_4 <- bbl_4 %>% st_transform(3087)
+
 summary(bbl_4)
 mapview(bbl_4)
 
-bbl_4 <- bbl_4 %>% st_transform(3087)
 
 distinct(bbl_4, SEGMENT_NA) %>% dplyr::arrange(., SEGMENT_NA)
 # have 190 distinct SEGMENT_NA, but 191 obs suggesting one polygon is sharing a name
@@ -190,6 +192,7 @@ mapview(np_sf1) + mapview(bbl_4)
 mapview(np_sf1) + mapview(polygons8)
 
 ```
+
 ## West Bay, Bayous, and Creeks
 
 The two code chunks below illustrate 2 ways to format data to make linked micromaps. The first way involves filtering from the points/stations data so it only has points within the polygons of interest. Also, the filtered data need to have variable name, in this case "bay", to match to the polgyon names entered under SEGMENT_NA. A five-number summary is made of the WQ data grouped by bay. Next, the appropriate polygons are selected and, if needed, values under SEGMENT_NA are replaced to match the bay entries of the points. The polygon data and five-number summary data are merged using the shared variable names of SEGMENT_NA and bay.
@@ -338,8 +341,7 @@ print.file = "output_micromap/mmplot_tp_wb2020v2.jpeg", res=100)
 
 ```
 
-I do not recommend this second method as it assumes points and polygons are exactly geograpically matched. Consequently, I have commented out this code chunk.
-The second way to format the data assumes the points and polgyon datasets are in exact alignment. That is every point/station is in its appropriate polygon. A spatial intersection is done of the points/stations to the polygons so that now all the polygon attributes, such as SEGMENT_NA, are assigned to the points. After this spatial intersection is done, then a five-number summary of the WQ data can be made and the linked micromaps created.
+I do not recommend this second method as it assumes points and polygons are exactly geograpically matched. Consequently, I have commented out this code chunk. The second way to format the data assumes the points and polgyon datasets are in exact alignment. That is every point/station is in its appropriate polygon. A spatial intersection is done of the points/stations to the polygons so that now all the polygon attributes, such as SEGMENT_NA, are assigned to the points. After this spatial intersection is done, then a five-number summary of the WQ data can be made and the linked micromaps created.
 
 Spatial intersection ends up omitting Bay-West Bay-3 from April 25, 2024 as that monitoring location does not intersect polygons for some reason. Need to think of summary statistics for Burnt Mill Creek, Crooked Creek and GICWW-West given their small sample sizes relative to West Bay main segment.
 
@@ -481,7 +483,9 @@ Also, Warren Bayou falls in polygon of West Bay segment so that's why Warren Bay
 ```
 
 ## North Bay and Bayous
-Seems looking Upper Goose Bay when I summarize by bay.
+
+Seems looking Upper Goose Bay when I summarize by bay, and that's because Goose Bay station and Upper Goose Bay station are grouped together under bay as Goose Bay. From polygons, I need to select all the North Bay bayous to show how many there are and to shwo which ones have been sampled and not sampled.
+
 ```{r nb_stats_spatial_join}
 nb_station1 <- dplyr::filter(np_sf1, bay == "Robinson Bayou" | bay == "Goose Bayou" | bay == "Upper Goose Bayou" | bay == "Upper Goose Bayou"| bay == "Fannin Bayou" |bay == "North Bay")
 # return 1148 observations, 
@@ -490,6 +494,8 @@ distinct(nb_station1, monitoring_location_id) %>% arrange(., monitoring_location
 # returns 12 observations including 1 NA, 1 Fannin Bayou,  1 Goose Bayou station, 4 North Bay stations, 1 Robinson Bayou, 1 Upper Goose Bayou station, and 3 FDEP Stations, G3TLHR0021, G3TLHR0031, and G3TLHR0055
 
 ggplot(nb_station1 |> filter(year >=2020), aes(x=yrmm_factor, y=log(tp))) + geom_point() + facet_wrap(vars(monitoring_location_id))
+
+ggplot(nb_station1 |> filter(year >=2020), aes(y=bay, x=log(tp))) + geom_boxplot() + facet_wrap(vars(yrmm_factor))
 
 mapview(nb_station1) + bbl_4
 
@@ -505,11 +511,9 @@ mapview(nb_station1) + bbl_4
 distinct(nb_station1, monitoring_location_id) %>% arrange(., monitoring_location_id) %>% print(n=Inf)
 # still returns 12 obs
 
-
 nb_station1 %>% 
   group_by(bay) %>% 
   summarize(., count = dplyr::n())
-# want to add a bay entry of "West Bay ICWW" for BAY-WEST BAY-12
 
 nb_station1 %>% 
   dplyr::filter(., year == 2020) %>% 
@@ -517,17 +521,19 @@ nb_station1 %>%
   summarize(., count = dplyr::n())
 
 
-bayous_wb1 <- dplyr::filter(bbl_4, SEGMENT_NA == "Burnt Mill Creek" | SEGMENT_NA == "Crooked Creek" | SEGMENT_NA == "Warren Bayou" | SEGMENT_NA == "Gulf ICWW between Choctawhatchee Bay and St. Andrew Bay" | SEGMENT_NA == "West Bay")
+bayous_nb1 <- dplyr::filter(bbl_4, SEGMENT_NA == "Fannin Bayou" | SEGMENT_NA == "Goose Bayou" | SEGMENT_NA == "Robinson Bayou" | SEGMENT_NA == "North Bay")
 
 
 # do replace values so SEGMENT_NA will match to bay in points data frame
-bayous_wb2 <- bayous_wb1 |> 
-  mutate(
-  SEGMENT_NA = SEGMENT_NA |>
-    replace_values(
-      "Gulf ICWW between Choctawhatchee Bay and St. Andrew Bay" ~ "West Bay ICWW"
-    )
-  )  
+# bayous_wb2 <- bayous_wb1 |> 
+#   mutate(
+#   SEGMENT_NA = SEGMENT_NA |>
+#     replace_values(
+#       "Gulf ICWW between Choctawhatchee Bay and St. Andrew Bay" ~ "West Bay ICWW"
+#     )
+#   )  
+
+mapview(bayous_nb1)
 
 ```
 
