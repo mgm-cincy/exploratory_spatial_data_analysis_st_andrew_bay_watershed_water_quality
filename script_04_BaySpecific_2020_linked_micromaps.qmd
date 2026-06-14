@@ -189,7 +189,7 @@ mapview(np_sf1) + mapview(bbl_4)
 # 
 # mapview(polygons8)
 
-mapview(np_sf1) + mapview(polygons8)
+# mapview(np_sf1) + mapview(polygons8)
 
 ```
 
@@ -484,8 +484,9 @@ Also, Warren Bayou falls in polygon of West Bay segment so that's why Warren Bay
 
 ## North Bay and Bayous
 
-Seems looking Upper Goose Bay when I summarize by bay, and that's because Goose Bay station and Upper Goose Bay station are grouped together under bay as Goose Bay. From polygons, I need to select all the North Bay bayous to show how many there are and to shwo which ones have been sampled and not sampled.
+Seems like looking Upper Goose Bay when I summarize by bay, and that's because Goose Bay station and Upper Goose Bay station are grouped together under bay as Goose Bay. From polygons, I need to select all the North Bay bayous to show how many there are and to show which ones have been sampled and not sampled.
 
+Very ugly draft linked micromap shows that 1) Upper Goose Bay station stats should be assigned to Upper Goose Bay polygon, and 2) that a dozen bayous in North Bay do not have any samples.
 ```{r nb_stats_spatial_join}
 nb_station1 <- dplyr::filter(np_sf1, bay == "Robinson Bayou" | bay == "Goose Bayou" | bay == "Upper Goose Bayou" | bay == "Upper Goose Bayou"| bay == "Fannin Bayou" |bay == "North Bay")
 # return 1148 observations, 
@@ -520,7 +521,25 @@ nb_station1 %>%
   group_by(bay) %>% 
   summarize(., count = dplyr::n())
 
+nb_station1 %>% 
+  dplyr::filter(., year >= 2020) %>% 
+  group_by(year) %>% 
+  summarize(., count = dplyr::n())
 
+# this creates an Upper Goose Bayou so stats can be assigned to that station
+nb_station2 <- nb_station1 |>
+  mutate(
+    bay = case_when(monitoring_location_id == "BAY-UPPER-GOOSE-BAYOU-1" ~ "Upper Goose Bayou",
+                       TRUE ~ bay
+                       )
+    )
+
+nb_station2 %>% 
+  dplyr::filter(., year == 2020) %>% 
+  group_by(bay) %>% 
+  summarize(., count = dplyr::n())
+
+# filter all North Bay polygons
 bayous_nb1 <- dplyr::filter(bbl_4, SEGMENT_NA == "Fannin Bayou" | SEGMENT_NA == "Goose Bayou" | SEGMENT_NA == "Robinson Bayou" | SEGMENT_NA == "North Bay" | SEGMENT_NA == "Mud Bayou" | SEGMENT_NA == "Alligator Bayou_GeneratingPlant" | SEGMENT_NA == "Newman Bayou" | SEGMENT_NA == "Sheephead Bayou" | SEGMENT_NA == "Gainer Bayou" | SEGMENT_NA == "Hodges Bayou" |  SEGMENT_NA == "Mill Bayou" | SEGMENT_NA == "Beatty Bayou" | SEGMENT_NA == "Anderson Bayou" | SEGMENT_NA == "Upper Goose Bayou" | SEGMENT_NA == "Lynn Haven Bayou")
 
 mapview(bayous_nb1)
@@ -536,8 +555,53 @@ mapview(nb_station1) + mapview(bayous_nb1)
 #     )
 #   )  
 
+# getting 5-number summary from points data
+tp_nb2020 <- st_set_geometry(nb_station2, NULL) %>% 
+  dplyr::filter(., year == 2020 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.") %>% 
+  dplyr::select(., tp, bay) %>% 
+  group_by(., bay) %>% 
+  summarize(., tp_min = fivenum(tp)[1],
+            tp_q1 = fivenum(tp)[2],
+            tp_med = fivenum(tp)[3],
+            tp_q3 = fivenum(tp)[4],
+            tp_max = fivenum(tp)[5],
+            tp_lmin = log(fivenum(tp)[1]),
+            tp_lq1 = log(fivenum(tp)[2]),
+            tp_lmed = log(fivenum(tp)[3]),
+            tp_lq3 = log(fivenum(tp)[4]),
+            tp_lmax = log(fivenum(tp)[5]),
+            tp_count = dplyr::n(),
+            tp_mean = mean(tp, na.rm = TRUE),
+            tp_na_count = sum(is.na(tp))) %>% 
+  print(n = Inf)
 
+# use left_join as have a many polygons (n=16) to few stats (n=5 obs) and want to keep all the polygons whether polygons have stats or not
+tp_nb2020v2 <- left_join(bayous_nb1, tp_nb2020, by = join_by(SEGMENT_NA == bay), keep = TRUE)
 
+# use right_join so cut down polygons to n=5 to match stats
+tp_nb2020v3 <- right_join(bayous_nb1, tp_nb2020, by = join_by(SEGMENT_NA == bay), keep = TRUE)
+
+# using tp_nb2020v2 shows how many bayous do not have samples
+mmplot(map.data=tp_nb2020v2,
+       panel.types=c('dot_legend', 'labels', 'box_summary', 'map'),
+       panel.data=list(NA,
+                       'SEGMENT_NA',
+                       list('tp_lmin', 'tp_lq1', 'tp_lmed', 'tp_lq3', 'tp_lmax'),
+                       NA),
+       grouping = 5,
+       ord.by='tp_lmed', rev.ord=TRUE,
+       median.row=FALSE)
+
+# using tp_nb2020v3 shows only polygons with stats
+mmplot(map.data=tp_nb2020v3,
+       panel.types=c('dot_legend', 'labels', 'box_summary', 'map'),
+       panel.data=list(NA,
+                       'SEGMENT_NA',
+                       list('tp_lmin', 'tp_lq1', 'tp_lmed', 'tp_lq3', 'tp_lmax'),
+                       NA),
+       grouping = 1,
+       ord.by='tp_lmed', rev.ord=TRUE,
+       median.row=FALSE)
 ```
 
 ## Station Issues
