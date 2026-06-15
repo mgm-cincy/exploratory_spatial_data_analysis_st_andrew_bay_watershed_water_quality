@@ -201,6 +201,8 @@ Mapvview of mm_stations1 shows monitoring location id BAY-WE-STBAY-5 clearly in 
 
 Note monitoring location id is all upper case so always use that. Monitoring location name is snake-cased so avoid it. Note subtle behavior of filter and filter_out with NAs, <https://dplyr.tidyverse.org/reference/filter.html>.
 
+This West Bay linked micromap omits Harrison Bayou, Basin Bayou, Botheration Bayou, and Doyle Bayou. See North Bay linked micromap for an example when all bayous are included.
+
 ```{r wb_stats_spatial_join}
 
 mm_station1 <- dplyr::filter(np_sf1, bay == "Crooked Creek" | bay == "Burnt Mill Creek" | bay == "Warren Bayou" | bay == "West Bay")
@@ -484,9 +486,11 @@ Also, Warren Bayou falls in polygon of West Bay segment so that's why Warren Bay
 
 ## North Bay and Bayous
 
-Seems like looking Upper Goose Bay when I summarize by bay, and that's because Goose Bay station and Upper Goose Bay station are grouped together under bay as Goose Bay. From polygons, I need to select all the North Bay bayous to show how many there are and to show which ones have been sampled and not sampled.
+Seems like losing Upper Goose Bay when I summarize by bay, and that's because Goose Bay station and Upper Goose Bay station are grouped together under bay as Goose Bay polygon. From polygons, I need to select all the North Bay bayous to show how many there are and to show which ones have been sampled (n=5) and not sampled (n=11).
 
-Very ugly draft linked micromap shows that 1) Upper Goose Bay station stats should be assigned to Upper Goose Bay polygon, and 2) that a dozen bayous in North Bay do not have any samples.
+Very ugly draft linked micromap shows that 1) Upper Goose Bay station stats should be assigned to Upper Goose Bay polygon, and 2) that a 11 bayous in North Bay do not have any samples.
+
+If used FDEP data would pick-up a lot more stations in bayous upstream of Bailey Bridge and downstream of dam/bridge.
 
 ```{r nb_stats_spatial_join}
 nb_station1 <- dplyr::filter(np_sf1, bay == "Robinson Bayou" | bay == "Goose Bayou" | bay == "Upper Goose Bayou" | bay == "Upper Goose Bayou"| bay == "Fannin Bayou" |bay == "North Bay")
@@ -657,7 +661,67 @@ print.file = "output_micromap/mmplot_tp_nb2020v2.jpeg", res=100)
 
 ```
 
-## Station Issues
+
+## Deer Point Lake and Creeks
+
+Filtering by Deer Point Lake picks up St. Andrew Bay Resource Management Association stations, NWFWMD/FDEP probabilistic stations (including a Lake Martin station), and FDEP Northwest Regional Office HAB station. The probabilistic stations are from 2011, 2013-2018.
+
+In 2020, St. Andrew Bay Resource Management Association sampled Deer Point Lake in March-September, November, and December, with only 2 stations sampled in August so 26 observations. As have a single polygon, Deer Point Lake, making a linked micromap is not appropriate. Will just make 5-number summary stats of TP by monitoring location id to see if any spatial pattern. Station 1 is furthest downstream, closest to dam, and station 3 is furthest upstream just above where Bayou George enters lake.
+```{r dp_stats_spatial_join}
+
+dp_station1 <- dplyr::filter(np_sf1, bay == "Deer Point Lake")
+# return 383 observations, 
+
+distinct(dp_station1, monitoring_location_id) %>% arrange(., monitoring_location_id) %>% print(n=Inf)
+# returns 20 observations including 1 NA, 15 NWFWMD/FDEP probabilistic stations,  3 SAB Baywatch Deer Point stations, and 1 NWFWMD HAB station
+
+ggplot(dp_station1 |> filter(year >=2020), aes(x=yrmm_factor, y=log(tp))) + geom_point() + facet_wrap(vars(monitoring_location_id))
+
+ggplot(dp_station1 |> filter(year >=2020), aes(y=bay, x=log(tp))) + geom_boxplot() + facet_wrap(vars(yrmm_factor))
+
+ggplot(dp_station1 |> filter(monitoring_location_id != 57719), aes(y=sampling_agency_name, x=log(tp))) + geom_boxplot()
+
+mapview(dp_station1, col.regions = "yellow") + bbl_4
+
+odd_coordinates <- dplyr::filter(dp_station1, monitoring_location_id == "57719")
+
+# Lake Martin station
+mapview(odd_coordinates)
+
+dp_station2 <- filter(dp_station1, sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.")
+# 148 obs
+
+ggplot(dp_station2 |> filter(year >=2020), aes(y=monitoring_location_id, x=log(tp))) + geom_boxplot()
+
+mapview(dp_station2, col.regions = "yellow") + bbl_4
+
+ggplot(dp_station2 |> filter(year ==2020), aes(y=monitoring_location_id, x=log(tp))) + geom_boxplot()
+
+# getting 5-number summary from points data
+tp_dp2020 <- st_set_geometry(dp_station1, NULL) %>% 
+  dplyr::filter(., year == 2020 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.") %>% 
+  dplyr::select(., tp, monitoring_location_id) %>% 
+  group_by(., monitoring_location_id) %>% 
+  summarize(., tp_min = fivenum(tp)[1],
+            tp_q1 = fivenum(tp)[2],
+            tp_med = fivenum(tp)[3],
+            tp_q3 = fivenum(tp)[4],
+            tp_max = fivenum(tp)[5],
+            tp_lmin = log(fivenum(tp)[1]),
+            tp_lq1 = log(fivenum(tp)[2]),
+            tp_lmed = log(fivenum(tp)[3]),
+            tp_lq3 = log(fivenum(tp)[4]),
+            tp_lmax = log(fivenum(tp)[5]),
+            tp_count = dplyr::n(),
+            tp_mean = mean(tp, na.rm = TRUE),
+            tp_na_count = sum(is.na(tp))) %>% 
+  print(n = Inf)
+
+```
+
+
+
+## Station and Polygon Issues
 
 Specific follow-up needed for some stations, such as coordinates that put a station on land, monitoring location ID BAY-WE-STBAY-3 near Burnt Mill Creek. Also, monitoring location ID BAY-WE-STBAY-5 that has a bay assignment of West Bay but coordinates put it in St. Andrew Bay.
 
