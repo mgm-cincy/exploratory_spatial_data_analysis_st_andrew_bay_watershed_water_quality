@@ -487,6 +487,7 @@ Also, Warren Bayou falls in polygon of West Bay segment so that's why Warren Bay
 Seems like looking Upper Goose Bay when I summarize by bay, and that's because Goose Bay station and Upper Goose Bay station are grouped together under bay as Goose Bay. From polygons, I need to select all the North Bay bayous to show how many there are and to show which ones have been sampled and not sampled.
 
 Very ugly draft linked micromap shows that 1) Upper Goose Bay station stats should be assigned to Upper Goose Bay polygon, and 2) that a dozen bayous in North Bay do not have any samples.
+
 ```{r nb_stats_spatial_join}
 nb_station1 <- dplyr::filter(np_sf1, bay == "Robinson Bayou" | bay == "Goose Bayou" | bay == "Upper Goose Bayou" | bay == "Upper Goose Bayou"| bay == "Fannin Bayou" |bay == "North Bay")
 # return 1148 observations, 
@@ -581,7 +582,7 @@ tp_nb2020v2 <- left_join(bayous_nb1, tp_nb2020, by = join_by(SEGMENT_NA == bay),
 # use right_join so cut down polygons to n=5 to match stats
 tp_nb2020v3 <- right_join(bayous_nb1, tp_nb2020, by = join_by(SEGMENT_NA == bay), keep = TRUE)
 
-# using tp_nb2020v2 shows how many bayous do not have samples
+# using tp_nb2020v2 shows how 11 bayous that do not have samples
 mmplot(map.data=tp_nb2020v2,
        panel.types=c('dot_legend', 'labels', 'box_summary', 'map'),
        panel.data=list(NA,
@@ -592,16 +593,68 @@ mmplot(map.data=tp_nb2020v2,
        ord.by='tp_lmed', rev.ord=TRUE,
        median.row=FALSE)
 
-# using tp_nb2020v3 shows only polygons with stats
+# using tp_nb2020v3 shows only the 5 polygons with stats
 mmplot(map.data=tp_nb2020v3,
        panel.types=c('dot_legend', 'labels', 'box_summary', 'map'),
        panel.data=list(NA,
                        'SEGMENT_NA',
                        list('tp_lmin', 'tp_lq1', 'tp_lmed', 'tp_lq3', 'tp_lmax'),
                        NA),
-       grouping = 1,
+       grouping = 4,
        ord.by='tp_lmed', rev.ord=TRUE,
        median.row=FALSE)
+
+
+# TP Refined Plot for North Bay and Bayous
+mmplot(map.data=tp_nb2020v2,
+       panel.types=c('dot_legend', 'labels', 'labels', 'labels', 'box_summary', 'map'),
+       panel.data=list(NA,
+                       'SEGMENT_NA',
+                       'tp_count',
+                       'tp_na_count',
+                       list('tp_lmin', 'tp_lq1', 'tp_lmed', 'tp_lq3', 'tp_lmax'),
+                       NA),
+       grouping = 3,
+       ord.by='tp_lmed',
+       rev.ord=TRUE,
+       median.row=FALSE,
+       plot.pGrp.spacing=1,
+       
+       plot.height=6, plot.width=9, #for poster use plot.height=6, plot.width=9,
+       colors=brewer.pal(4, "Spectral"), #for journal use plot.height=9, plot.width=6.8
+              
+       panel.att=list(list(1, panel.width=1, point.type=20, point.size=2,
+                           point.border=TRUE), 
+                      
+                      list(2, header='North Bay Segment,\n & Bayous', panel.width=1.2,#increased panel.width to 1.1 from .8
+                           align='left', text.size=.8),
+                      
+                      list(3, header='Total #\n of Samples',
+                           panel.width=.35,
+                           align='right',
+                           text.size=.8),
+                      
+                      list(4, header='# of NA\n Samples',
+                           panel.width=.4,
+                           align='right',
+                           text.size=.8),
+                      
+                      list(5, header='2020 Detectable Total Phoshporous',
+                           graph.bgcolor='lightgray',
+                           xaxis.ticks=c(-6.0, -5.0, -4.0, -3.0, -2.0),
+                           xaxis.labels=c(-6,-5, -4, -3, -2),
+                           xaxis.labels.size=1.25,
+                           graph.bar.size = 0.5,
+                           #xaxis.labels.angle=90,
+                           add.line=-4.27, add.line.col="black",
+                           xaxis.title='Log(TP, mg/L)', xaxis.title.size=1.25, panel.width=1.75),
+                      
+                      list(6, header='Light Gray Means Highlighted Above',
+                           inactive.border.color=gray(.7), inactive.border.size=2,
+                            panel.width=1.75)),
+print.file = "output_micromap/mmplot_tp_nb2020v2.jpeg", res=100)
+
+
 ```
 
 ## Station Issues
