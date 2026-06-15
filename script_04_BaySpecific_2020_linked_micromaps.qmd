@@ -667,6 +667,8 @@ print.file = "output_micromap/mmplot_tp_nb2020v2.jpeg", res=100)
 Filtering by Deer Point Lake picks up St. Andrew Bay Resource Management Association stations, NWFWMD/FDEP probabilistic stations (including a Lake Martin station), and FDEP Northwest Regional Office HAB station. The probabilistic stations are from 2011, 2013-2018.
 
 In 2020, St. Andrew Bay Resource Management Association sampled Deer Point Lake in March-September, November, and December, with only 2 stations sampled in August so 26 observations. As have a single polygon, Deer Point Lake, making a linked micromap is not appropriate. Will just make 5-number summary stats of TP by monitoring location id to see if any spatial pattern. Station 1 is furthest downstream, closest to dam, and station 3 is furthest upstream just above where Bayou George enters lake.
+
+Likely worthwhile to see if FDEP probabilistic large river and small stream status monitoring has sampling points on Econfina Creek, Bayou George, Bear Creek, and Cedar Creek.
 ```{r dp_stats_spatial_join}
 
 dp_station1 <- dplyr::filter(np_sf1, bay == "Deer Point Lake")
@@ -716,6 +718,14 @@ tp_dp2020 <- st_set_geometry(dp_station1, NULL) %>%
             tp_mean = mean(tp, na.rm = TRUE),
             tp_na_count = sum(is.na(tp))) %>% 
   print(n = Inf)
+
+```
+
+
+## East Bay, Bayous, and Creeks
+```{r eb_stats_spatial_join}
+
+
 
 ```
 
