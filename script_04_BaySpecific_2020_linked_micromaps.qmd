@@ -201,7 +201,7 @@ Mapvview of mm_stations1 shows monitoring location id BAY-WE-STBAY-5 clearly in 
 
 Note monitoring location id is all upper case so always use that. Monitoring location name is snake-cased so avoid it. Note subtle behavior of filter and filter_out with NAs, <https://dplyr.tidyverse.org/reference/filter.html>.
 
-This West Bay linked micromap omits Harrison Bayou, Basin Bayou, Botheration Bayou, and Doyle Bayou. See North Bay linked micromap for an example when all bayous are included.
+This West Bay linked micromap omits Harrison Bayou, Basin Bayou, Botheration Bayou, and Doyle Bayou. See North Bay linked micromap for an example when all bayous, sampled and unsampled, are included.
 
 ```{r wb_stats_spatial_join}
 
@@ -661,7 +661,6 @@ print.file = "output_micromap/mmplot_tp_nb2020v2.jpeg", res=100)
 
 ```
 
-
 ## Deer Point Lake and Creeks
 
 Filtering by Deer Point Lake picks up St. Andrew Bay Resource Management Association stations, NWFWMD/FDEP probabilistic stations (including a Lake Martin station), and FDEP Northwest Regional Office HAB station. The probabilistic stations are from 2011, 2013-2018.
@@ -669,6 +668,7 @@ Filtering by Deer Point Lake picks up St. Andrew Bay Resource Management Associa
 In 2020, St. Andrew Bay Resource Management Association sampled Deer Point Lake in March-September, November, and December, with only 2 stations sampled in August so 26 observations. As have a single polygon, Deer Point Lake, making a linked micromap is not appropriate. Will just make 5-number summary stats of TP by monitoring location id to see if any spatial pattern. Station 1 is furthest downstream, closest to dam, and station 3 is furthest upstream just above where Bayou George enters lake.
 
 Likely worthwhile to see if FDEP probabilistic large river and small stream status monitoring has sampling points on Econfina Creek, Bayou George, Bear Creek, and Cedar Creek.
+
 ```{r dp_stats_spatial_join}
 
 dp_station1 <- dplyr::filter(np_sf1, bay == "Deer Point Lake")
@@ -699,8 +699,8 @@ mapview(dp_station2, col.regions = "yellow") + bbl_4
 
 ggplot(dp_station2 |> filter(year ==2020), aes(y=monitoring_location_id, x=log(tp))) + geom_boxplot()
 
-# getting 5-number summary from points data
-tp_dp2020 <- st_set_geometry(dp_station1, NULL) %>% 
+# getting 5-number summary from points data for 3 monitoring location id
+tp_dp2020v1 <- st_set_geometry(dp_station1, NULL) %>% 
   dplyr::filter(., year == 2020 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.") %>% 
   dplyr::select(., tp, monitoring_location_id) %>% 
   group_by(., monitoring_location_id) %>% 
@@ -719,17 +719,107 @@ tp_dp2020 <- st_set_geometry(dp_station1, NULL) %>%
             tp_na_count = sum(is.na(tp))) %>% 
   print(n = Inf)
 
+# getting 5-number summary for Deer Point polygon
+tp_dp2020v2 <- st_set_geometry(dp_station1, NULL) %>% 
+  dplyr::filter(., year == 2020 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.") %>% 
+  dplyr::select(., tp, bay) %>% 
+  group_by(., bay) %>% 
+  summarize(., tp_min = fivenum(tp)[1],
+            tp_q1 = fivenum(tp)[2],
+            tp_med = fivenum(tp)[3],
+            tp_q3 = fivenum(tp)[4],
+            tp_max = fivenum(tp)[5],
+            tp_lmin = log(fivenum(tp)[1]),
+            tp_lq1 = log(fivenum(tp)[2]),
+            tp_lmed = log(fivenum(tp)[3]),
+            tp_lq3 = log(fivenum(tp)[4]),
+            tp_lmax = log(fivenum(tp)[5]),
+            tp_count = dplyr::n(),
+            tp_mean = mean(tp, na.rm = TRUE),
+            tp_na_count = sum(is.na(tp))) %>% 
+  print(n = Inf)
+
+tp_nbdp2020 <- dplyr::bind_rows(tp_nb2020, tp_dp2020v2)
+
+# filter all North Bay polygons and Deer Point Lake polygon
+bayous_nbdp1 <- dplyr::filter(bbl_4, SEGMENT_NA == "Fannin Bayou" | SEGMENT_NA == "Goose Bayou" | SEGMENT_NA == "Robinson Bayou" | SEGMENT_NA == "North Bay" | SEGMENT_NA == "Mud Bayou" | SEGMENT_NA == "Alligator Bayou_GeneratingPlant" | SEGMENT_NA == "Newman Bayou" | SEGMENT_NA == "Sheephead Bayou" | SEGMENT_NA == "Gainer Bayou" | SEGMENT_NA == "Hodges Bayou" |  SEGMENT_NA == "Mill Bayou" | SEGMENT_NA == "Beatty Bayou" | SEGMENT_NA == "Anderson Bayou" | SEGMENT_NA == "Upper Goose Bayou" | SEGMENT_NA == "Lynn Haven Bayou" | SEGMENT_NA == "Deer Point Lake")
+
+mapview(bayous_nbdp1)
+
+# use right_join so cut down polygons to n=6 to match stats
+tp_nbdp2020v2 <- right_join(bayous_nbdp1, tp_nbdp2020, by = join_by(SEGMENT_NA == bay), keep = TRUE)
+
+# using tp_nbdp2020v2 shows only the 6 polygons with stats
+mmplot(map.data=tp_nbdp2020v2,
+       panel.types=c('dot_legend', 'labels', 'box_summary', 'map'),
+       panel.data=list(NA,
+                       'SEGMENT_NA',
+                       list('tp_lmin', 'tp_lq1', 'tp_lmed', 'tp_lq3', 'tp_lmax'),
+                       NA),
+       grouping = 3,
+       ord.by='tp_lmed', rev.ord=TRUE,
+       median.row=FALSE)
+
+# TP Refined Plot for North Bay, North Bay Bayous, and Deer Point Lake
+mmplot(map.data=tp_nbdp2020v2,
+       panel.types=c('dot_legend', 'labels', 'labels', 'labels', 'box_summary', 'map'),
+       panel.data=list(NA,
+                       'SEGMENT_NA',
+                       'tp_count',
+                       'tp_na_count',
+                       list('tp_lmin', 'tp_lq1', 'tp_lmed', 'tp_lq3', 'tp_lmax'),
+                       NA),
+       grouping = 3,
+       ord.by='tp_lmed',
+       rev.ord=TRUE,
+       median.row=FALSE,
+       plot.pGrp.spacing=1,
+       
+       plot.height=6, plot.width=9, #for poster use plot.height=6, plot.width=9,
+       colors=brewer.pal(4, "Spectral"), #for journal use plot.height=9, plot.width=6.8
+              
+       panel.att=list(list(1, panel.width=1, point.type=20, point.size=2,
+                           point.border=TRUE), 
+                      
+                      list(2, header='North Bay Segment, Bayous\n & Deer Point Lake', panel.width=1.2,#increased panel.width to 1.1 from .8
+                           align='left', text.size=.8),
+                      
+                      list(3, header='Total #\n of Samples',
+                           panel.width=.35,
+                           align='right',
+                           text.size=.8),
+                      
+                      list(4, header='# of NA\n Samples',
+                           panel.width=.4,
+                           align='right',
+                           text.size=.8),
+                      
+                      list(5, header='2020 Detectable Total Phoshporous',
+                           graph.bgcolor='lightgray',
+                           xaxis.ticks=c(-6.0, -5.0, -4.0, -3.0, -2.0),
+                           xaxis.labels=c(-6,-5, -4, -3, -2),
+                           xaxis.labels.size=1.25,
+                           graph.bar.size = 0.5,
+                           #xaxis.labels.angle=90,
+                           add.line=-4.27, add.line.col="black",
+                           xaxis.title='Log(TP, mg/L)', xaxis.title.size=1.25, panel.width=1.75),
+                      
+                      list(6, header='Light Gray Means Highlighted Above',
+                           inactive.border.color=gray(.7), inactive.border.size=2,
+                            panel.width=1.75)),
+print.file = "output_micromap/mmplot_tp_nbdp2020v1.jpeg", res=100)
+
+
+
 ```
 
-
 ## East Bay, Bayous, and Creeks
+
 ```{r eb_stats_spatial_join}
 
 
 
 ```
-
-
 
 ## Station and Polygon Issues
 
