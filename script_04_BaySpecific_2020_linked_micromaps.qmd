@@ -1,5 +1,5 @@
 ---
-title: "Linked Micromap 2020"
+title: "Bay-Segment-Specific Linked Micromaps 2020"
 author: "Mike McManus"
 format: html
 editor: visual
@@ -817,8 +817,10 @@ print.file = "output_micromap/mmplot_tp_nbdp2020v1.jpeg", res=100)
 
 ```{r eb_stats_spatial_join}
 
+eb_station1 <- dplyr::filter(np_sf1, bay == "	Massalina Bayou" | bay == "Watson Bayou" | bay == "Lake Martin" | bay == "Pitts Bayou"| bay == "Callaway Bayou" | bay == "Callaway Bayou" | bay == "Laird Bayou" | bay == "Cooks Bayou" | bay ==  | bay == "East Bay")
 
 
+bayous_eb <- dplyr::filter(bbl_4, SEGMENT_NA == "Massalina Bayou" | SEGMENT_NA == "Watson Bayou" | SEGMENT_NA == "Lake Martin" | SEGMENT_NA == "Pitts Bayou" | SEGMENT_NA == "	Emmons Bayou" | SEGMENT_NA == "Callaway Bayou" | SEGMENT_NA == "Boggy Bayou" | SEGMENT_NA == "Laird Bayou" | SEGMENT_NA == "Cooks Bayou" | SEGMENT_NA == "Higgs Bayou" |  SEGMENT_NA == "California Bayou" | SEGMENT_NA == "Smith Bayou" | SEGMENT_NA == "Burkett Bayou" | SEGMENT_NA == "Richard Bayou" | SEGMENT_NA == "Murray Bayou" | SEGMENT_NA == "Sandy Creek" | SEGMENT_NA == "Eagle Nest Bayou" | SEGMENT_NA == "	Horseshoe Bayou" | SEGMENT_NA == "Gulf ICWW between St. Andrew Bay and St. Joseph Bay" | SEGMENT_NA == "Deer Point Lake")
 ```
 
 ## Station and Polygon Issues
