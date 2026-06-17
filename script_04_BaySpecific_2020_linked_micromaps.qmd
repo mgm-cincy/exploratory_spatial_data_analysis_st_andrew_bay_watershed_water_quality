@@ -817,14 +817,22 @@ print.file = "output_micromap/mmplot_tp_nbdp2020v1.jpeg", res=100)
 
 ```{r eb_stats_spatial_join}
 
-eb_station1 <- dplyr::filter(np_sf1, bay == "	Massalina Bayou" | bay == "Watson Bayou" | bay == "Lake Martin" | bay == "Pitts Bayou"| bay == "Callaway Bayou" | bay == "Callaway Bayou" | bay == "Laird Bayou" | bay == "Cooks Bayou" | bay ==  | bay == "East Bay")
+eb_station1 <- dplyr::filter(np_sf1, bay == "Massalina Bayou" | bay == "Watson Bayou" | bay == "Lake Martin" | bay == "Pitts Bayou"| bay == "Callaway Bayou" | bay == "Laird Bayou" | bay == "Cooks Bayou" | bay == "Sandy Creek" | bay == "Parker Bayou"| bay == "Eagle Nest Bayou" | bay == "East Bay" | monitoring_location_id == "NWFYI0018")
+# returns 1938 obs
 
+mapview(eb_station1) + bbl_4
 
-bayous_eb <- dplyr::filter(bbl_4, SEGMENT_NA == "Massalina Bayou" | SEGMENT_NA == "Watson Bayou" | SEGMENT_NA == "Lake Martin" | SEGMENT_NA == "Pitts Bayou" | SEGMENT_NA == "	Emmons Bayou" | SEGMENT_NA == "Callaway Bayou" | SEGMENT_NA == "Boggy Bayou" | SEGMENT_NA == "Laird Bayou" | SEGMENT_NA == "Cooks Bayou" | SEGMENT_NA == "Higgs Bayou" |  SEGMENT_NA == "California Bayou" | SEGMENT_NA == "Smith Bayou" | SEGMENT_NA == "Burkett Bayou" | SEGMENT_NA == "Richard Bayou" | SEGMENT_NA == "Murray Bayou" | SEGMENT_NA == "Sandy Creek" | SEGMENT_NA == "Eagle Nest Bayou" | SEGMENT_NA == "	Horseshoe Bayou" | SEGMENT_NA == "Gulf ICWW between St. Andrew Bay and St. Joseph Bay" | SEGMENT_NA == "Deer Point Lake")
+bayous_eb1 <- dplyr::filter(bbl_4, SEGMENT_NA == "Massalina Bayou" | SEGMENT_NA == "Watson Bayou" | SEGMENT_NA == "Lake Van Vac" | SEGMENT_NA == "Lake Martin" | SEGMENT_NA == "Pitts Bayou" | SEGMENT_NA == "Emmons Bayou" | SEGMENT_NA == "Baby Bayou"| SEGMENT_NA == "Callaway Bayou" | SEGMENT_NA == "Boggy Bayou" | SEGMENT_NA == "Laird Bayou" | SEGMENT_NA == "Cooks Bayou" | SEGMENT_NA == "Higgs Bayou" |  SEGMENT_NA == "California Bayou" | SEGMENT_NA == "Smith Bayou" | SEGMENT_NA == "Burkett Bayou" | SEGMENT_NA == "Richard Bayou" | SEGMENT_NA == "Murray Bayou" | SEGMENT_NA == "Sandy Creek" | SEGMENT_NA == "Eagle Nest Bayou" | SEGMENT_NA == "Horseshoe Bayou" | SEGMENT_NA == "Gulf ICWW between St. Andrew Bay and St. Joseph Bay" | SEGMENT_NA == "Lathrop Bayou" | SEGMENT_NA == "Walker Bayou" | SEGMENT_NA == "Farmdale Bayou" | SEGMENT_NA == "Strange Bayou" | SEGMENT_NA == "Blind Alligator Bayou" | SEGMENT_NA == "Auburn Cove" | SEGMENT_NA == "Chatterson Bayou" | SEGMENT_NA == "Fred Bayou" | SEGMENT_NA == "Pearl Bayou" | SEGMENT_NA == "Freshwater Bayou" | SEGMENT_NA == "Sheephead Bayou" | SEGMENT_NA == "Smack Bayou" | SEGMENT_NA == "East Bay")
+
+mapview(bayous_eb1)
+
+mapview(eb_station1) + mapview(bayous_eb1)
 ```
 
 ## Station and Polygon Issues
 
 Specific follow-up needed for some stations, such as coordinates that put a station on land, monitoring location ID BAY-WE-STBAY-3 near Burnt Mill Creek. Also, monitoring location ID BAY-WE-STBAY-5 that has a bay assignment of West Bay but coordinates put it in St. Andrew Bay.
 
-Note that Sheepshead Bayou in North Bay actually has Major_Seg of "East Bay" assigned to it. Also, that in North Bay, Fannin Bayou has 3 arms to that bayou.
+Note that Sheepshead Bayou in North Bay actually has Major_Seg of "East Bay" assigned to it. There is a Sheepshead Bayou in East Bay, so maybe the one in North Bay is labelled incorrectly.  Also, note that in North Bay, Fannin Bayou has 3 arms to that bayou.
+
+In East Bay, monitoring location id NWFYI0018 is assigned bay value of St. Andrew Bay, which  I believe is incorrect as coordinates put that point by Dupont Bridge. Monitoring location ids G3TLHR0043 and G3TLHR0018 are assigned to bay Parker Bayou, which I believe is wrong. Monitoring location id Z1-LL-14008 LAKE MARTIN is assigned to bay Deer Point Lake.
