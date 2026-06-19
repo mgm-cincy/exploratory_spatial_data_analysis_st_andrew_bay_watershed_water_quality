@@ -846,7 +846,9 @@ eb_station1 %>%
   group_by(year) %>% 
   summarize(., count = dplyr::n())
 
-bayous_eb1 <- dplyr::filter(bbl_4, SEGMENT_NA == "Massalina Bayou" | SEGMENT_NA == "Watson Bayou" | SEGMENT_NA == "Lake Van Vac" | SEGMENT_NA == "Lake Martin" | SEGMENT_NA == "Pitts Bayou" | SEGMENT_NA == "Emmons Bayou" | SEGMENT_NA == "Baby Bayou"| SEGMENT_NA == "Callaway Bayou" | SEGMENT_NA == "Boggy Bayou" | SEGMENT_NA == "Laird Bayou" | SEGMENT_NA == "Cooks Bayou" | SEGMENT_NA == "Higgs Bayou" |  SEGMENT_NA == "California Bayou" | SEGMENT_NA == "Smith Bayou" | SEGMENT_NA == "Burkett Bayou" | SEGMENT_NA == "Richard Bayou" | SEGMENT_NA == "Murray Bayou" | SEGMENT_NA == "Sandy Creek" | SEGMENT_NA == "Eagle Nest Bayou" | SEGMENT_NA == "Horseshoe Bayou" | SEGMENT_NA == "Gulf ICWW between St. Andrew Bay and St. Joseph Bay" | SEGMENT_NA == "Lathrop Bayou" | SEGMENT_NA == "Walker Bayou" | SEGMENT_NA == "Farmdale Bayou" | SEGMENT_NA == "Strange Bayou" | SEGMENT_NA == "Blind Alligator Bayou" | SEGMENT_NA == "Auburn Cove" | SEGMENT_NA == "Chatterson Bayou" | SEGMENT_NA == "Fred Bayou" | SEGMENT_NA == "Pearl Bayou" | SEGMENT_NA == "Freshwater Bayou" | SEGMENT_NA == "Sheephead Bayou" | SEGMENT_NA == "Smack Bayou" | SEGMENT_NA == "East Bay")
+# inserted Parker Bayou, but those polygon slivers should be cleaned up
+bayous_eb1 <- dplyr::filter(bbl_4, SEGMENT_NA == "Massalina Bayou" | SEGMENT_NA == "Watson Bayou" | SEGMENT_NA == "Lake Van Vac" | SEGMENT_NA == "Lake Martin" | SEGMENT_NA == "Pitts Bayou" | SEGMENT_NA == "Emmons Bayou" | SEGMENT_NA == "Baby Bayou"| SEGMENT_NA == "Callaway Bayou" | SEGMENT_NA == "Boggy Bayou" | SEGMENT_NA == "Laird Bayou" | SEGMENT_NA == "Cooks Bayou" | SEGMENT_NA == "Higgs Bayou" |  SEGMENT_NA == "California Bayou" | SEGMENT_NA == "Smith Bayou" | SEGMENT_NA == "Burkett Bayou" | SEGMENT_NA == "Richard Bayou" | SEGMENT_NA == "Murray Bayou" | SEGMENT_NA == "Sandy Creek" | SEGMENT_NA == "Eagle Nest Bayou" | SEGMENT_NA == "Horseshoe Bayou" | SEGMENT_NA == "Gulf ICWW between St. Andrew Bay and St. Joseph Bay" | SEGMENT_NA == "Lathrop Bayou" | SEGMENT_NA == "Walker Bayou" | SEGMENT_NA == "Farmdale Bayou" | SEGMENT_NA == "Strange Bayou" | SEGMENT_NA == "Blind Alligator Bayou" | SEGMENT_NA == "Auburn Cove" | SEGMENT_NA == "Chatterson Bayou" | SEGMENT_NA == "Fred Bayou" | SEGMENT_NA == "Pearl Bayou" | SEGMENT_NA == "Freshwater Bayou" | SEGMENT_NA == "Sheephead Bayou" | SEGMENT_NA == "Smack Bayou" | SEGMENT_NA == "Parker Bayou" |SEGMENT_NA == "East Bay")
+# returns 35 obs
 
 mapview(bayous_eb1)
 
@@ -860,6 +862,20 @@ bayous_eb2 <- bayous_eb1 |>
       "Gulf ICWW between St. Andrew Bay and St. Joseph Bay" ~ "East Bay ICWW"
     )
   )
+
+
+# 3 monitoring points/stations are assigned bay = Parker Bayou, but the 2 collected by FDEP TALLAHASSEE REGIONAL OPERATIONS CENTER, G3TLHR0018 and G3TLHR0043, appear to be in Callaway Bayou. G3TLHR0043 is assigned Parker Bayou @ Mouth While BAY-PARKER-BAYOU-1 appears to be in Parker Bayou monitoring location name. G3TLHR0018, monitoring_location_name of Parker Bayou Continuous Monitoring, but that actual polygon is Baby Bayou, an arm of Callaway Bayou.
+odd_point <- filter(eb_station1, bay == "Parker Bayou")
+
+mapview(odd_point)
+
+# note that just have an outline of Parker Bayou polygon as most of that polygon is overlaid by East Bay Polygon
+odd_polygon <- filter(bbl_4, SEGMENT_NA == "Parker Bayou")
+
+# show over a dozen polygon slivers along the margins of Parker Bayou. In Google Maps, looks like Parker Bayou should encolse embayments capture by a line from Parker Point to Donalson Point
+mapview(odd_polygon)
+
+# FDEP stations labeled as Parker Bayou excluded by filtering below
 
 # getting 5-number summary from points data
 tp_eb2020 <- st_set_geometry(eb_station1, NULL) %>% 
@@ -880,14 +896,92 @@ tp_eb2020 <- st_set_geometry(eb_station1, NULL) %>%
             tp_mean = mean(tp, na.rm = TRUE),
             tp_na_count = sum(is.na(tp))) %>% 
   print(n = Inf)
+# returns 8 obs
 
-# use left_join as have a many polygons (n=34) to few stats (n=8 obs) and want to keep all the polygons whether polygons have stats or not
+# use left_join as have a many polygons (n=35) to few stats (n=8 obs) and want to keep all the polygons whether polygons have stats or not
 tp_eb2020v2 <- left_join(bayous_eb2, tp_eb2020, by = join_by(SEGMENT_NA == bay), keep = TRUE)
 
 # use right_join so cut down polygons to n=8 to match stats
 tp_eb2020v3 <- right_join(bayous_eb2, tp_eb2020, by = join_by(SEGMENT_NA == bay), keep = TRUE)
 
-# think there is a mismatch between Parker Bayou station coordinates and Parker Bayou polygon
+# think there is a mismatch between Parker Bayou station coordinates and Parker Bayou polygon as originally had an empty row for Parker Bayou, which led to the investigation above
+
+# need appropriate polygon for Parker Bayou as slivers are not visible
+
+# using tp_eb2020v2 shows how 27 bayous that do not have samples
+mmplot(map.data=tp_eb2020v2,
+       panel.types=c('dot_legend', 'labels', 'box_summary', 'map'),
+       panel.data=list(NA,
+                       'SEGMENT_NA',
+                       list('tp_lmin', 'tp_lq1', 'tp_lmed', 'tp_lq3', 'tp_lmax'),
+                       NA),
+       grouping = 5,
+       ord.by='tp_lmed', rev.ord=TRUE,
+       median.row=FALSE)
+
+# using tp_nb2020v3 shows only the 8 polygons with wq stats
+mmplot(map.data=tp_eb2020v3,
+       panel.types=c('dot_legend', 'labels', 'box_summary', 'map'),
+       panel.data=list(NA,
+                       'SEGMENT_NA',
+                       list('tp_lmin', 'tp_lq1', 'tp_lmed', 'tp_lq3', 'tp_lmax'),
+                       NA),
+       grouping = 4,
+       ord.by='tp_lmed', rev.ord=TRUE,
+       median.row=FALSE)
+
+
+# using tp_eb2020v3 shows only the 8 polygons with stats
+# TP Refined Plot for East Bay and Bayous
+mmplot(map.data=tp_eb2020v3,
+       panel.types=c('dot_legend', 'labels', 'labels', 'labels', 'box_summary', 'map'),
+       panel.data=list(NA,
+                       'SEGMENT_NA',
+                       'tp_count',
+                       'tp_na_count',
+                       list('tp_lmin', 'tp_lq1', 'tp_lmed', 'tp_lq3', 'tp_lmax'),
+                       NA),
+       grouping = 4,
+       ord.by='tp_lmed',
+       rev.ord=TRUE,
+       median.row=FALSE,
+       plot.pGrp.spacing=1,
+       
+       plot.height=6, plot.width=9, #for poster use plot.height=6, plot.width=9,
+       colors=brewer.pal(4, "Spectral"), #for journal use plot.height=9, plot.width=6.8
+              
+       panel.att=list(list(1, panel.width=1, point.type=20, point.size=2,
+                           point.border=TRUE), 
+                      
+                      list(2, header='East Bay Segment,\n & Bayous', panel.width=1.2,#increased panel.width to 1.1 from .8
+                           align='left', text.size=.8),
+                      
+                      list(3, header='Total #\n of Samples',
+                           panel.width=.35,
+                           align='right',
+                           text.size=.8),
+                      
+                      list(4, header='# of NA\n Samples',
+                           panel.width=.4,
+                           align='right',
+                           text.size=.8),
+                      
+                      list(5, header='2020 Detectable Total Phoshporous',
+                           graph.bgcolor='lightgray',
+                           xaxis.ticks=c(-6.0, -5.0, -4.0, -3.0, -2.0),
+                           xaxis.labels=c(-6,-5, -4, -3, -2),
+                           xaxis.labels.size=1.25,
+                           graph.bar.size = 0.5,
+                           #xaxis.labels.angle=90,
+                           add.line=-4.13, add.line.col="black",
+                           xaxis.title='Log(TP, mg/L)', xaxis.title.size=1.25, panel.width=1.75),
+                      
+                      list(6, header='Light Gray Means Highlighted Above',
+                           inactive.border.color=gray(.7), inactive.border.size=2,
+                            panel.width=1.75)),
+print.file = "output_micromap/mmplot_tp_eb2020v1.jpeg", res=100)
+
+
 
 ```
 
@@ -898,3 +992,4 @@ Specific follow-up needed for some stations, such as coordinates that put a stat
 Note that Sheepshead Bayou in North Bay actually has Major_Seg of "East Bay" assigned to it. There is a Sheepshead Bayou in East Bay, so maybe the one in North Bay is labelled incorrectly. Also, note that in North Bay, Fannin Bayou has 3 arms to that bayou.
 
 In East Bay, monitoring location id NWFYI0018 is assigned bay value of St. Andrew Bay, which I believe is incorrect as coordinates put that point by Dupont Bridge. Monitoring location ids G3TLHR0043 and G3TLHR0018 are assigned to bay Parker Bayou, which I believe is wrong. Monitoring location id Z1-LL-14008 LAKE MARTIN is assigned to bay Deer Point Lake. Have a monitoring location id of BAY-LA-BAYOU-3 assigned to bay Laird Bayou, but point falls in Cooks Bayou, which is an arm of Laird Bayou.
+Need to get entire Parker Bayou polygon as currently only have slivers of that polygon, with East Bay polygon overlaying much of Parker Bayou.
