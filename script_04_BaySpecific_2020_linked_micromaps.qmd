@@ -872,7 +872,7 @@ mapview(odd_point)
 # note that just have an outline of Parker Bayou polygon as most of that polygon is overlaid by East Bay Polygon
 odd_polygon <- filter(bbl_4, SEGMENT_NA == "Parker Bayou")
 
-# show over a dozen polygon slivers along the margins of Parker Bayou. In Google Maps, looks like Parker Bayou should encolse embayments capture by a line from Parker Point to Donalson Point
+# show over a dozen polygon slivers along the margins of Parker Bayou. In Google Maps, looks like Parker Bayou should enclose embayments capture by a line from Parker Point to Donalson Point
 mapview(odd_polygon)
 
 # FDEP stations labeled as Parker Bayou excluded by filtering below
@@ -985,11 +985,25 @@ print.file = "output_micromap/mmplot_tp_eb2020v1.jpeg", res=100)
 
 ```
 
+## St. Andrew Bay and Bayous
+
+```{r sab_stats_spatial_join}}
+
+sab_station1 <- dplyr::filter(np_sf1, bay == "Johnson Bayou" | bay == "Posten Bayou" | bay == "Pretty Bayou" | bay == "Grand Lagoon"| bay == "St. Andrew Bay")
+
+
+bayous_eb1 <- dplyr::filter(bbl_4, SEGMENT_NA == "Johnson Bayou" | SEGMENT_NA == "Posten Bayou" | SEGMENT_NA == "Pretty Bayou" | SEGMENT_NA == "Grand Lagoon" | SEGMENT_NA == "Hog Island Sound" | SEGMENT_NA == "Crooked Island Sound" |SEGMENT_NA == "East Bay")
+# returns 35 obs
+
+
+```
+
+
+
 ## Station and Polygon Issues
 
 Specific follow-up needed for some stations, such as coordinates that put a station on land, monitoring location ID BAY-WE-STBAY-3 near Burnt Mill Creek. Also, monitoring location ID BAY-WE-STBAY-5 that has a bay assignment of West Bay but coordinates put it in St. Andrew Bay.
 
 Note that Sheepshead Bayou in North Bay actually has Major_Seg of "East Bay" assigned to it. There is a Sheepshead Bayou in East Bay, so maybe the one in North Bay is labelled incorrectly. Also, note that in North Bay, Fannin Bayou has 3 arms to that bayou.
 
-In East Bay, monitoring location id NWFYI0018 is assigned bay value of St. Andrew Bay, which I believe is incorrect as coordinates put that point by Dupont Bridge. Monitoring location ids G3TLHR0043 and G3TLHR0018 are assigned to bay Parker Bayou, which I believe is wrong. Monitoring location id Z1-LL-14008 LAKE MARTIN is assigned to bay Deer Point Lake. Have a monitoring location id of BAY-LA-BAYOU-3 assigned to bay Laird Bayou, but point falls in Cooks Bayou, which is an arm of Laird Bayou.
-Need to get entire Parker Bayou polygon as currently only have slivers of that polygon, with East Bay polygon overlaying much of Parker Bayou.
+In East Bay, monitoring location id NWFYI0018 is assigned bay value of St. Andrew Bay, which I believe is incorrect as coordinates put that point by Dupont Bridge. Monitoring location ids G3TLHR0043 and G3TLHR0018 are assigned to bay Parker Bayou, which I believe is wrong. Monitoring location id Z1-LL-14008 LAKE MARTIN is assigned to bay Deer Point Lake. Have a monitoring location id of BAY-LA-BAYOU-3 assigned to bay Laird Bayou, but point falls in Cooks Bayou, which is an arm of Laird Bayou. Need to get entire Parker Bayou polygon as currently only have slivers of that polygon, with East Bay polygon overlaying much of Parker Bayou.
