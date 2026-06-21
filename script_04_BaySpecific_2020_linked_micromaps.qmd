@@ -990,12 +990,20 @@ print.file = "output_micromap/mmplot_tp_eb2020v1.jpeg", res=100)
 ```{r sab_stats_spatial_join}}
 
 sab_station1 <- dplyr::filter(np_sf1, bay == "Johnson Bayou" | bay == "Posten Bayou" | bay == "Pretty Bayou" | bay == "Grand Lagoon"| bay == "St. Andrew Bay")
+# returns 2786 obs
+mapview(sab_station1)
 
+sab_station2 <- dplyr::filter_out(sab_station1, monitoring_location_id == "NWFYI0018")
+# returns 2784 obs as 2 obs from FDEP NORTHWEST REGIONAL OPERATIONS CENTER taken near DuPont Bridge removed
+mapview(sab_station2)
 
-bayous_eb1 <- dplyr::filter(bbl_4, SEGMENT_NA == "Johnson Bayou" | SEGMENT_NA == "Posten Bayou" | SEGMENT_NA == "Pretty Bayou" | SEGMENT_NA == "Grand Lagoon" | SEGMENT_NA == "Hog Island Sound" | SEGMENT_NA == "Crooked Island Sound" |SEGMENT_NA == "East Bay")
-# returns 35 obs
+# appears to be 2 Johnson Bayous, one near power plant and other just east of Panama City marina
+bayous_sab1 <- dplyr::filter(bbl_4, SEGMENT_NA == "Johnson Bayou" | SEGMENT_NA == "Posten Bayou" | SEGMENT_NA == "Pretty Bayou" | SEGMENT_NA == "Alligator" | SEGMENT_NA == "Grand Lagoon" | SEGMENT_NA == "Hog Island Sound" | SEGMENT_NA == "Crooked Island Sound" |SEGMENT_NA == "St. Andrew Bay")
+# returns 7 obs
 
+mapview(bayous_sab1)
 
+mapview(sab_station2) + bayous_sab1
 ```
 
 
