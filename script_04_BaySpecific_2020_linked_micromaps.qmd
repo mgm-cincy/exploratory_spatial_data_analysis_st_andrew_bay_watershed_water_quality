@@ -998,15 +998,14 @@ sab_station2 <- dplyr::filter_out(sab_station1, monitoring_location_id == "NWFYI
 mapview(sab_station2)
 
 # appears to be 2 Johnson Bayous, one near power plant and other just east of Panama City marina
-bayous_sab1 <- dplyr::filter(bbl_4, SEGMENT_NA == "Johnson Bayou" | SEGMENT_NA == "Posten Bayou" | SEGMENT_NA == "Pretty Bayou" | SEGMENT_NA == "Alligator" | SEGMENT_NA == "Grand Lagoon" | SEGMENT_NA == "Hog Island Sound" | SEGMENT_NA == "Crooked Island Sound" |SEGMENT_NA == "St. Andrew Bay")
-# returns 7 obs
+bayous_sab1 <- dplyr::filter(bbl_4, SEGMENT_NA == "Johnson Bayou"
+| SEGMENT_NA == "Posten Bayou" | SEGMENT_NA == "Pretty Bayou" | SEGMENT_NA == "Alligator Bayou" | SEGMENT_NA == "Grand Lagoon" | SEGMENT_NA == "Hog Island Sound" | SEGMENT_NA == "Crooked Island Sound" |SEGMENT_NA == "St. Andrew Bay")
+# returns 8 obs
 
 mapview(bayous_sab1)
 
 mapview(sab_station2) + bayous_sab1
 ```
-
-
 
 ## Station and Polygon Issues
 
@@ -1015,3 +1014,7 @@ Specific follow-up needed for some stations, such as coordinates that put a stat
 Note that Sheepshead Bayou in North Bay actually has Major_Seg of "East Bay" assigned to it. There is a Sheepshead Bayou in East Bay, so maybe the one in North Bay is labelled incorrectly. Also, note that in North Bay, Fannin Bayou has 3 arms to that bayou.
 
 In East Bay, monitoring location id NWFYI0018 is assigned bay value of St. Andrew Bay, which I believe is incorrect as coordinates put that point by Dupont Bridge. Monitoring location ids G3TLHR0043 and G3TLHR0018 are assigned to bay Parker Bayou, which I believe is wrong. Monitoring location id Z1-LL-14008 LAKE MARTIN is assigned to bay Deer Point Lake. Have a monitoring location id of BAY-LA-BAYOU-3 assigned to bay Laird Bayou, but point falls in Cooks Bayou, which is an arm of Laird Bayou. Need to get entire Parker Bayou polygon as currently only have slivers of that polygon, with East Bay polygon overlaying much of Parker Bayou.
+
+Also, Johnson Bayou has a duplicated entry with one bayou near the power plant (and it Major_Seg is St. Andrew Bay). The other Johnson Bayou polygon is off of West Beach Drive, just west of Panama City marina, and it has monitoring location id BAY-JOHNSON-BAYOU-1 located in it. Google Map shows both bayous with a Johnson Bayou label.
+
+Two stations do not fall in St. Andrew Bay polygon, NWFYI0017 and BAY-ST-EWBAY-3. Both have  a bay assignment of St. Andrew Bay. NWFYI0017 was collected by FDEP NORTHWEST REGIONAL OPERATIONS CENTER, and BAY-ST-EWBAY-3 was collected by ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.
