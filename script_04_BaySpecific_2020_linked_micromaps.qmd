@@ -986,7 +986,7 @@ print.file = "output_micromap/mmplot_tp_eb2020v1.jpeg", res=100)
 ```
 
 ## St. Andrew Bay and Bayous
-
+In time-series plot see decreasing spatial trend in Grand Lagoon 1 station to Grand Lagoon station 5.
 ```{r sab_stats_spatial_join}}
 
 sab_station1 <- dplyr::filter(np_sf1, bay == "Johnson Bayou" | bay == "Posten Bayou" | bay == "Pretty Bayou" | bay == "Grand Lagoon"| bay == "St. Andrew Bay")
@@ -1056,6 +1056,87 @@ tp_sab2020 <- st_set_geometry(sab_station2, NULL) %>%
 # returns 5 obs
 
 
+# use left_join as have a many polygons (n=8) to few stats (n=5 obs) and want to keep all the polygons whether polygons have stats or not
+tp_sab2020v1 <- left_join(bayous_sab1, tp_sab2020, by = join_by(SEGMENT_NA == bay), keep = TRUE)
+
+# use right_join so cut down polygons to n=8 to match stats
+tp_sab2020v2 <- right_join(bayous_sab1, tp_sab2020, by = join_by(SEGMENT_NA == bay), keep = TRUE)
+
+# using tp_sab2020v1 shows how 3 bayous that do not have samples
+mmplot(map.data=tp_sab2020v1,
+       panel.types=c('dot_legend', 'labels', 'box_summary', 'map'),
+       panel.data=list(NA,
+                       'SEGMENT_NA',
+                       list('tp_lmin', 'tp_lq1', 'tp_lmed', 'tp_lq3', 'tp_lmax'),
+                       NA),
+       grouping = 5,
+       ord.by='tp_lmed', rev.ord=TRUE,
+       median.row=FALSE)
+
+# using tp_sab2020v2 shows only the 5 polygons with wq stats
+mmplot(map.data=tp_sab2020v2,
+       panel.types=c('dot_legend', 'labels', 'box_summary', 'map'),
+       panel.data=list(NA,
+                       'SEGMENT_NA',
+                       list('tp_lmin', 'tp_lq1', 'tp_lmed', 'tp_lq3', 'tp_lmax'),
+                       NA),
+       grouping = 3,
+       ord.by='tp_lmed', rev.ord=TRUE,
+       median.row=FALSE)
+
+
+# using tp_sab2020v2 shows only the 5 polygons with stats
+# TP Refined Plot for St. Andrew Bay and Bayous
+mmplot(map.data=tp_sab2020v2,
+       panel.types=c('dot_legend', 'labels', 'labels', 'labels', 'box_summary', 'map'),
+       panel.data=list(NA,
+                       'SEGMENT_NA',
+                       'tp_count',
+                       'tp_na_count',
+                       list('tp_lmin', 'tp_lq1', 'tp_lmed', 'tp_lq3', 'tp_lmax'),
+                       NA),
+       grouping = 3,
+       ord.by='tp_lmed',
+       rev.ord=TRUE,
+       median.row=FALSE,
+       plot.pGrp.spacing=1,
+       
+       plot.height=6, plot.width=9, #for poster use plot.height=6, plot.width=9,
+       colors=brewer.pal(4, "Spectral"), #for journal use plot.height=9, plot.width=6.8
+              
+       panel.att=list(list(1, panel.width=1, point.type=20, point.size=2,
+                           point.border=TRUE), 
+                      
+                      list(2, header='St. Andrew Bay Segment,\n & Bayous', panel.width=1.2,#increased panel.width to 1.1 from .8
+                           align='left', text.size=.8),
+                      
+                      list(3, header='Total #\n of Samples',
+                           panel.width=.35,
+                           align='right',
+                           text.size=.8),
+                      
+                      list(4, header='# of NA\n Samples',
+                           panel.width=.4,
+                           align='right',
+                           text.size=.8),
+                      
+                      list(5, header='2020 Detectable Total Phoshporous',
+                           graph.bgcolor='lightgray',
+                           xaxis.ticks=c(-6.0, -5.0, -4.0, -3.0, -2.0),
+                           xaxis.labels=c(-6,-5, -4, -3, -2),
+                           xaxis.labels.size=1.25,
+                           graph.bar.size = 0.5,
+                           #xaxis.labels.angle=90,
+                           add.line=-3.96, add.line.col="black",
+                           xaxis.title='Log(TP, mg/L)', xaxis.title.size=1.25, panel.width=1.75),
+                      
+                      list(6, header='Light Gray Means Highlighted Above',
+                           inactive.border.color=gray(.7), inactive.border.size=2,
+                            panel.width=1.75)),
+print.file = "output_micromap/mmplot_tp_sab2020v1.jpeg", res=100)
+
+
+
 ```
 
 ## Station and Polygon Issues
@@ -1068,4 +1149,4 @@ In East Bay, monitoring location id NWFYI0018 is assigned bay value of St. Andre
 
 Also, Johnson Bayou has a duplicated entry with one bayou near the power plant (and it Major_Seg is St. Andrew Bay). The other Johnson Bayou polygon is off of West Beach Drive, just west of Panama City marina, and it has monitoring location id BAY-JOHNSON-BAYOU-1 located in it. Google Map shows both bayous with a Johnson Bayou label.
 
-Two stations do not fall in St. Andrew Bay polygon, NWFYI0017 and BAY-ST-EWBAY-3. Both have  a bay assignment of St. Andrew Bay. NWFYI0017 was collected by FDEP NORTHWEST REGIONAL OPERATIONS CENTER, and BAY-ST-EWBAY-3 was collected by ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC. Those 2 stations do fall in the East Bay and Bayous polygon, bayous_eb1.
+Two stations do not fall in St. Andrew Bay polygon, NWFYI0017 and BAY-ST-EWBAY-3. Both have a bay assignment of St. Andrew Bay. NWFYI0017 was collected by FDEP NORTHWEST REGIONAL OPERATIONS CENTER, and BAY-ST-EWBAY-3 was collected by ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC. Those 2 stations do fall in the East Bay and Bayous polygon, bayous_eb1.
