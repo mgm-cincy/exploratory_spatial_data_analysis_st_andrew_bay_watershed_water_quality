@@ -32,6 +32,8 @@ library(tidyverse)
 
 ## Log
 
+2026-06-25 update West Bay polygons to include bayous that do not have samples as I did with other bay segments. Need to check bayous in other bay segments following this approach: got names below by filterinig on Major_Seg West Bay in View mode of bbl_v4
+
 2026-05-30 calculated distances from Warren Bayou point/station to polygons in bayous_wb1
 
 2026-05-06 renamed with YYYY in script name
@@ -205,46 +207,71 @@ This West Bay linked micromap omits Harrison Bayou, Basin Bayou, Botheration Bay
 
 ```{r wb_stats_spatial_join}
 
-mm_station1 <- dplyr::filter(np_sf1, bay == "Crooked Creek" | bay == "Burnt Mill Creek" | bay == "Warren Bayou" | bay == "West Bay")
+wb_station1 <- dplyr::filter(np_sf1, bay == "Crooked Creek" | bay == "Burnt Mill Creek" | bay == "Warren Bayou" | bay == "West Bay")
 # return 1778 observations, of which 1418 observations have sta_nr numeric entry, and 360 have monitoring location id entry
 
-distinct(mm_station1, monitoring_location_id) %>% arrange(., monitoring_location_id) %>% print(n=Inf)
+distinct(wb_station1, monitoring_location_id) %>% arrange(., monitoring_location_id) %>% print(n=Inf)
 # returns 21 observations including NA, 3 Burnt Mill stations, 3 Crooked stations, 1 Warren Bayou, 11 BAY-WE-STBAY stations, 1 BAY-WEST-BAY-12, and 1 NWFYI0005
 
-ggplot(mm_station1 |> filter(year >=2020), aes(x=yrmm_factor, y=log(tp))) + geom_point() + facet_wrap(vars(monitoring_location_id))
+ggplot(wb_station1 |> filter(year >=2020), aes(x=yrmm_factor, y=log(tp))) + geom_point() + facet_wrap(vars(monitoring_location_id))
 
-mapview(mm_station1) + bayous_wb1
+ggplot(wb_station1 |> filter(year >=2020), aes(y=bay, x=log(tp))) + geom_boxplot() + facet_wrap(vars(yrmm_factor))
 
-odd_coordinates <- dplyr::filter(mm_station1, monitoring_location_id == "BAY-WE-STBAY-3" | monitoring_location_id == "BAY-WE-STBAY-5")
+mapview(wb_station1)
 
-mapview(odd_coordinates) + bayous_wb1
+odd_coordinates <- dplyr::filter(wb_station1, monitoring_location_id == "BAY-WE-STBAY-3" | monitoring_location_id == "BAY-WE-STBAY-5")
 
-mm_station1 <- dplyr::filter_out(mm_station1, monitoring_location_id == "BAY-WE-STBAY-5")
+mapview(odd_coordinates)
+
+wb_station2 <- dplyr::filter_out(wb_station1, monitoring_location_id == "BAY-WE-STBAY-5")
 # believe this filtering out removes all 28 obs for monitoring location BAY-WE-STBAY-5 so now have 1750 obs
 
-distinct(mm_station1, monitoring_location_id) %>% arrange(., monitoring_location_id) %>% print(n=Inf)
+distinct(wb_station2, monitoring_location_id) %>% arrange(., monitoring_location_id) %>% print(n=Inf)
 # now returns to 20 obs and no BAY-WE-STBAY-5 observation
 
+ggplot(wb_station2 |> filter(year >=2020), aes(x=yrmm_factor, y=log(tp))) + geom_point() + facet_wrap(vars(monitoring_location_id))
 
-mm_station1 %>% 
+ggplot(wb_station2 |> filter(year >=2020), aes(y=bay, x=log(tp))) + geom_boxplot() + facet_wrap(vars(yrmm_factor))
+
+
+wb_station2 %>% 
   group_by(bay) %>% 
   summarize(., count = dplyr::n())
 # want to add a bay entry of "West Bay ICWW" for BAY-WEST BAY-12
 
+# evaluate samples within bays sampled in 2020
+wb_station2 %>% 
+  dplyr::filter(., year == 2020) %>% 
+  group_by(bay) %>% 
+  summarize(., count = dplyr::n())
 
-mm_station2 <- mm_station1 |>
+# evaluate which years have the most samples
+wb_station2 %>% 
+  dplyr::filter(., year >= 2020) %>% 
+  group_by(year) %>% 
+  summarize(., count = dplyr::n())
+
+
+wb_station3 <- wb_station2 |>
   mutate(
     bay = case_when(monitoring_location_id == "BAY-WEST-BAY-12" ~ "West Bay ICWW",
                        TRUE ~ bay
                        )
     )
 
-mm_station2 %>% 
+wb_station3 %>% 
   group_by(bay) %>% 
   summarize(., count = dplyr::n())
+#now have 5 bays
 
-bayous_wb1 <- dplyr::filter(bbl_4, SEGMENT_NA == "Burnt Mill Creek" | SEGMENT_NA == "Crooked Creek" | SEGMENT_NA == "Warren Bayou" | SEGMENT_NA == "Gulf ICWW between Choctawhatchee Bay and St. Andrew Bay" | SEGMENT_NA == "West Bay")
+# got names below by filterinig on Major_Seg West Bay in View mode of bbl_v4
+bayous_wb1 <- dplyr::filter(bbl_4, SEGMENT_NA == "Burnt Mill Creek" | SEGMENT_NA == "Crooked Creek" | SEGMENT_NA == "Warren Bayou" | SEGMENT_NA == "Gulf ICWW between Choctawhatchee Bay and St. Andrew Bay" | SEGMENT_NA == "West Bay" | SEGMENT_NA == "Little Johnson Bayou"| SEGMENT_NA == "Johnson Bayou" | SEGMENT_NA == "Basin Bayou" | SEGMENT_NA == "Botheration Bayou" | SEGMENT_NA == "Doyle Bayou" | SEGMENT_NA == "Harrison Bayou" | SEGMENT_NA == "Ward Creek")
 
+mapview(bayous_wb1)
+# can see other Johnson Bayou in St. Andrew Bay
+
+mapview(wb_station3) + bayous_wb1
+# still see sta_nr 2.5, which is BAY-WE-STBAY-5, b/c of 2006-12-01 collection but will loose that when I filter vor year == 2020 in 5-number summary stats
 
 # do replace values so SEGMENT_NA will match to bay in points data frame
 bayous_wb2 <- bayous_wb1 |> 
@@ -256,7 +283,7 @@ bayous_wb2 <- bayous_wb1 |>
   )  
 
 # getting 5-number summary from points data
-tp_wb2020 <- st_set_geometry(mm_station2, NULL) %>% 
+tp_wb2020 <- st_set_geometry(wb_station3, NULL) %>% 
   dplyr::filter(., year == 2020 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.") %>% 
   dplyr::select(., tp, bay) %>% 
   group_by(., bay) %>% 
@@ -275,9 +302,22 @@ tp_wb2020 <- st_set_geometry(mm_station2, NULL) %>%
             tp_na_count = sum(is.na(tp))) %>% 
   print(n = Inf)
 
+# use left_join as have a many polygons (n=11) to few stats (n=5 obs) and want to keep all the polygons whether polygons have stats or not
+tp_wb2020v1 <- left_join(bayous_wb2, tp_wb2020, by = join_by(SEGMENT_NA == bay), keep = TRUE)
 
-tp_wb2020v2 <- merge(bayous_wb2, tp_wb2020, by.x = "SEGMENT_NA", by.y = "bay" )
+# use right_join so cut down polygons to n=8 to match stats
+tp_wb2020v2 <- right_join(bayous_wb2, tp_wb2020, by = join_by(SEGMENT_NA == bay), keep = TRUE)
 
+
+mmplot(map.data=tp_wb2020v1,
+       panel.types=c('dot_legend', 'labels', 'box_summary', 'map'),
+       panel.data=list(NA,
+                       'SEGMENT_NA',
+                       list('tp_lmin', 'tp_lq1', 'tp_lmed', 'tp_lq3', 'tp_lmax'),
+                       NA),
+       grouping = 5,
+       ord.by='tp_lmed', rev.ord=TRUE,
+       median.row=FALSE)
 
 mmplot(map.data=tp_wb2020v2,
        panel.types=c('dot_legend', 'labels', 'box_summary', 'map'),
@@ -288,6 +328,7 @@ mmplot(map.data=tp_wb2020v2,
        grouping = 1,
        ord.by='tp_lmed', rev.ord=TRUE,
        median.row=FALSE)
+
 
 
 # TP Refined Plot for West Bay Creeks and Bayous
@@ -986,7 +1027,9 @@ print.file = "output_micromap/mmplot_tp_eb2020v1.jpeg", res=100)
 ```
 
 ## St. Andrew Bay and Bayous
+
 In time-series plot see decreasing spatial trend in Grand Lagoon 1 station to Grand Lagoon station 5.
+
 ```{r sab_stats_spatial_join}}
 
 sab_station1 <- dplyr::filter(np_sf1, bay == "Johnson Bayou" | bay == "Posten Bayou" | bay == "Pretty Bayou" | bay == "Grand Lagoon"| bay == "St. Andrew Bay")
