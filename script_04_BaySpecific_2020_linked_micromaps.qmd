@@ -702,7 +702,7 @@ print.file = "output_micromap/mmplot_tp_nb2020v2.jpeg", res=100)
 
 ```
 
-## Deer Point Lake and Creeks
+## North Bay, Deer Point Lake and Creeks
 
 Filtering by Deer Point Lake picks up St. Andrew Bay Resource Management Association stations, NWFWMD/FDEP probabilistic stations (including a Lake Martin station), and FDEP Northwest Regional Office HAB station. The probabilistic stations are from 2011, 2013-2018.
 
@@ -855,7 +855,7 @@ print.file = "output_micromap/mmplot_tp_nbdp2020v1.jpeg", res=100)
 ```
 
 ## East Bay, Bayous, and Creeks
-
+Filter Major Segment by East Bay and get 44 obs
 ```{r eb_stats_spatial_join}
 
 eb_station1 <- dplyr::filter(np_sf1, bay == "Massalina Bayou" | bay == "Watson Bayou" | bay == "Lake Martin" | bay == "Pitts Bayou"| bay == "Callaway Bayou" | bay == "Laird Bayou" | bay == "Sandy Creek" | bay == "Parker Bayou"| bay == "Eagle Nest Bayou" | bay == "East Bay" | monitoring_location_id == "NWFYI0018")
@@ -888,8 +888,8 @@ eb_station1 %>%
   summarize(., count = dplyr::n())
 
 # inserted Parker Bayou, but those polygon slivers should be cleaned up
-bayous_eb1 <- dplyr::filter(bbl_4, SEGMENT_NA == "Massalina Bayou" | SEGMENT_NA == "Watson Bayou" | SEGMENT_NA == "Lake Van Vac" | SEGMENT_NA == "Lake Martin" | SEGMENT_NA == "Pitts Bayou" | SEGMENT_NA == "Emmons Bayou" | SEGMENT_NA == "Baby Bayou"| SEGMENT_NA == "Callaway Bayou" | SEGMENT_NA == "Boggy Bayou" | SEGMENT_NA == "Laird Bayou" | SEGMENT_NA == "Cooks Bayou" | SEGMENT_NA == "Higgs Bayou" |  SEGMENT_NA == "California Bayou" | SEGMENT_NA == "Smith Bayou" | SEGMENT_NA == "Burkett Bayou" | SEGMENT_NA == "Richard Bayou" | SEGMENT_NA == "Murray Bayou" | SEGMENT_NA == "Sandy Creek" | SEGMENT_NA == "Eagle Nest Bayou" | SEGMENT_NA == "Horseshoe Bayou" | SEGMENT_NA == "Gulf ICWW between St. Andrew Bay and St. Joseph Bay" | SEGMENT_NA == "Lathrop Bayou" | SEGMENT_NA == "Walker Bayou" | SEGMENT_NA == "Farmdale Bayou" | SEGMENT_NA == "Strange Bayou" | SEGMENT_NA == "Blind Alligator Bayou" | SEGMENT_NA == "Auburn Cove" | SEGMENT_NA == "Chatterson Bayou" | SEGMENT_NA == "Fred Bayou" | SEGMENT_NA == "Pearl Bayou" | SEGMENT_NA == "Freshwater Bayou" | SEGMENT_NA == "Sheephead Bayou" | SEGMENT_NA == "Smack Bayou" | SEGMENT_NA == "Parker Bayou" |SEGMENT_NA == "East Bay")
-# returns 35 obs
+bayous_eb1 <- dplyr::filter(bbl_4, SEGMENT_NA == "Auburn Cove" |SEGMENT_NA == "Baby Bayou" | SEGMENT_NA == "Baker Bayou"  | SEGMENT_NA == "Big Cove" | SEGMENT_NA == "Blind Alligator Bayou" | SEGMENT_NA == "Boggy Bayo"| SEGMENT_NA == "Boggy Creek" | SEGMENT_NA == "Bunkers Cove" | SEGMENT_NA == "Burkett Bayou" | SEGMENT_NA == "California Bayou" | SEGMENT_NA == "Callaway Bayou" |  SEGMENT_NA == "Chatterson Bayou" | SEGMENT_NA == "Cooks Bayou" | SEGMENT_NA == "Dolan Bayou" | SEGMENT_NA == "Eagle Nest Bayou" | SEGMENT_NA == "East Bay" | SEGMENT_NA == "Emmons Bayou" | SEGMENT_NA == "Farmdale Bayou" | SEGMENT_NA == "Fred Bayou" | SEGMENT_NA == "Freshwater Bayou" | SEGMENT_NA == "Gulf ICWW between St. Andrew Bay and St. Joseph Bay"| SEGMENT_NA == "Farmdale Bayou" |SEGMENT_NA == "Higgs Bayou" | SEGMENT_NA == "Horseshoe Bayou" | SEGMENT_NA == "Laird Bayou" | SEGMENT_NA == "Lake Van Vac" | SEGMENT_NA == "Lathrop Bayou" | SEGMENT_NA == "Massalina Bayou" |SEGMENT_NA == "Murray Bayou" | SEGMENT_NA == "Parker Bayou" | SEGMENT_NA == "Pearl Bayou" | SEGMENT_NA == "Piclalene Bayou" | SEGMENT_NA == "Pitts Bayou" | SEGMENT_NA == "Pratt Bayou" |SEGMENT_NA == "Richard Bayou" |SEGMENT_NA == "Sandy Creek" |SEGMENT_NA == "Sheephead Bayou" |SEGMENT_NA == "Smack Bayou" |SEGMENT_NA == "Smith Bayou" | SEGMENT_NA == "Strange Bayou" | SEGMENT_NA == "Turtle Slough" | SEGMENT_NA == "Walker Bayou" | SEGMENT_NA == "Watson Bayou"| SEGMENT_NA == "Wetappo Creek" | SEGMENT_NA == "Lannie Rowe" | SEGMENT_NA == "Lake Martin")
+# returns 44 obs
 
 mapview(bayous_eb1)
 
@@ -939,7 +939,7 @@ tp_eb2020 <- st_set_geometry(eb_station1, NULL) %>%
   print(n = Inf)
 # returns 8 obs
 
-# use left_join as have a many polygons (n=35) to few stats (n=8 obs) and want to keep all the polygons whether polygons have stats or not
+# use left_join as have a many polygons (n=44) to few stats (n=8 obs) and want to keep all the polygons whether polygons have stats or not
 tp_eb2020v2 <- left_join(bayous_eb2, tp_eb2020, by = join_by(SEGMENT_NA == bay), keep = TRUE)
 
 # use right_join so cut down polygons to n=8 to match stats
@@ -949,7 +949,7 @@ tp_eb2020v3 <- right_join(bayous_eb2, tp_eb2020, by = join_by(SEGMENT_NA == bay)
 
 # need appropriate polygon for Parker Bayou as slivers are not visible
 
-# using tp_eb2020v2 shows how 27 bayous that do not have samples
+# using tp_eb2020v2 shows how 36 bayous that do not have samples
 mmplot(map.data=tp_eb2020v2,
        panel.types=c('dot_legend', 'labels', 'box_summary', 'map'),
        panel.data=list(NA,
