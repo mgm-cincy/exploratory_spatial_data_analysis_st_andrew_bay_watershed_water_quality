@@ -1069,6 +1069,7 @@ print.file = "output_micromap/mmplot_tp_eb2020v1.jpeg", res=100)
 In time-series plot see decreasing spatial trend in Grand Lagoon 1 station to Grand Lagoon station 5.
 
 Note 2 stations/points are in East Bay, one is a FDEP station, which will be filtered out in 5-number summary by sampling agency name, and the other is a Baywatch station, sta_nr 3.3, which will be filtered out by year in that summary.
+
 ```{r sab_stats_spatial_join}}
 
 sab_station1 <- dplyr::filter(np_sf1, bay == "Johnson Bayou" | bay == "Posten Bayou" | bay == "Pretty Bayou" | bay == "Grand Lagoon"| bay == "St. Andrew Bay")
