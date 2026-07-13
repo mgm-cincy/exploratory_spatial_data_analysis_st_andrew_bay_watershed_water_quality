@@ -377,6 +377,22 @@ tp_2020 <- st_set_geometry(mm_station2, NULL) %>%
 
 ```
 
+## 2020 Baywatch Stations
+```{r baywatch_2020}
+
+bw_2020v1 <- dplyr::filter(mm_station2, year == 2020 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.")
+
+mapview(bw_2020v1)
+
+distinct(bw_2020v1, monitoring_location_id) %>% arrange(.,monitoring_location_id) %>% print(n=Inf)
+# return 37 stations
+
+distinct(bw_2020v1, SEGMENT_NA) %>% arrange(.,SEGMENT_NA) %>% print(n=Inf)
+
+distinct(bw_2020v1, c(monitoring_location_id, SEGMENT_NA)) %>% arrange(., c(monitoring_location_id, SEGMENT_NA)) %>% print(n=Inf)
+```
+
+
 ## Edit Polygons and Stats
 
 Edit data, both polygons and stats, to just the areas of interest. Dropping Burnt Mill Creek and Crooked Creek polygons and stats as have too few observations. Also, merge the chlorophyll, tn, and tp statistics to the polygon data as a single sf object.
@@ -406,6 +422,8 @@ chlatn_2020v2 <- merge(chla_2020v2, tn_2020v1, by = "SEGMENT_NA" )
 tp_2020v1 <- filter(tp_2020, SEGMENT_NA != "Crooked Creek")
 
 nutr_2020 <- merge(chlatn_2020v2, tp_2020v1, by = "SEGMENT_NA" )
+
+mapview(bw_2020v1) + polygons6
 
 ```
 
@@ -479,11 +497,11 @@ mmplot(map.data=nutr_2020,
        panel.att=list(list(1, panel.width=1, point.type=20, point.size=2,
                            point.border=TRUE), 
                       
-                      list(2, header='St.Andrew Bay Segments', panel.width=1.2,#increased panel.width to 1.1 from .8
+                      list(2, header='St.Andrew Bay\n Segments', panel.width=1,#increased panel.width to 1.1 from .8
                            align='left', text.size=.8),
                       
                       list(3, header='Total #\n of Samples',
-                           panel.width=.35,
+                           panel.width=.45,
                            align='right',
                            text.size=.8),
                       
@@ -504,7 +522,7 @@ mmplot(map.data=nutr_2020,
                       list(6, header='Light Gray Means Highlighted Above',
                            inactive.border.color=gray(.7), inactive.border.size=2,
                             panel.width=1.75)),
-print.file = "output_micromap/mmplot_tp2020.jpeg", res=100)
+print.file = "output_micromap/mmplot_tp2020v2.jpeg", res=100)
 
 
 
@@ -534,11 +552,11 @@ mmplot(map.data=nutr_2020,
        panel.att=list(list(1, panel.width=1, point.type=20, point.size=2,
                            point.border=TRUE), 
                       
-                      list(2, header='St.Andrew Bay Segments', panel.width=1.2,#increased panel.width to 1.1 from .8
+                      list(2, header='St.Andrew Bay\n Segments', panel.width=1,#increased panel.width to 1.1 from .8
                            align='left', text.size=.8),
                       
                       list(3, header='Total #\n of Samples',
-                           panel.width=.35,
+                           panel.width=.45,
                            align='right',
                            text.size=.8),
                       
@@ -561,7 +579,7 @@ mmplot(map.data=nutr_2020,
                             panel.width=1.75)),
 # to run so just appears in Plots pane have 3 parentheses after the last panel.width
 # to run and save the image delete 3rd parenthesis and insert comma       
-print.file = "output_micromap/mmplot_tn2020.jpeg", res=100)
+print.file = "output_micromap/mmplot_tn2020v2.jpeg", res=100)
 
 
 ```
