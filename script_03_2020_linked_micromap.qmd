@@ -377,6 +377,45 @@ tp_2020 <- st_set_geometry(mm_station2, NULL) %>%
 
 ```
 
+## 2020 Baywatch Stations
+
+```{r baywatch_2020}
+
+bw_2020v1 <- dplyr::filter(mm_station2, year == 2020 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.")
+
+mapview(bw_2020v1)
+
+ggplot(bw_2020v1, aes(x = yrmm, y = log(tp))) + geom_point() + facet_wrap(vars(SEGMENT_NA))
+
+ggplot(bw_2020v1, aes(x = yrmm, y = log(tp))) + geom_point() + facet_wrap(vars(SEGMENT_NA), scales = "free_y")
+
+ggplot(bw_2020v1, aes(x = yrmm, y = log(tn))) + geom_point() + facet_wrap(vars(SEGMENT_NA))
+
+ggplot(bw_2020v1, aes(x = yrmm, y = log(tn))) + geom_point() + facet_wrap(vars(SEGMENT_NA), scales = "free_y")
+
+
+distinct(bw_2020v1, SEGMENT_NA) %>% arrange(., SEGMENT_NA)
+
+bw_2020v2 <- distinct(bw_2020v1, monitoring_location_id, .keep_all = TRUE) %>% arrange(.,monitoring_location_id) %>% print(n=Inf)
+# return 37 stations and 44 fields
+
+distinct(bw_2020v2, SEGMENT_NA) %>% 
+  arrange(., SEGMENT_NA) %>% 
+  print(n=Inf)
+
+group_by(bw_2020v2, SEGMENT_NA) %>%
+  summarize(.,count = dplyr::n()) %>% 
+  print(n=Inf)
+# returns 8 segment names with a total sum of 37 stations
+
+group_by(bw_2020v2, SEGMENT_NA, monitoring_location_id) %>%
+  summarize(.,count = dplyr::n()) %>% 
+  print(n=Inf)
+# returns 37 monitoring location ids grouped within 8 segment names so in next code chunk of Edit Polygon and Stats when filter to exclude segment names of Burnt Mill Creek and Crooked Creek that drops 2 stations so map should have 35 dots with Deer Point Lake n = 3, East Bay n = 8 (includes Parker and Watson Bayous), Grand Lagoon n = 4, North Bay n = 7 (includes Fannin Bayou, Goose Bayou, Robinson Bayou, and Upper Goose Bayou) St. Andrew Bay n = 8 (includes Posten Bayou) and West Bay n =  5 (includes Burnt M-1L and Warren Bayou)
+
+mapview(bw_2020v2)
+```
+
 ## Edit Polygons and Stats
 
 Edit data, both polygons and stats, to just the areas of interest. Dropping Burnt Mill Creek and Crooked Creek polygons and stats as have too few observations. Also, merge the chlorophyll, tn, and tp statistics to the polygon data as a single sf object.
@@ -406,6 +445,8 @@ chlatn_2020v2 <- merge(chla_2020v2, tn_2020v1, by = "SEGMENT_NA" )
 tp_2020v1 <- filter(tp_2020, SEGMENT_NA != "Crooked Creek")
 
 nutr_2020 <- merge(chlatn_2020v2, tp_2020v1, by = "SEGMENT_NA" )
+
+mapview(bw_2020v2) + polygons6
 
 ```
 
@@ -479,11 +520,11 @@ mmplot(map.data=nutr_2020,
        panel.att=list(list(1, panel.width=1, point.type=20, point.size=2,
                            point.border=TRUE), 
                       
-                      list(2, header='St.Andrew Bay Segments', panel.width=1.2,#increased panel.width to 1.1 from .8
+                      list(2, header='St.Andrew Bay\n Segments', panel.width=1,#increased panel.width to 1.1 from .8
                            align='left', text.size=.8),
                       
                       list(3, header='Total #\n of Samples',
-                           panel.width=.35,
+                           panel.width=.45,
                            align='right',
                            text.size=.8),
                       
@@ -504,7 +545,7 @@ mmplot(map.data=nutr_2020,
                       list(6, header='Light Gray Means Highlighted Above',
                            inactive.border.color=gray(.7), inactive.border.size=2,
                             panel.width=1.75)),
-print.file = "output_micromap/mmplot_tp2020.jpeg", res=100)
+print.file = "output_micromap/mmplot_tp2020v2.jpeg", res=100)
 
 
 
@@ -534,11 +575,11 @@ mmplot(map.data=nutr_2020,
        panel.att=list(list(1, panel.width=1, point.type=20, point.size=2,
                            point.border=TRUE), 
                       
-                      list(2, header='St.Andrew Bay Segments', panel.width=1.2,#increased panel.width to 1.1 from .8
+                      list(2, header='St.Andrew Bay\n Segments', panel.width=1,#increased panel.width to 1.1 from .8
                            align='left', text.size=.8),
                       
                       list(3, header='Total #\n of Samples',
-                           panel.width=.35,
+                           panel.width=.45,
                            align='right',
                            text.size=.8),
                       
@@ -561,7 +602,7 @@ mmplot(map.data=nutr_2020,
                             panel.width=1.75)),
 # to run so just appears in Plots pane have 3 parentheses after the last panel.width
 # to run and save the image delete 3rd parenthesis and insert comma       
-print.file = "output_micromap/mmplot_tn2020.jpeg", res=100)
+print.file = "output_micromap/mmplot_tn2020v2.jpeg", res=100)
 
 
 ```
