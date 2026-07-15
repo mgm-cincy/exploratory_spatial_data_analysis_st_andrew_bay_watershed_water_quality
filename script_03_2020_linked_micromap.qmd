@@ -385,6 +385,15 @@ bw_2020v1 <- dplyr::filter(mm_station2, year == 2020 & sampling_agency_name == "
 
 mapview(bw_2020v1)
 
+ggplot(bw_2020v1, aes(x = yrmm, y = log(tp))) + geom_point() + facet_wrap(vars(SEGMENT_NA))
+
+ggplot(bw_2020v1, aes(x = yrmm, y = log(tp))) + geom_point() + facet_wrap(vars(SEGMENT_NA), scales = "free_y")
+
+ggplot(bw_2020v1, aes(x = yrmm, y = log(tn))) + geom_point() + facet_wrap(vars(SEGMENT_NA))
+
+ggplot(bw_2020v1, aes(x = yrmm, y = log(tn))) + geom_point() + facet_wrap(vars(SEGMENT_NA), scales = "free_y")
+
+
 distinct(bw_2020v1, SEGMENT_NA) %>% arrange(., SEGMENT_NA)
 
 bw_2020v2 <- distinct(bw_2020v1, monitoring_location_id, .keep_all = TRUE) %>% arrange(.,monitoring_location_id) %>% print(n=Inf)
