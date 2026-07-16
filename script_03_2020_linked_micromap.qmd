@@ -446,8 +446,9 @@ tp_2020v1 <- filter(tp_2020, SEGMENT_NA != "Crooked Creek")
 
 nutr_2020 <- merge(chlatn_2020v2, tp_2020v1, by = "SEGMENT_NA" )
 
-mapview(bw_2020v2) + polygons6
+mapview(bw_2020v2, col.regions = "red") + polygons6
 
+mapview(nutr_2020, col.regions = "yellow")
 ```
 
 ## Draft Linked Micromap
