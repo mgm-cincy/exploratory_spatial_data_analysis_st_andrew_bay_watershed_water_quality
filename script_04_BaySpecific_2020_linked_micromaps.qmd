@@ -539,6 +539,7 @@ Very ugly draft linked micromap shows that 1) Upper Goose Bay station stats shou
 
 If used FDEP data would pick-up a lot more stations in bayous upstream of Bailey Bridge and downstream of dam/bridge.
 
+In bbl_5, Massalina Bayou polygon is mistakenly assigned to North Bay. Also, have an FDEP large lake station point in Massalina Bayou and it is has a bay assignment of North Bay. Also, need to bring both Robinson polygon and Robinson Bayou into North Bay.
 ```{r nb_stats_spatial_join}
 nbdp_station1 <- dplyr::filter(np_sf1, bay == "Robinson Bayou" | bay == "Goose Bayou" | bay == "Upper Goose Bayou" | bay == "Fannin Bayou" | bay == "North Bay" | bay == "Deer Point Lake")
 # return 1531 observations
@@ -575,10 +576,9 @@ ggplot(nbdp_station1 |> filter(year >=2020), aes(y=bay, x=log(tp))) + geom_boxpl
 
 mapview(nbdp_station1, col.regions = "red") + bbl_5
 
-# no odd coordinate placement in North Bay, that is way out of North Bay and Deer Point polygons and bayous and no station points on land
+# shows odd coordinate placement in Massalina Bayou for monitoring location id 57719, a FDEP Large Lake sample supposedly for Lake Martin and bay was assigned as Deer Point Lake. This station point will be filtered out by sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC."
 
-# so commented out code
-# odd_coordinates <- dplyr::filter(mm_station1, monitoring_location_id == "BAY-WE-STBAY-3" | monitoring_location_id == "BAY-WE-STBAY-5")
+# odd_coords_nb <- dplyr::filter(mm_station1, monitoring_location_id == "57719")
 # 
 # mapview(odd_coordinates) + bayous_wb1
 # 
@@ -614,7 +614,8 @@ mapview(bayous_nb2)
 # filter all North Bay polygons
 # bayous_nb1 <- dplyr::filter(bbl_4, SEGMENT_NA == "Fannin Bayou" | SEGMENT_NA == "Goose Bayou" | SEGMENT_NA == "Robinson Bayou" | SEGMENT_NA == "North Bay" | SEGMENT_NA == "Mud Bayou" | SEGMENT_NA == "Alligator Bayou_GeneratingPlant" | SEGMENT_NA == "Newman Bayou" | SEGMENT_NA == "Sheephead Bayou" | SEGMENT_NA == "Gainer Bayou" | SEGMENT_NA == "Hodges Bayou" |  SEGMENT_NA == "Mill Bayou" | SEGMENT_NA == "Beatty Bayou" | SEGMENT_NA == "Anderson Bayou" | SEGMENT_NA == "Upper Goose Bayou" | SEGMENT_NA == "Lynn Haven Bayou")
 
-mapview(nbdp_station2) + mapview(bayous_nb2)
+mapview(nbdp_station2, col.regions = "green") + mapview(bayous_nb2)
+# shows odd Massalina station
 
 # do replace values so SEGMENT_NA will match to bay in points data frame
 # bayous_wb2 <- bayous_wb1 |> 
@@ -626,7 +627,7 @@ mapview(nbdp_station2) + mapview(bayous_nb2)
 #   )  
 
 # getting 5-number summary from points data
-tp_nb2020 <- st_set_geometry(nb_station2, NULL) %>% 
+tp_nbdp2020 <- st_set_geometry(nbdp_station2, NULL) %>% 
   dplyr::filter(., year == 2020 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.") %>% 
   dplyr::select(., tp, bay) %>% 
   group_by(., bay) %>% 
@@ -644,13 +645,13 @@ tp_nb2020 <- st_set_geometry(nb_station2, NULL) %>%
             tp_mean = mean(tp, na.rm = TRUE),
             tp_na_count = sum(is.na(tp))) %>% 
   print(n = Inf)
-# returns 5 obs/rows of summary stats for 5 bays
+# returns 6 obs/rows of summary stats for 6 bays
 
-# use left_join as have a many polygons (n=16) to few stats (n=5 obs) and want to keep all the polygons whether polygons have stats or not
-tp_nb2020v2 <- left_join(bayous_nb1, tp_nb2020, by = join_by(SEGMENT_NA == bay), keep = TRUE)
+# use left_join as have a many polygons (n=16) to few stats (n=6 obs) and want to keep all the polygons whether polygons have stats or not
+tp_nbdp2020v2 <- left_join(bayous_nb2, tp_nbdp2020, by = join_by(SEGMENT_NA == bay), keep = TRUE)
 
-# use right_join so cut down polygons to n=5 to match stats
-tp_nb2020v3 <- right_join(bayous_nb1, tp_nb2020, by = join_by(SEGMENT_NA == bay), keep = TRUE)
+# use right_join so cut down polygons to n=6 to match stats
+tp_nbdp2020v3 <- right_join(bayous_nb2, tp_nbdp2020, by = join_by(SEGMENT_NA == bay), keep = TRUE)
 
 # using tp_nb2020v2 shows how 11 bayous that do not have samples
 mmplot(map.data=tp_nb2020v2,
