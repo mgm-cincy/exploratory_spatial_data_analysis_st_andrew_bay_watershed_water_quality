@@ -390,7 +390,7 @@ print.file = "output_micromap/mmplot_tp_wb2020v2.jpeg", res=100)
 
 ```
 
-I do not recommend this second method as it assumes points and polygons are exactly geograpically matched. Consequently, I have commented out this code chunk. The second way to format the data assumes the points and polgyon datasets are in exact alignment. That is every point/station is in its appropriate polygon. A spatial intersection is done of the points/stations to the polygons so that now all the polygon attributes, such as SEGMENT_NA, are assigned to the points. After this spatial intersection is done, then a five-number summary of the WQ data can be made and the linked micromaps created.
+I do not recommend this second method as it assumes points and polygons are exactly geographically matched. Consequently, I have commented out this code chunk. The second way to format the data assumes the points and polgyon datasets are in exact alignment. That is every point/station is in its appropriate polygon. A spatial intersection is done of the points/stations to the polygons so that now all the polygon attributes, such as SEGMENT_NA, are assigned to the points. After this spatial intersection is done, then a five-number summary of the WQ data can be made and the linked micromaps created.
 
 Spatial intersection ends up omitting Bay-West Bay-3 from April 25, 2024 as that monitoring location does not intersect polygons for some reason. Need to think of summary statistics for Burnt Mill Creek, Crooked Creek and GICWW-West given their small sample sizes relative to West Bay main segment.
 
@@ -539,7 +539,8 @@ Very ugly draft linked micromap shows that 1) Upper Goose Bay station stats shou
 
 If used FDEP data would pick-up a lot more stations in bayous upstream of Bailey Bridge and downstream of dam/bridge.
 
-In bbl_5, Massalina Bayou polygon is mistakenly assigned to North Bay. Also, have an FDEP large lake station point in Massalina Bayou and it is has a bay assignment of North Bay. Also, need to bring both Robinson polygon and Robinson Bayou into North Bay.
+In bbl_5, Massalina Bayou polygon is mistakenly assigned to North Bay. Also, have an FDEP large lake station point in Massalina Bayou and it is has a bay assignment of North Bay. Also, need to bring both Robinson polygon and Robinson Bayou station into North Bay.
+
 ```{r nb_stats_spatial_join}
 nbdp_station1 <- dplyr::filter(np_sf1, bay == "Robinson Bayou" | bay == "Goose Bayou" | bay == "Upper Goose Bayou" | bay == "Fannin Bayou" | bay == "North Bay" | bay == "Deer Point Lake")
 # return 1531 observations
@@ -578,9 +579,9 @@ mapview(nbdp_station1, col.regions = "red") + bbl_5
 
 # shows odd coordinate placement in Massalina Bayou for monitoring location id 57719, a FDEP Large Lake sample supposedly for Lake Martin and bay was assigned as Deer Point Lake. This station point will be filtered out by sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC."
 
-# odd_coords_nb <- dplyr::filter(mm_station1, monitoring_location_id == "57719")
-# 
-# mapview(odd_coordinates) + bayous_wb1
+odd_coords_nb <- dplyr::filter(nbdp_station1, monitoring_location_id == "57719")
+ 
+mapview(odd_coords_nb, col.regions = "red") + bbl_5
 # 
 # mm_station1 <- dplyr::filter_out(mm_station1, monitoring_location_id == "BAY-WE-STBAY-5")
 # believe this filtering out removes all 28 obs for monitoring location BAY-WE-STBAY-5 so now have 1750 obs
@@ -603,18 +604,16 @@ nbdp_station2 %>%
 # now returns 6 rows/obs of summary stats for 6 bays
 
 
-bayous_nb1 <- dplyr::filter(bbl_5, Major_Seg == "North Bay")
-# returns 17 obs/polygon, but mistakenly includes Massalina Bayou
+bayous_nb1 <- dplyr::filter(bbl_5, Major_Seg == "North Bay" | SEGMENT_NA == "Robinson Bayou") %>% dplyr::filter_out(., SEGMENT_NA == "Massalina Bayou")
+  
+# returns 17 obs/polygon, and excludes Massalina Bayou
 
-bayous_nb2 <- dplyr::filter_out(bayous_nb1, SEGMENT_NA == "Massalina Bayou")
-# now 16 polygons
-mapview(bayous_nb2)
 
-# too laborious and missed some polygons, such as Maxwell and McKitchens
+# this method too laborious and missed some polygons, such as Maxwell and McKitchens
 # filter all North Bay polygons
 # bayous_nb1 <- dplyr::filter(bbl_4, SEGMENT_NA == "Fannin Bayou" | SEGMENT_NA == "Goose Bayou" | SEGMENT_NA == "Robinson Bayou" | SEGMENT_NA == "North Bay" | SEGMENT_NA == "Mud Bayou" | SEGMENT_NA == "Alligator Bayou_GeneratingPlant" | SEGMENT_NA == "Newman Bayou" | SEGMENT_NA == "Sheephead Bayou" | SEGMENT_NA == "Gainer Bayou" | SEGMENT_NA == "Hodges Bayou" |  SEGMENT_NA == "Mill Bayou" | SEGMENT_NA == "Beatty Bayou" | SEGMENT_NA == "Anderson Bayou" | SEGMENT_NA == "Upper Goose Bayou" | SEGMENT_NA == "Lynn Haven Bayou")
 
-mapview(nbdp_station2, col.regions = "green") + mapview(bayous_nb2)
+mapview(nbdp_station2, col.regions = "green") + mapview(bayous_nb1)
 # shows odd Massalina station
 
 # do replace values so SEGMENT_NA will match to bay in points data frame
@@ -647,14 +646,14 @@ tp_nbdp2020 <- st_set_geometry(nbdp_station2, NULL) %>%
   print(n = Inf)
 # returns 6 obs/rows of summary stats for 6 bays
 
-# use left_join as have a many polygons (n=16) to few stats (n=6 obs) and want to keep all the polygons whether polygons have stats or not
-tp_nbdp2020v2 <- left_join(bayous_nb2, tp_nbdp2020, by = join_by(SEGMENT_NA == bay), keep = TRUE)
+# use left_join as have a many polygons (n=11) to few stats (n=6 obs) and want to keep all the polygons whether polygons have stats or not
+tp_nbdp2020v2 <- left_join(bayous_nb1, tp_nbdp2020, by = join_by(SEGMENT_NA == bay), keep = TRUE)
 
 # use right_join so cut down polygons to n=6 to match stats
-tp_nbdp2020v3 <- right_join(bayous_nb2, tp_nbdp2020, by = join_by(SEGMENT_NA == bay), keep = TRUE)
+tp_nbdp2020v3 <- right_join(bayous_nb1, tp_nbdp2020, by = join_by(SEGMENT_NA == bay), keep = TRUE)
 
-# using tp_nb2020v2 shows how 11 bayous that do not have samples
-mmplot(map.data=tp_nb2020v2,
+# using tp_nbdp2020v2 shows how 11 bayous that do not have samples
+mmplot(map.data=tp_nbdp2020v2,
        panel.types=c('dot_legend', 'labels', 'box_summary', 'map'),
        panel.data=list(NA,
                        'SEGMENT_NA',
@@ -664,14 +663,14 @@ mmplot(map.data=tp_nb2020v2,
        ord.by='tp_lmed', rev.ord=TRUE,
        median.row=FALSE)
 
-# using tp_nb2020v3 shows only the 5 polygons with stats
-mmplot(map.data=tp_nb2020v3,
+# using tp_nbdp2020v3 shows only the 6 polygons with stats
+mmplot(map.data=tp_nbdp2020v3,
        panel.types=c('dot_legend', 'labels', 'box_summary', 'map'),
        panel.data=list(NA,
                        'SEGMENT_NA',
                        list('tp_lmin', 'tp_lq1', 'tp_lmed', 'tp_lq3', 'tp_lmax'),
                        NA),
-       grouping = 4,
+       grouping = 3,
        ord.by='tp_lmed', rev.ord=TRUE,
        median.row=FALSE)
 
@@ -846,7 +845,7 @@ mmplot(map.data=tp_nbdp2020v2,
        median.row=FALSE)
 
 # TP Refined Plot for North Bay, North Bay Bayous, and Deer Point Lake
-mmplot(map.data=tp_nbdp2020v2,
+mmplot(map.data=tp_nbdp2020v3,
        panel.types=c('dot_legend', 'labels', 'labels', 'labels', 'box_summary', 'map'),
        panel.data=list(NA,
                        'SEGMENT_NA',
@@ -866,11 +865,11 @@ mmplot(map.data=tp_nbdp2020v2,
        panel.att=list(list(1, panel.width=1, point.type=20, point.size=2,
                            point.border=TRUE), 
                       
-                      list(2, header='North Bay Segment, Bayous\n & Deer Point Lake', panel.width=1.2,#increased panel.width to 1.1 from .8
+                      list(2, header='North Bay, Bayous\n & Deer Point Lake', panel.width=1,#increased panel.width to 1.1 from .8
                            align='left', text.size=.8),
                       
-                      list(3, header='Total #\n of Samples',
-                           panel.width=.35,
+                      list(3, header='Total # of\n Samples',
+                           panel.width=.5,
                            align='right',
                            text.size=.8),
                       
@@ -887,12 +886,11 @@ mmplot(map.data=tp_nbdp2020v2,
                            graph.bar.size = 0.5,
                            #xaxis.labels.angle=90,
                            add.line=-4.27, add.line.col="black",
-                           xaxis.title='Log(TP, mg/L)', xaxis.title.size=1.25, panel.width=1.75),
+                           xaxis.title='Log(TP, mg/L)', xaxis.title.size=1.25, panel.width=1.7),
                       
                       list(6, header='Light Gray Means Highlighted Above',
-                           inactive.border.color=gray(.7), inactive.border.size=2,
-                            panel.width=1.75)),
-print.file = "output_micromap/mmplot_tp_nbdp2020v1.jpeg", res=100)
+                           inactive.border.color=gray(.7), inactive.border.size=2,panel.width=1.7)),
+print.file = "output_micromap/mmplot_tp_nbdp2020v9.jpeg", res=100)
 
 
 
