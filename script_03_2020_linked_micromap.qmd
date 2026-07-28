@@ -32,6 +32,8 @@ library(tidyverse)
 
 ## Log
 
+2026-07-16 Rose Horn uploaded Bays_Bayous_Lakes_v5 shapefiles to repository
+
 2026-05-30 calculated distances from Warren Bayou point/station to polygons in bayous_wb1
 
 2026-05-06 renamed with YYYY in script name
@@ -163,27 +165,27 @@ Rose Horn took 2 polygons for Alligator Bayou, which borders the U.S. Coast Guar
 
 Need to see if I have 8 polygon names for: East Bay, Grand Lagoon, North Bay, St. Andrew Bay, West Bay, Crooked and Burnt Mill Creeks, and Deer Point Lake as I want to use those 6 polygons in linked micromap. Perhaps by using SEGMENT_NA and Major_Seg I can get the polygons I want.
 
-```{r bbl_v4}
+```{r bbl_v5}
 
-bbl_4 <- st_read("data_gis/Bays_Bayous_Lakes_V4/Bays_Bayous_Lakes_V4.shp")
-summary(bbl_4)
-mapview(bbl_4)
+bbl_5 <- st_read("data_gis/Bays_Bayous_Lakes_V5.shp")
+summary(bbl_5)
+mapview(bbl_5)
 
-bbl_4 <- bbl_4 %>% st_transform(3087)
+bbl_5 <- bbl_5 %>% st_transform(3087)
 
-distinct(bbl_4, SEGMENT_NA) %>% dplyr::arrange(., SEGMENT_NA)
-# have 190 distinct SEGMENT_NA, but 191 obs suggesting one polygon is sharing a name
+distinct(bbl_5, SEGMENT_NA) %>% dplyr::arrange(., SEGMENT_NA)
+# now have 193 distinct SEGMENT_NA and 193 obs as I believe Rose Horn added Alligator Bayou_GeneratingPlant, and SheepsheadBayou_EastBay to distniguish them from bayous with same names. bbl_4 had 191 SEGMENT_NA 
 
 # Is Major_Seg a new field from Rose?
-distinct(bbl_4, Major_Seg) %>% dplyr::arrange(., Major_Seg)
+distinct(bbl_5, Major_Seg) %>% dplyr::arrange(., Major_Seg)
 # returns 8 Major_Seg
 
 
-mapview(np_sf1) + mapview(bbl_4)
+mapview(np_sf1) + mapview(bbl_5)
 # a burnt mill creek station from 2024-04-25 is off polygon
 
 # these 8 polygons might be what I use for a linked micromap
-polygons8 <- dplyr::filter(bbl_4, SEGMENT_NA == "West Bay" | SEGMENT_NA == "North Bay" | SEGMENT_NA == "St. Andrew Bay" | SEGMENT_NA == "East Bay" | SEGMENT_NA == "Burnt Mill Creek" | SEGMENT_NA == "Crooked Creek" | SEGMENT_NA == "Grand Lagoon" |SEGMENT_NA == "Deer Point Lake")
+polygons8 <- dplyr::filter(bbl_5, SEGMENT_NA == "West Bay" | SEGMENT_NA == "North Bay" | SEGMENT_NA == "St. Andrew Bay" | SEGMENT_NA == "East Bay" | SEGMENT_NA == "Burnt Mill Creek" | SEGMENT_NA == "Crooked Creek" | SEGMENT_NA == "Grand Lagoon" |SEGMENT_NA == "Deer Point Lake")
 
 mapview(polygons8)
 
