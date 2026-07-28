@@ -358,11 +358,11 @@ mmplot(map.data=tp_wb2020v2,
        panel.att=list(list(1, panel.width=1, point.type=20, point.size=2,
                            point.border=TRUE), 
                       
-                      list(2, header='West Bay Segment,\n Creeks & Bayous', panel.width=1.2,#increased panel.width to 1.1 from .8
+                      list(2, header='West Bay Segment,\n Creeks & Bayous', panel.width=1,#increased panel.width to 1.1 from .8
                            align='left', text.size=.8),
                       
                       list(3, header='Total #\n of Samples',
-                           panel.width=.35,
+                           panel.width=.45,
                            align='right',
                            text.size=.8),
                       
@@ -384,7 +384,7 @@ mmplot(map.data=tp_wb2020v2,
                       list(6, header='Light Gray Means Highlighted Above',
                            inactive.border.color=gray(.7), inactive.border.size=2,
                             panel.width=1.75)),
-print.file = "output_micromap/mmplot_tp_wb2020v2.jpeg", res=100)
+print.file = "output_micromap/mmplot_tp_wb2020v3.jpeg", res=100)
 
 
 
@@ -733,7 +733,6 @@ print.file = "output_micromap/mmplot_tp_nbdp2020v9.jpeg", res=100)
 
 ```
 
-
 ## East Bay, Bayous, and Creeks
 
 Filter bbl_5 by Major Segment for East Bay and get 42 polygons.
@@ -1069,10 +1068,10 @@ print.file = "output_micromap/mmplot_tp_sab2020v2.jpeg", res=100)
 ```
 
 ## Station and Polygon Issues
+
 Only 2 issues with polygons in bbl_5. First, Massalina Bayou is mistakenly assigned to Major Segment of North Bay and should be corrected to be East Bay. Second, in West Bay Harrrison Bayou polygon should be split in two. The southern bayou is Harrison Bayou, and the northern bayou is Little Johnson Bayou. At least that is how those 2 bayous are labeled in Google Maps and OpenTopoMap.
 
-Comments below pertain to bbl_4, and I believe polygon issues with bbl_4 have been corrected.
-Specific follow-up needed for some stations, such as coordinates that put a station on land, monitoring location ID BAY-WE-STBAY-3 near Burnt Mill Creek. Also, monitoring location ID BAY-WE-STBAY-5 that has a bay assignment of West Bay but coordinates put it in St. Andrew Bay.
+Comments below pertain to bbl_4, and I believe polygon issues with bbl_4 have been corrected. Specific follow-up needed for some stations, such as coordinates that put a station on land, monitoring location ID BAY-WE-STBAY-3 near Burnt Mill Creek. Also, monitoring location ID BAY-WE-STBAY-5 that has a bay assignment of West Bay but coordinates put it in St. Andrew Bay.
 
 Note that Sheepshead Bayou in North Bay actually has Major_Seg of "East Bay" assigned to it. There is a Sheepshead Bayou in East Bay, so maybe the one in North Bay is labelled incorrectly. Also, note that in North Bay, Fannin Bayou has 3 arms to that bayou.
 
