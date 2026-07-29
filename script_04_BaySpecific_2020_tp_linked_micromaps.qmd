@@ -173,6 +173,10 @@ Need to see if I have 8 polygon names for: East Bay, Grand Lagoon, North Bay, St
 
 bbl_5 <- st_read("data_gis/Bays_Bayous_Lakes_V5.shp")
 
+bbl_6 <- st_read("data_gis/Bays_Bayous_Lakes_V6.shp")
+
+bbl_7 <- st_read("data_gis/Bays_Bayous_Lakes_V7.shp")
+
 bbl_5 <- bbl_5 %>% st_transform(3087)
 
 summary(bbl_5)
