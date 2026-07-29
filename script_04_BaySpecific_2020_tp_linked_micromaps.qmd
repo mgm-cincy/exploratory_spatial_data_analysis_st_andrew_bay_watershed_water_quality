@@ -32,9 +32,11 @@ library(tidyverse)
 
 ## Log
 
-2026-06-20 bbl_v5 that Rose Horn uploaded to repository. No changes to refined West Bay micromap based on bbl_v5. The all polygons West Bay micromap now has Johnson Bayou_WestBay label and polygon displayed.
+20206-07-29 bbl_v7 from Rose Horn was uploaded to repository, and methods and metadata were uploaded to Methods folder.
 
-2026-06-25 update West Bay polygons to include bayous that do not have samples as I did with other bay segments. Need to check bayous in other bay segments following this approach: got names below by filterinig on Major_Seg West Bay in View mode of bbl_v4
+2026-07-20 bbl_v5 that Rose Horn uploaded to repository. No changes to refined West Bay micromap based on bbl_v5. The all polygons West Bay micromap now has Johnson Bayou_WestBay label and polygon displayed.
+
+2026-06-25 update West Bay polygons to include bayous that do not have samples as I did with other bay segments. Need to check bayous in other bay segments following this approach: got names below by filtering on Major_Seg West Bay in View mode of bbl_v4
 
 2026-05-30 calculated distances from Warren Bayou point/station to polygons in bayous_wb1
 
@@ -162,6 +164,7 @@ mapview(np_sf1) + mapview(nnc_1)
 ```
 
 ## Read Bays, Bayous and Lakes V4
+Using bbl_7 from Rose Horn.
 
 Using bbl_5 that Rose Horn sent, which has adjustments to distinguish polygons that had the same name. Still wonder why have Shape_Leng, Shape_Le_1 and Shape_Le_2.
 
@@ -169,29 +172,24 @@ Rose Horn took 2 polygons for Alligator Bayou, which borders the U.S. Coast Guar
 
 Need to see if I have 8 polygon names for: East Bay, Grand Lagoon, North Bay, St. Andrew Bay, West Bay, Crooked and Burnt Mill Creeks, and Deer Point Lake as I want to use those 6 polygons in linked micromap. Perhaps by using SEGMENT_NA and Major_Seg I can get the polygons I want.
 
-```{r bbl_v5}
-
-bbl_5 <- st_read("data_gis/Bays_Bayous_Lakes_V5.shp")
-
-bbl_6 <- st_read("data_gis/Bays_Bayous_Lakes_V6.shp")
+```{r bbl_v7}
 
 bbl_7 <- st_read("data_gis/Bays_Bayous_Lakes_V7.shp")
 
-bbl_5 <- bbl_5 %>% st_transform(3087)
+bbl_7 <- bbl_7 %>% st_transform(3087)
 
-summary(bbl_5)
-mapview(bbl_5)
+summary(bbl_7)
+mapview(bbl_7)
 
 
-distinct(bbl_5, SEGMENT_NA) %>% dplyr::arrange(., SEGMENT_NA)
-# with bbl_5 have 193 distinct segment names and 193 obs. Previously in bbl_4 had 190 distinct SEGMENT_NA, but 191 obs suggesting one polygon is sharing a name
+distinct(bbl_7, SEGMENT_NA) %>% dplyr::arrange(., SEGMENT_NA)
+# now with bbl_7 have 194 distinct segment names and 194 obs, I believe, because Harrison Bayou was split in to Harrison Bayou and Little Johnson Bayou. with bbl_5 have 193 distinct segment names and 193 obs. Previously in bbl_4 had 190 distinct SEGMENT_NA, but 191 obs suggesting one polygon is sharing a name
 
-# Is Major_Seg a new field from Rose?
-distinct(bbl_5, Major_Seg) %>% dplyr::arrange(., Major_Seg)
+distinct(bbl_7, Major_Seg) %>% dplyr::arrange(., Major_Seg)
 # returns 8 Major_Seg
 
 
-mapview(np_sf1) + mapview(bbl_5)
+mapview(np_sf1) + mapview(bbl_7)
 # a burnt mill creek station from 2024-04-25 is off polygon
 
 # these 8 polygons might be what I use for a linked micromap
@@ -204,6 +202,8 @@ mapview(np_sf1) + mapview(bbl_5)
 ```
 
 ## West Bay, Bayous, and Creeks
+
+Note that in bbl_7, both Harrison Bayou and Little Johnson Bayou in West Bay have same area. I think Rose Horn may have forgotten to recalculate areas once she edited the original Harrison Bayou.
 
 The two code chunks below illustrate 2 ways to format data to make linked micromaps. The first way involves filtering from the points/stations data so it only has points within the polygons of interest. Also, the filtered data need to have variable name, in this case "bay", to match to the polgyon names entered under SEGMENT_NA. A five-number summary is made of the WQ data grouped by bay. Next, the appropriate polygons are selected and, if needed, values under SEGMENT_NA are replaced to match the bay entries of the points. The polygon data and five-number summary data are merged using the shared variable names of SEGMENT_NA and bay.
 
@@ -274,14 +274,14 @@ wb_station3 %>%
   summarize(., count = dplyr::n())
 #now have 5 bays
 
-# got names below by filtering on Major_Seg West Bay in View mode of bbl_v4
-bayous_wb1 <- dplyr::filter(bbl_5, SEGMENT_NA == "Burnt Mill Creek" | SEGMENT_NA == "Crooked Creek" | SEGMENT_NA == "Warren Bayou" | SEGMENT_NA == "Gulf ICWW between Choctawhatchee Bay and St. Andrew Bay" | SEGMENT_NA == "West Bay" | SEGMENT_NA == "Johnson Bayou_WestBay" | SEGMENT_NA == "Basin Bayou" | SEGMENT_NA == "Botheration Bayou" | SEGMENT_NA == "Doyle Bayou" | SEGMENT_NA == "Harrison Bayou" | SEGMENT_NA == "Ward Creek")
-# returns 11 obs matching 11 segment names
+# got names below by filtering on Major_Seg West Bay in View mode of bbl_v7 and adding Gulf ICCW to list
+bayous_wb1 <- dplyr::filter(bbl_7, SEGMENT_NA == "Burnt Mill Creek" | SEGMENT_NA == "Crooked Creek" | SEGMENT_NA == "Warren Bayou" | SEGMENT_NA == "Gulf ICWW between Choctawhatchee Bay and St. Andrew Bay" | SEGMENT_NA == "West Bay" | SEGMENT_NA == "Johnson Bayou_WestBay" | SEGMENT_NA == "Basin Bayou" | SEGMENT_NA == "Botheration Bayou" | SEGMENT_NA == "Doyle Bayou" | SEGMENT_NA == "Harrison Bayou" | SEGMENT_NA == "Little Johnson Bayou" |SEGMENT_NA == "Ward Creek")
+# returns 12 obs matching 12 segment names
 mapview(bayous_wb1)
 # no longer see other Johnson Bayou in St. Andrew Bay
 
 mapview(wb_station3) + bayous_wb1
-# still see sta_nr 2.5, which is BAY-WE-STBAY-5, b/c of 2006-12-01 collection but will loose that when I filter vor year == 2020 in 5-number summary stats
+# still see sta_nr 2.5, which is BAY-WE-STBAY-5, b/c of 2006-12-01 collection but will loose that when I filter for year == 2020 in 5-number summary stats
 
 # do replace values so SEGMENT_NA will match to bay in points data frame
 bayous_wb2 <- bayous_wb1 |> 
@@ -312,13 +312,13 @@ tp_wb2020 <- st_set_geometry(wb_station3, NULL) %>%
             tp_na_count = sum(is.na(tp))) %>% 
   print(n = Inf)
 
-# use left_join as have a many polygons (n=11) to few stats (n=5 obs) and want to keep all the polygons whether polygons have stats or not
+# use left_join as have a many polygons (n=12) to few stats (n=5 obs) and want to keep all the polygons whether polygons have stats or not
 tp_wb2020v1 <- left_join(bayous_wb2, tp_wb2020, by = join_by(SEGMENT_NA == bay), keep = TRUE)
 
-# use right_join so cut down polygons to n=8 to match stats
+# use right_join so cut down polygons to n=5 to match stats
 tp_wb2020v2 <- right_join(bayous_wb2, tp_wb2020, by = join_by(SEGMENT_NA == bay), keep = TRUE)
 
-
+# this micromap shows Little John Bayou
 mmplot(map.data=tp_wb2020v1,
        panel.types=c('dot_legend', 'labels', 'box_summary', 'map'),
        panel.data=list(NA,
@@ -388,7 +388,7 @@ mmplot(map.data=tp_wb2020v2,
                       list(6, header='Light Gray Means Highlighted Above',
                            inactive.border.color=gray(.7), inactive.border.size=2,
                             panel.width=1.75)),
-print.file = "output_micromap/mmplot_tp_wb2020v3.jpeg", res=100)
+print.file = "output_micromap/mmplot_tp_wb2020v4.jpeg", res=100)
 
 
 
@@ -912,6 +912,8 @@ print.file = "output_micromap/mmplot_tp_eb2020v2.jpeg", res=100)
 ```
 
 ## St. Andrew Bay and Bayous
+
+Do I need to do a spatial intesect of SAB polygon to monitoring_location_id == "BAY-WE-STBAY-5" so that station gets assigned to SAB and not West Bay?
 
 Filtered bbl_5 by Major Segment equal St. Andrew Bay, and returned 10 polygons, which included St. Andrew Bay to St. Joseph Bay ICCW.
 
