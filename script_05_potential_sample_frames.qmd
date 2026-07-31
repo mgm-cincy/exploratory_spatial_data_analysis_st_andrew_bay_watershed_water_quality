@@ -1,0 +1,106 @@
+---
+title: "Potential Sample Frames"
+author: "Mike McManus"
+format: html
+editor: visual
+editor_options: 
+  chunk_output_type: console
+---
+
+## Libraries
+
+```{r libraries}
+library(tidyverse)
+library(sf)
+library(mapview)
+library(janitor)
+library(leaflet)
+library(leafpop) # for popups in 
+library(leafsync) # sync mapview maps
+library(leafem) # add labels to map
+library(patchwork)
+library(nhdplusTools)
+library(tmap)
+library(forcats)
+library(gifski) #for tmap animation
+library(plotly)
+library(webshot) # save mapview object
+library(nngeo)
+library(micromap)
+library(tidyverse)
+```
+
+## Log
+
+## Read Bays, Bayous and Lakes V7
+
+Using bbl_7 from Rose Horn.
+
+Using bbl_5 that Rose Horn sent, which has adjustments to distinguish polygons that had the same name. Still wonder why have Shape_Leng, Shape_Le_1 and Shape_Le_2.
+
+Rose Horn took 2 polygons for Alligator Bayou, which borders the U.S. Coast Guard Station on St. Andrew Bay, and splits them into separate sampling areas. Also, in version the new update reflects the removal of small edge portions of St. Andrew Bay that were along the edges of East Bay and Grand Lagoon. Looks like I should pick-up Upper and Lower Burnt Mill Creek Stations.
+
+Need to see if I have 8 polygon names for: East Bay, Grand Lagoon, North Bay, St. Andrew Bay, West Bay, Crooked and Burnt Mill Creeks, and Deer Point Lake as I want to use those 6 polygons in linked micromap. Perhaps by using SEGMENT_NA and Major_Seg I can get the polygons I want.
+
+```{r bbl_v7}
+
+bbl_7 <- st_read("data_gis/Bays_Bayous_Lakes_V7.shp")
+
+bbl_7 <- bbl_7 %>% st_transform(3087)
+
+names(bbl_7)
+summary(bbl_7)
+mapview(bbl_7)
+
+
+distinct(bbl_7, SEGMENT_NA) %>% dplyr::arrange(., SEGMENT_NA)
+# now with bbl_7 have 194 distinct segment names and 194 obs, I believe, because Harrison Bayou was split in to Harrison Bayou and Little Johnson Bayou. with bbl_5 have 193 distinct segment names and 193 obs. Previously in bbl_4 had 190 distinct SEGMENT_NA, but 191 obs suggesting one polygon is sharing a name
+
+distinct(bbl_7, Major_Seg) %>% dplyr::arrange(., Major_Seg)
+# returns 8 Major_Seg
+
+
+```
+
+## Filter Bays and Bayous
+```{r filter_bays_bayous}
+
+bayous_wb1 <- dplyr::filter(bbl_7, SEGMENT_NA == "Burnt Mill Creek" | SEGMENT_NA == "Crooked Creek" | SEGMENT_NA == "Warren Bayou" | SEGMENT_NA == "Gulf ICWW between Choctawhatchee Bay and St. Andrew Bay" | SEGMENT_NA == "West Bay" | SEGMENT_NA == "Johnson Bayou_WestBay" | SEGMENT_NA == "Basin Bayou" | SEGMENT_NA == "Botheration Bayou" | SEGMENT_NA == "Doyle Bayou" | SEGMENT_NA == "Harrison Bayou" | SEGMENT_NA == "Little Johnson Bayou" |SEGMENT_NA == "Ward Creek")
+# returns 12 obs matching 12 segment names
+
+bayous_wb2 <- bayous_wb1 |> 
+  mutate(
+  SEGMENT_NA = SEGMENT_NA |>
+    replace_values(
+      "Gulf ICWW between Choctawhatchee Bay and St. Andrew Bay" ~ "West Bay ICWW"
+    )
+  )  
+
+# filter for North Bay and include Robinson Bay, which is near North Bay and St. Andrew Bay border
+bayous_nb1 <- dplyr::filter(bbl_7, Major_Seg == "North Bay" | SEGMENT_NA == "Robinson Bayou")
+# using bbl_7 returns 17 obs/polygon
+
+bayous_eb1 <- dplyr::filter(bbl_7, Major_Seg == "East Bay")
+# returns 42 polygons
+
+bayous_eb2 <- bayous_eb1 |>
+  mutate(
+  SEGMENT_NA = SEGMENT_NA |>
+    replace_values(
+      "Gulf ICWW between St. Andrew Bay and St. Joseph Bay" ~ "East Bay ICWW"
+    )
+  )
+
+# dropped Crooked Island Sound polygon
+bayous_sab1 <- dplyr::filter(bbl_7, SEGMENT_NA == "Alligator Bayou" |  SEGMENT_NA == "Grand Lagoon" |SEGMENT_NA == "Hog Island Sound" | SEGMENT_NA == "Johnson Bayou"| SEGMENT_NA == "Lake Huntington" | SEGMENT_NA == "Massalina Bayou" | SEGMENT_NA == "Posten Bayou" | SEGMENT_NA == "Pretty Bayou" | SEGMENT_NA == "St. Andrew Bay")
+# returns 9 obs
+
+```
+
+## Mapview Bays and Bayous
+```{r mapview_bays_bayous}
+
+mapview(bayous_eb2, col.regions = "gray") + mapview(bayous_nb1, col.regions = "orange") + mapview(bayous_sab1, col.regions = "green") + mapview(bayous_wb2, col.regions = "blue")
+
+```
+
