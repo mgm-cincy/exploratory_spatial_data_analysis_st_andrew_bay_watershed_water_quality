@@ -719,12 +719,12 @@ mmplot(map.data=tn_nbdp2020v3,
                            xaxis.labels.size=1.25,
                            graph.bar.size = 0.5,
                            #xaxis.labels.angle=90,
-                           add.line=-4.27, add.line.col="black",
+                           add.line=-1.273, add.line.col="black",
                            xaxis.title='Log(tn, mg/L)', xaxis.title.size=1.25, panel.width=1.7),
                       
                       list(6, header='Light Gray Means Highlighted Above',
                            inactive.border.color=gray(.7), inactive.border.size=2,panel.width=1.7)),
-print.file = "output_micromap/mmplot_tn_nbdp2020v1.jpeg", res=100)
+print.file = "output_micromap/mmplot_tn_nbdp2020v2.jpeg", res=100)
 
 
 
