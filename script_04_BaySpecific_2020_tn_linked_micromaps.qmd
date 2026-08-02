@@ -544,7 +544,7 @@ Likely worthwhile to see if FDEP probabilistic large river and small stream stat
 
 In bbl_7, Massalina Bayou polygon is mistakenly assigned to North Bay. Also, have an FDEP large lake station point in Massalina Bayou and it is has a bay assignment of North Bay. Also, need to bring both Robinson polygon and Robinson Bayou station into North Bay.
 
-```{r nbdp_stats_spatial_join}
+```{r nbdp_tn}
 nbdp_station1 <- dplyr::filter(np_sf1, bay == "Robinson Bayou" | bay == "Goose Bayou" | bay == "Upper Goose Bayou" | bay == "Fannin Bayou" | bay == "North Bay" | bay == "Deer Point Lake")
 # return 1531 observations
 
@@ -732,21 +732,23 @@ print.file = "output_micromap/mmplot_tn_nbdp2020v2.jpeg", res=100)
 
 ## East Bay, Bayous, and Creeks
 
+Excluding Massalina Bayou station and polygon as both will go into St. Andrew Bay. Excluding Lake Martin station and polygon as well. 
+
 Filter bbl_7 by Major Segment for East Bay and get 42 polygons.
 
-```{r eb_stats_spatial_join}
+```{r eb_tn}
 
-eb_station1 <- dplyr::filter(np_sf1, bay == "Massalina Bayou" | bay == "Watson Bayou" | bay == "Lake Martin" | bay == "Pitts Bayou"| bay == "Callaway Bayou" | bay == "Laird Bayou" | bay == "Sandy Creek" | bay == "Parker Bayou"| bay == "Eagle Nest Bayou" | bay == "East Bay" | monitoring_location_id == "NWFYI0018")
-# returns 1938 obs
+eb_station1 <- dplyr::filter(np_sf1, bay == "Watson Bayou" | bay == "Pitts Bayou"| bay == "Callaway Bayou" | bay == "Laird Bayou" | bay == "Sandy Creek" | bay == "Parker Bayou"| bay == "Eagle Nest Bayou" | bay == "East Bay" | monitoring_location_id == "NWFYI0018")
+# returns 1733 obs
 
 mapview(eb_station1, col.regions = "red") + bbl_7
 
 distinct(eb_station1, monitoring_location_id) %>% arrange(., monitoring_location_id) %>% print(n=Inf)
-# returns 25 observations including 1 NA, 2 Callaway Bayou stations,  5 East Bayou stations, 3 Laird Bayou stations, 1 Lake Martin station, 1 Massalina Bayou station, 1 Parker Bayou station, 1 Pitts Bayou Station, 1 Watson Bayou station, 8 FDEP Stations, that begin with G3TLHR, and 1 NWFY10018 station
+# returns 22 observations including 1 NA, 2 Callaway Bayou stations,  5 East Bayou stations, 3 Laird Bayou stations, 1 Parker Bayou station, 1 Pitts Bayou Station, 1 Watson Bayou station, 7 FDEP Stations, that begin with G3TLHR, and 1 NWFY10018 station
 
-ggplot(eb_station1 |> filter(year >=2020), aes(x=yrmm_factor, y=log(tp))) + geom_point() + facet_wrap(vars(monitoring_location_id))
+ggplot(eb_station1 |> filter(year >=2020), aes(x=yrmm_factor, y=log(tn))) + geom_point() + facet_wrap(vars(monitoring_location_id))
 
-ggplot(eb_station1 |> filter(year >=2020), aes(y=bay, x=log(tp))) + geom_boxplot() + facet_wrap(vars(yrmm_factor))
+ggplot(eb_station1 |> filter(year >=2020), aes(y=bay, x=log(tn))) + geom_boxplot() + facet_wrap(vars(yrmm_factor))
 
 # evaluate samples within bays across all years
 # note 2 samples from St. Andrew Bay
@@ -767,9 +769,13 @@ eb_station1 %>%
   group_by(year) %>% 
   summarize(., count = dplyr::n())
 
-# inserted Parker Bayou, but those polygon slivers should be cleaned up
-bayous_eb1 <- dplyr::filter(bbl_7, SEGMENT_NA == "Auburn Cove" |SEGMENT_NA == "Baby Bayou" | SEGMENT_NA == "Baker Bayou"  | SEGMENT_NA == "Big Cove" | SEGMENT_NA == "Blind Alligator Bayou" | SEGMENT_NA == "Boggy Bayo"| SEGMENT_NA == "Boggy Creek" | SEGMENT_NA == "Bunkers Cove" | SEGMENT_NA == "Burkett Bayou" | SEGMENT_NA == "California Bayou" | SEGMENT_NA == "Callaway Bayou" |  SEGMENT_NA == "Chatterson Bayou" | SEGMENT_NA == "Cooks Bayou" | SEGMENT_NA == "Dolan Bayou" | SEGMENT_NA == "Eagle Nest Bayou" | SEGMENT_NA == "East Bay" | SEGMENT_NA == "Emmons Bayou" | SEGMENT_NA == "Farmdale Bayou" | SEGMENT_NA == "Fred Bayou" | SEGMENT_NA == "Freshwater Bayou" | SEGMENT_NA == "Gulf ICWW between St. Andrew Bay and St. Joseph Bay"| SEGMENT_NA == "Higgs Bayou" | SEGMENT_NA == "Horseshoe Bayou" | SEGMENT_NA == "Laird Bayou" | SEGMENT_NA == "Lake Clair" |SEGMENT_NA == "Lake Van Vac" | SEGMENT_NA == "Lathrop Bayou" | SEGMENT_NA == "Massalina Bayou" |SEGMENT_NA == "Murray Bayou" | SEGMENT_NA == "Parker Bayou" | SEGMENT_NA == "Pearl Bayou" | SEGMENT_NA == "Piclalene Bayou" | SEGMENT_NA == "Pitts Bayou" | SEGMENT_NA == "Pratt Bayou" |SEGMENT_NA == "Richard Bayou" |SEGMENT_NA == "Sandy Creek" |SEGMENT_NA == "SheepheadBayou_EastBay" |SEGMENT_NA == "Smack Bayou" |SEGMENT_NA == "Smith Bayou" | SEGMENT_NA == "Strange Bayou" | SEGMENT_NA == "Turtle Slough" | SEGMENT_NA == "Walker Bayou" | SEGMENT_NA == "Watson Bayou"| SEGMENT_NA == "Wetappo Creek" | SEGMENT_NA == "Lannie Rowe" | SEGMENT_NA == "Lake Martin")
-# returns 43 obs b/c I filtered for Masslina Bayou, which has the mistaken major segment assignment of North Bay
+# Bunkers Cove, Lannie Rowe, and Lake Martin dropped in bbl_7 and Massalina Bayou moved to St. Andrew Bay segement because close to border of SAB and East Bay. See metadata and methods from 07/28/2026 in Methods folder provided by Rose Horn
+
+bayous_eb1 <- dplyr::filter(bbl_7, Major_Seg == "East Bay")
+# returns 42 polygons
+
+# this method is too laborious
+# bayous_eb1 <- dplyr::filter(bbl_7, SEGMENT_NA == "Auburn Cove" |SEGMENT_NA == "Baby Bayou" | SEGMENT_NA == "Baker Bayou"  | SEGMENT_NA == "Big Cove" | SEGMENT_NA == "Blind Alligator Bayou" | SEGMENT_NA == "Boggy Bayo"| SEGMENT_NA == "Boggy Creek" | SEGMENT_NA == "Bunkers Cove" | SEGMENT_NA == "Burkett Bayou" | SEGMENT_NA == "California Bayou" | SEGMENT_NA == "Callaway Bayou" |  SEGMENT_NA == "Chatterson Bayou" | SEGMENT_NA == "Cooks Bayou" | SEGMENT_NA == "Dolan Bayou" | SEGMENT_NA == "Eagle Nest Bayou" | SEGMENT_NA == "East Bay" | SEGMENT_NA == "Emmons Bayou" | SEGMENT_NA == "Farmdale Bayou" | SEGMENT_NA == "Fred Bayou" | SEGMENT_NA == "Freshwater Bayou" | SEGMENT_NA == "Gulf ICWW between St. Andrew Bay and St. Joseph Bay"| SEGMENT_NA == "Higgs Bayou" | SEGMENT_NA == "Horseshoe Bayou" | SEGMENT_NA == "Laird Bayou" | SEGMENT_NA == "Lake Clair" |SEGMENT_NA == "Lake Van Vac" | SEGMENT_NA == "Lathrop Bayou" | SEGMENT_NA == "Massalina Bayou" |SEGMENT_NA == "Murray Bayou" | SEGMENT_NA == "Parker Bayou" | SEGMENT_NA == "Pearl Bayou" | SEGMENT_NA == "Piclalene Bayou" | SEGMENT_NA == "Pitts Bayou" | SEGMENT_NA == "Pratt Bayou" |SEGMENT_NA == "Richard Bayou" |SEGMENT_NA == "Sandy Creek" |SEGMENT_NA == "SheepheadBayou_EastBay" |SEGMENT_NA == "Smack Bayou" |SEGMENT_NA == "Smith Bayou" | SEGMENT_NA == "Strange Bayou" | SEGMENT_NA == "Turtle Slough" | SEGMENT_NA == "Walker Bayou" | SEGMENT_NA == "Watson Bayou"| SEGMENT_NA == "Wetappo Creek" | SEGMENT_NA == "Lannie Rowe" | SEGMENT_NA == "Lake Martin")
 
 mapview(bayous_eb1)
 
@@ -800,71 +806,71 @@ mapview(odd_polygon)
 # FDEP stations labeled as Parker Bayou excluded by filtering below
 
 # getting 5-number summary from points data
-tp_eb2020 <- st_set_geometry(eb_station1, NULL) %>% 
+tn_eb2020 <- st_set_geometry(eb_station1, NULL) %>% 
   dplyr::filter(., year == 2020 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.") %>% 
-  dplyr::select(., tp, bay) %>% 
+  dplyr::select(., tn, bay) %>% 
   group_by(., bay) %>% 
-  summarize(., tp_min = fivenum(tp)[1],
-            tp_q1 = fivenum(tp)[2],
-            tp_med = fivenum(tp)[3],
-            tp_q3 = fivenum(tp)[4],
-            tp_max = fivenum(tp)[5],
-            tp_lmin = log(fivenum(tp)[1]),
-            tp_lq1 = log(fivenum(tp)[2]),
-            tp_lmed = log(fivenum(tp)[3]),
-            tp_lq3 = log(fivenum(tp)[4]),
-            tp_lmax = log(fivenum(tp)[5]),
-            tp_count = dplyr::n(),
-            tp_mean = mean(tp, na.rm = TRUE),
-            tp_na_count = sum(is.na(tp))) %>% 
+  summarize(., tn_min = fivenum(tn)[1],
+            tn_q1 = fivenum(tn)[2],
+            tn_med = fivenum(tn)[3],
+            tn_q3 = fivenum(tn)[4],
+            tn_max = fivenum(tn)[5],
+            tn_lmin = log(fivenum(tn)[1]),
+            tn_lq1 = log(fivenum(tn)[2]),
+            tn_lmed = log(fivenum(tn)[3]),
+            tn_lq3 = log(fivenum(tn)[4]),
+            tn_lmax = log(fivenum(tn)[5]),
+            tn_count = dplyr::n(),
+            tn_mean = mean(tn, na.rm = TRUE),
+            tn_na_count = sum(is.na(tn))) %>% 
   print(n = Inf)
-# returns 8 obs
+# returns 6 obs
 
 # use left_join as have a many polygons (n=43) to few stats (n=8 obs) and want to keep all the polygons whether polygons have stats or not
-tp_eb2020v2 <- left_join(bayous_eb2, tp_eb2020, by = join_by(SEGMENT_NA == bay), keep = TRUE)
+tn_eb2020v2 <- left_join(bayous_eb2, tn_eb2020, by = join_by(SEGMENT_NA == bay), keep = TRUE)
 
 # use right_join so cut down polygons to n=8 to match stats
-tp_eb2020v3 <- right_join(bayous_eb2, tp_eb2020, by = join_by(SEGMENT_NA == bay), keep = TRUE)
+tn_eb2020v3 <- right_join(bayous_eb2, tn_eb2020, by = join_by(SEGMENT_NA == bay), keep = TRUE)
 
 # think there is a mismatch between Parker Bayou station coordinates and Parker Bayou polygon as originally had an empty row for Parker Bayou, which led to the investigation above
 
 # need appropriate polygon for Parker Bayou as slivers are not visible
 
-# using tp_eb2020v2 shows how 35 bayous that do not have samples
-mmplot(map.data=tp_eb2020v2,
+# using tn_eb2020v2 shows how 35 bayous that do not have samples
+mmplot(map.data=tn_eb2020v2,
        panel.types=c('dot_legend', 'labels', 'box_summary', 'map'),
        panel.data=list(NA,
                        'SEGMENT_NA',
-                       list('tp_lmin', 'tp_lq1', 'tp_lmed', 'tp_lq3', 'tp_lmax'),
+                       list('tn_lmin', 'tn_lq1', 'tn_lmed', 'tn_lq3', 'tn_lmax'),
                        NA),
        grouping = 5,
-       ord.by='tp_lmed', rev.ord=TRUE,
+       ord.by='tn_lmed', rev.ord=TRUE,
        median.row=FALSE)
 
-# using tp_nb2020v3 shows only the 8 polygons with wq stats
-mmplot(map.data=tp_eb2020v3,
+# using tn_nb2020v3 shows only the 8 polygons with wq stats
+mmplot(map.data=tn_eb2020v3,
        panel.types=c('dot_legend', 'labels', 'box_summary', 'map'),
        panel.data=list(NA,
                        'SEGMENT_NA',
-                       list('tp_lmin', 'tp_lq1', 'tp_lmed', 'tp_lq3', 'tp_lmax'),
+                       list('tn_lmin', 'tn_lq1', 'tn_lmed', 'tn_lq3', 'tn_lmax'),
                        NA),
-       grouping = 4,
-       ord.by='tp_lmed', rev.ord=TRUE,
+       grouping = 3,
+       ord.by='tn_lmed', rev.ord=TRUE,
        median.row=FALSE)
 
 
-# using tp_eb2020v3 shows only the 8 polygons with stats
-# TP Refined Plot for East Bay and Bayous
-mmplot(map.data=tp_eb2020v3,
+# using tn_eb2020v3 shows only the 8 polygons with stats
+# tn Refined Plot for East Bay and Bayous
+mmplot(map.data=tn_eb2020v3,
        panel.types=c('dot_legend', 'labels', 'labels', 'labels', 'box_summary', 'map'),
        panel.data=list(NA,
                        'SEGMENT_NA',
-                       'tp_count',
-                       'tp_na_count',
-                       list('tp_lmin', 'tp_lq1', 'tp_lmed', 'tp_lq3', 'tp_lmax'),
+                       'tn_count',
+                       'tn_na_count',
+                       list('tn_lmin', 'tn_lq1', 'tn_lmed', 'tn_lq3', 'tn_lmax'),
                        NA),
-       grouping = 4,
-       ord.by='tp_lmed',
+       grouping = 3,
+       ord.by='tn_lmed',
        rev.ord=TRUE,
        median.row=FALSE,
        plot.pGrp.spacing=1,
@@ -875,11 +881,11 @@ mmplot(map.data=tp_eb2020v3,
        panel.att=list(list(1, panel.width=1, point.type=20, point.size=2,
                            point.border=TRUE), 
                       
-                      list(2, header='East Bay Segment,\n & Bayous', panel.width=1.2,#increased panel.width to 1.1 from .8
+                      list(2, header='East Bay Segment,\n & Bayous', panel.width=1,#increased panel.width to 1.1 from .8
                            align='left', text.size=.8),
                       
                       list(3, header='Total #\n of Samples',
-                           panel.width=.35,
+                           panel.width=.5,
                            align='right',
                            text.size=.8),
                       
@@ -888,19 +894,19 @@ mmplot(map.data=tp_eb2020v3,
                            align='right',
                            text.size=.8),
                       
-                      list(5, header='2020 Detectable Total Phoshporous',
+                      list(5, header='2020 Detectable Total Nitrogen',
                            graph.bgcolor='lightgray',
-                           xaxis.ticks=c(-6.0, -5.0, -4.0, -3.0, -2.0),
-                           xaxis.labels=c(-6,-5, -4, -3, -2),
+                           xaxis.ticks=c(-2.5, -2.0, -1.5, -1.0, -0.5, 0.0),
+                           xaxis.labels=c(-2.5, -2.0, -1.5, -1.0, -0.5, 0.0),
                            xaxis.labels.size=1.25,
                            graph.bar.size = 0.5,
                            #xaxis.labels.angle=90,
-                           add.line=-4.13, add.line.col="black",
-                           xaxis.title='Log(TP, mg/L)', xaxis.title.size=1.25, panel.width=1.75),
+                           add.line=-1.109, add.line.col="black",
+                           xaxis.title='Log(tn, mg/L)', xaxis.title.size=1.25, panel.width=1.75),
                       
                       list(6, header='Light Gray Means Highlighted Above',
                            inactive.border.color=gray(.7), inactive.border.size=2, panel.width=1.75)),
-print.file = "output_micromap/mmplot_tp_eb2020v2.jpeg", res=100)
+print.file = "output_micromap/mmplot_tn_eb2020v3.jpeg", res=100)
 
 ```
 
