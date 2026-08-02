@@ -36,7 +36,6 @@ library(tidyverse)
 
 2026-07-28 copied tp script 04 to make tn linked micromaps
 
-
 ## Reading in Data and Formatting Date Variables
 
 One csv file, win_baywatch_sabnut.csv, uploaded by Ryann Rossi, SASJBEP, on December 23, 2025. Ryan pulled the data from WIN and did some data cleaning. Note activity_start_date comes in as character.
@@ -575,9 +574,9 @@ nbdp_station1 %>%
   summarize(., count = dplyr::n())
 
 
-ggplot(nbdp_station1 |> filter(year >=2020), aes(x=yrmm_factor, y=log(tp))) + geom_point() + facet_wrap(vars(monitoring_location_id))
+ggplot(nbdp_station1 |> filter(year >=2020), aes(x=yrmm_factor, y=log(tn))) + geom_point() + facet_wrap(vars(monitoring_location_id))
 
-ggplot(nbdp_station1 |> filter(year >=2020), aes(y=bay, x=log(tp))) + geom_boxplot() + facet_wrap(vars(yrmm_factor))
+ggplot(nbdp_station1 |> filter(year >=2020), aes(y=bay, x=log(tn))) + geom_boxplot() + facet_wrap(vars(yrmm_factor))
 
 mapview(nbdp_station1, col.regions = "red") + bbl_7
 
@@ -593,7 +592,7 @@ mapview(odd_coords_nb, col.regions = "red") + bbl_7
 distinct(nbdp_station1, monitoring_location_id) %>% arrange(., monitoring_location_id) %>% print(n=Inf)
 # still returns 31 obs
 
-# this creates an Upper Goose Bayou so stats can be assigned to that station
+# this creates an Upper Goose Bayou so stats can be assigned to that station and then to that polygon
 nbdp_station2 <- nbdp_station1 |>
   mutate(
     bay = case_when(monitoring_location_id == "BAY-UPPER-GOOSE-BAYOU-1" ~ "Upper Goose Bayou",
@@ -630,66 +629,66 @@ mapview(nbdp_station2, col.regions = "green") + mapview(bayous_nb1)
 #   )  
 
 # getting 5-number summary from points data
-tp_nbdp2020 <- st_set_geometry(nbdp_station2, NULL) %>% 
+tn_nbdp2020 <- st_set_geometry(nbdp_station2, NULL) %>% 
   dplyr::filter(., year == 2020 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.") %>% 
-  dplyr::select(., tp, bay) %>% 
+  dplyr::select(., tn, bay) %>% 
   group_by(., bay) %>% 
-  summarize(., tp_min = fivenum(tp)[1],
-            tp_q1 = fivenum(tp)[2],
-            tp_med = fivenum(tp)[3],
-            tp_q3 = fivenum(tp)[4],
-            tp_max = fivenum(tp)[5],
-            tp_lmin = log(fivenum(tp)[1]),
-            tp_lq1 = log(fivenum(tp)[2]),
-            tp_lmed = log(fivenum(tp)[3]),
-            tp_lq3 = log(fivenum(tp)[4]),
-            tp_lmax = log(fivenum(tp)[5]),
-            tp_count = dplyr::n(),
-            tp_mean = mean(tp, na.rm = TRUE),
-            tp_na_count = sum(is.na(tp))) %>% 
+  summarize(., tn_min = fivenum(tn)[1],
+            tn_q1 = fivenum(tn)[2],
+            tn_med = fivenum(tn)[3],
+            tn_q3 = fivenum(tn)[4],
+            tn_max = fivenum(tn)[5],
+            tn_lmin = log(fivenum(tn)[1]),
+            tn_lq1 = log(fivenum(tn)[2]),
+            tn_lmed = log(fivenum(tn)[3]),
+            tn_lq3 = log(fivenum(tn)[4]),
+            tn_lmax = log(fivenum(tn)[5]),
+            tn_count = dplyr::n(),
+            tn_mean = mean(tn, na.rm = TRUE),
+            tn_na_count = sum(is.na(tn))) %>% 
   print(n = Inf)
 # returns 6 obs/rows of summary stats for 6 bays
 
 # use left_join as have a many polygons (n=11) to few stats (n=6 obs) and want to keep all the polygons whether polygons have stats or not
-tp_nbdp2020v2 <- left_join(bayous_nb1, tp_nbdp2020, by = join_by(SEGMENT_NA == bay), keep = TRUE)
+tn_nbdp2020v2 <- left_join(bayous_nb1, tn_nbdp2020, by = join_by(SEGMENT_NA == bay), keep = TRUE)
 
 # use right_join so cut down polygons to n=6 to match stats
-tp_nbdp2020v3 <- right_join(bayous_nb1, tp_nbdp2020, by = join_by(SEGMENT_NA == bay), keep = TRUE)
+tn_nbdp2020v3 <- right_join(bayous_nb1, tn_nbdp2020, by = join_by(SEGMENT_NA == bay), keep = TRUE)
 
-# using tp_nbdp2020v2 shows how 11 bayous that do not have samples
-mmplot(map.data=tp_nbdp2020v2,
+# using tn_nbdp2020v2 shows how 11 bayous that do not have samples
+mmplot(map.data=tn_nbdp2020v2,
        panel.types=c('dot_legend', 'labels', 'box_summary', 'map'),
        panel.data=list(NA,
                        'SEGMENT_NA',
-                       list('tp_lmin', 'tp_lq1', 'tp_lmed', 'tp_lq3', 'tp_lmax'),
+                       list('tn_lmin', 'tn_lq1', 'tn_lmed', 'tn_lq3', 'tn_lmax'),
                        NA),
        grouping = 5,
-       ord.by='tp_lmed', rev.ord=TRUE,
+       ord.by='tn_lmed', rev.ord=TRUE,
        median.row=FALSE)
 
-# using tp_nbdp2020v3 shows only the 6 polygons with stats
-mmplot(map.data=tp_nbdp2020v3,
+# using tn_nbdp2020v3 shows only the 6 polygons with stats
+mmplot(map.data=tn_nbdp2020v3,
        panel.types=c('dot_legend', 'labels', 'box_summary', 'map'),
        panel.data=list(NA,
                        'SEGMENT_NA',
-                       list('tp_lmin', 'tp_lq1', 'tp_lmed', 'tp_lq3', 'tp_lmax'),
+                       list('tn_lmin', 'tn_lq1', 'tn_lmed', 'tn_lq3', 'tn_lmax'),
                        NA),
        grouping = 3,
-       ord.by='tp_lmed', rev.ord=TRUE,
+       ord.by='tn_lmed', rev.ord=TRUE,
        median.row=FALSE)
 
 
-# TP Refined Plot for North Bay, North Bay Bayous, and Deer Point Lake
-mmplot(map.data=tp_nbdp2020v3,
+# tn Refined Plot for North Bay, North Bay Bayous, and Deer Point Lake
+mmplot(map.data=tn_nbdp2020v3,
        panel.types=c('dot_legend', 'labels', 'labels', 'labels', 'box_summary', 'map'),
        panel.data=list(NA,
                        'SEGMENT_NA',
-                       'tp_count',
-                       'tp_na_count',
-                       list('tp_lmin', 'tp_lq1', 'tp_lmed', 'tp_lq3', 'tp_lmax'),
+                       'tn_count',
+                       'tn_na_count',
+                       list('tn_lmin', 'tn_lq1', 'tn_lmed', 'tn_lq3', 'tn_lmax'),
                        NA),
        grouping = 3,
-       ord.by='tp_lmed',
+       ord.by='tn_lmed',
        rev.ord=TRUE,
        median.row=FALSE,
        plot.pGrp.spacing=1,
@@ -713,19 +712,19 @@ mmplot(map.data=tp_nbdp2020v3,
                            align='right',
                            text.size=.8),
                       
-                      list(5, header='2020 Detectable Total Phoshporous',
+                      list(5, header='2020 Detectable Total Nitrogen',
                            graph.bgcolor='lightgray',
-                           xaxis.ticks=c(-6.0, -5.0, -4.0, -3.0, -2.0),
-                           xaxis.labels=c(-6,-5, -4, -3, -2),
+                           xaxis.ticks=c(-2.5, -2.0, -1.5, -1.0, -0.5, 0.0),
+                           xaxis.labels=c(-2.5, -2.0, -1.5, -1.0, -0.5, 0.0),
                            xaxis.labels.size=1.25,
                            graph.bar.size = 0.5,
                            #xaxis.labels.angle=90,
                            add.line=-4.27, add.line.col="black",
-                           xaxis.title='Log(TP, mg/L)', xaxis.title.size=1.25, panel.width=1.7),
+                           xaxis.title='Log(tn, mg/L)', xaxis.title.size=1.25, panel.width=1.7),
                       
                       list(6, header='Light Gray Means Highlighted Above',
                            inactive.border.color=gray(.7), inactive.border.size=2,panel.width=1.7)),
-print.file = "output_micromap/mmplot_tp_nbdp2020v9.jpeg", res=100)
+print.file = "output_micromap/mmplot_tn_nbdp2020v1.jpeg", res=100)
 
 
 
