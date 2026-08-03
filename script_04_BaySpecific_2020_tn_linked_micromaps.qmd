@@ -732,7 +732,7 @@ print.file = "output_micromap/mmplot_tn_nbdp2020v2.jpeg", res=100)
 
 ## East Bay, Bayous, and Creeks
 
-Excluding Massalina Bayou station and polygon as both will go into St. Andrew Bay. Excluding Lake Martin station and polygon as well. 
+Excluding Massalina Bayou station and polygon as both will go into St. Andrew Bay. Excluding Lake Martin station and polygon as well.
 
 Filter bbl_7 by Major Segment for East Bay and get 42 polygons.
 
@@ -918,116 +918,133 @@ In time-series plot see decreasing spatial trend in Grand Lagoon 1 station, furt
 
 Note 2 stations/points are in East Bay, one is a FDEP station, which will be filtered out in 5-number summary by sampling agency name, and the other is a Baywatch station, sta_nr 3.3, which will be filtered out by year in that summary.
 
-```{r sab_stats_spatial_join}}
+```{r sab_tn}
 
-sab_station1 <- dplyr::filter(np_sf1, bay == "Johnson Bayou" | bay == "Posten Bayou" | bay == "Pretty Bayou" | bay == "Grand Lagoon"| bay == "St. Andrew Bay")
-# returns 2786 obs
+sab_station1 <- dplyr::filter(np_sf1, bay == "Johnson Bayou" | bay == "Posten Bayou" | bay == "Pretty Bayou" | bay == "Grand Lagoon"| bay == "St. Andrew Bay" | bay == "Massalina Bayou")
+# returns 2955 obs
 
 mapview(sab_station1)
 # shows one station by Dupont Bridge and other station off of Bunkers Point near corner of East Beach Drive and Cherry Street, with both being in East Bay
 
 sab_station2 <- dplyr::filter_out(sab_station1, monitoring_location_id == "NWFYI0018" | monitoring_location_id == "BAY-ST-EWBAY-3")
-# returns 2753 obs as 2 obs from FDEP NORTHWEST REGIONAL OPERATIONS CENTER taken near DuPont Bridge removed and 31 obs of BAY-ST-EWBAY-3 removed
+# returns 2922 obs as removed 2 obs from FDEP NORTHWEST REGIONAL OPERATIONS CENTER taken near DuPont Bridge removed and 31 obs of BAY-ST-EWBAY-3 
 
 mapview(sab_station2, col.regions = "red") + bbl_7
-# show sta_nr 3.3 from 2006 and NWFY0017 from 2020 in East Bay, and both will be removed in stats by filtering.
+# show sta_nr 3.3 from 2006 and NWFY0017 from 2020 in East Bay, and both will be removed in stats by filtering on year == 20202 and sampling_agency_name == ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.
 
-distinct(sab_station2, monitoring_location_id) %>% arrange(., monitoring_location_id) %>% print(n=Inf)
-# returns 26 observations including 1 NA, 11 320 coded stations,  5 Grand Lagoon stations, 1 Johnson Bayou station, 1 Posten Bayou station, 1 Pretty Bayou station, 4 BAY-ST-EWBAY stations (1,2,6,7), 1 BAY-ST. ANDREW BAY-12 Station, and 1 NWFY10017 station
+odd_coords_wb <- dplyr::filter(np_sf1, monitoring_location_id == "BAY-WE-STBAY-5")
 
-ggplot(sab_station2 |> filter(year >=2020), aes(x=yrmm_factor, y=log(tp))) + geom_point() + facet_wrap(vars(monitoring_location_id))
+mapview(odd_coords_wb, col.regions = "green") + mapview(sab_station2, col.regions = "red")
 
-ggplot(sab_station2 |> filter(year >=2020), aes(y=bay, x=log(tp))) + geom_boxplot() + facet_wrap(vars(yrmm_factor))
+# bind odd West Bay station to rest of St. Andrew Bay stations
+sab_station3 <- dplyr::bind_rows(sab_station2, odd_coords_wb)
+# returns 2950 obs
+
+# assign BAY-WE-STBAY-5 to St. Andrew Bay instead of West Bay
+sab_station3 <- sab_station3 |>
+  mutate(
+    bay = case_when(monitoring_location_id == "BAY-WE-STBAY-5" ~ "St. Andrew Bay",
+                       TRUE ~ bay
+                       )
+    )
+
+
+distinct(sab_station3, monitoring_location_id) %>% arrange(., monitoring_location_id) %>% print(n=Inf)
+# returns 28 observations including 1 NA, 11 320 coded stations,  5 Grand Lagoon stations, 1 Johnson Bayou station, 1 Massalina Bayou station, 1 Posten Bayou station, 1 Pretty Bayou station, 4 BAY-ST-EWBAY stations (1,2,6,7), 1 BAY-ST. ANDREW BAY-12 Station, 1 Bay-WE-STBAY-5 station, and 1 NWFY10017 station
+
+ggplot(sab_station3 |> filter(year >=2020), aes(x=yrmm_factor, y=log(tn))) + geom_point() + facet_wrap(vars(monitoring_location_id))
+
+ggplot(sab_station3 |> filter(year >=2020), aes(y=bay, x=log(tn))) + geom_boxplot() + facet_wrap(vars(yrmm_factor))
 
 # evaluate samples within bays across all years
-sab_station2 %>% 
+sab_station3 %>% 
   group_by(bay) %>% 
   summarize(., count = dplyr::n())
 
 # evaluate samples within bays sampled in 2020
-sab_station2 %>% 
+sab_station3 %>% 
   dplyr::filter(., year == 2020) %>% 
   group_by(bay) %>% 
   summarize(., count = dplyr::n())
 
 # evaluate which years have the most samples
-sab_station2 %>% 
+sab_station3 %>% 
   dplyr::filter(., year >= 2020) %>% 
   group_by(year) %>% 
   summarize(., count = dplyr::n())
 
 
-# appears to be 2 Johnson Bayous, one near power plant and other just east of Panama City marina
-bayous_sab1 <- dplyr::filter(bbl_7, SEGMENT_NA == "Hog Island Sound" | SEGMENT_NA == "Johnson Bayou"| SEGMENT_NA == "Lake Huntington" | SEGMENT_NA == "Posten Bayou" | SEGMENT_NA == "Pretty Bayou" | SEGMENT_NA == "Alligator Bayou" | SEGMENT_NA == "Grand Lagoon" | SEGMENT_NA == "Crooked Island Sound" |SEGMENT_NA == "St. Andrew Bay")
+# dropped Crooked Island Sound polygon
+bayous_sab1 <- dplyr::filter(bbl_7, SEGMENT_NA == "Alligator Bayou" |  SEGMENT_NA == "Grand Lagoon" |SEGMENT_NA == "Hog Island Sound" | SEGMENT_NA == "Johnson Bayou"| SEGMENT_NA == "Lake Huntington" | SEGMENT_NA == "Massalina Bayou" | SEGMENT_NA == "Posten Bayou" | SEGMENT_NA == "Pretty Bayou" | SEGMENT_NA == "St. Andrew Bay")
 # returns 9 obs
 
 mapview(bayous_sab1)
 
-mapview(sab_station2, col.regions = "green") + bayous_sab1
+mapview(sab_station3, col.regions = "green") + bayous_sab1
 
 # getting 5-number summary from points data
-tp_sab2020 <- st_set_geometry(sab_station2, NULL) %>% 
+tn_sab2020 <- st_set_geometry(sab_station3, NULL) %>% 
   dplyr::filter(., year == 2020 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.") %>% 
-  dplyr::select(., tp, bay) %>% 
+  dplyr::select(., tn, bay) %>% 
   group_by(., bay) %>% 
-  summarize(., tp_min = fivenum(tp)[1],
-            tp_q1 = fivenum(tp)[2],
-            tp_med = fivenum(tp)[3],
-            tp_q3 = fivenum(tp)[4],
-            tp_max = fivenum(tp)[5],
-            tp_lmin = log(fivenum(tp)[1]),
-            tp_lq1 = log(fivenum(tp)[2]),
-            tp_lmed = log(fivenum(tp)[3]),
-            tp_lq3 = log(fivenum(tp)[4]),
-            tp_lmax = log(fivenum(tp)[5]),
-            tp_count = dplyr::n(),
-            tp_mean = mean(tp, na.rm = TRUE),
-            tp_na_count = sum(is.na(tp))) %>% 
+  summarize(., tn_min = fivenum(tn)[1],
+            tn_q1 = fivenum(tn)[2],
+            tn_med = fivenum(tn)[3],
+            tn_q3 = fivenum(tn)[4],
+            tn_max = fivenum(tn)[5],
+            tn_lmin = log(fivenum(tn)[1]),
+            tn_lq1 = log(fivenum(tn)[2]),
+            tn_lmed = log(fivenum(tn)[3]),
+            tn_lq3 = log(fivenum(tn)[4]),
+            tn_lmax = log(fivenum(tn)[5]),
+            tn_count = dplyr::n(),
+            tn_mean = mean(tn, na.rm = TRUE),
+            tn_na_count = sum(is.na(tn))) %>% 
   print(n = Inf)
 # returns 5 obs
 
 
-# use left_join as have a many polygons (n=9) to few stats (n=5 obs) and want to keep all the polygons whether polygons have stats or not
-tp_sab2020v1 <- left_join(bayous_sab1, tp_sab2020, by = join_by(SEGMENT_NA == bay), keep = TRUE)
+# use left_join as have a many polygons (n=9) to few stats (n=6 obs) and want to keep all the polygons whether polygons have stats or not
+tn_sab2020v1 <- left_join(bayous_sab1, tn_sab2020, by = join_by(SEGMENT_NA == bay), keep = TRUE)
 
-# use right_join so cut down polygons to n=5 to match stats
-tp_sab2020v2 <- right_join(bayous_sab1, tp_sab2020, by = join_by(SEGMENT_NA == bay), keep = TRUE)
+# use right_join so cut down polygons to n=6 to match stats
+tn_sab2020v2 <- right_join(bayous_sab1, tn_sab2020, by = join_by(SEGMENT_NA == bay), keep = TRUE)
 
-# using tp_sab2020v1 shows how 4 bayous that do not have samples
-mmplot(map.data=tp_sab2020v1,
+# using tn_sab2020v1 shows how 4 bayous that do not have samples
+mmplot(map.data=tn_sab2020v1,
        panel.types=c('dot_legend', 'labels', 'box_summary', 'map'),
        panel.data=list(NA,
                        'SEGMENT_NA',
-                       list('tp_lmin', 'tp_lq1', 'tp_lmed', 'tp_lq3', 'tp_lmax'),
+                       list('tn_lmin', 'tn_lq1', 'tn_lmed', 'tn_lq3', 'tn_lmax'),
                        NA),
        grouping = 5,
-       ord.by='tp_lmed', rev.ord=TRUE,
+       ord.by='tn_lmed', rev.ord=TRUE,
        median.row=FALSE)
 
-# using tp_sab2020v2 shows only the 5 polygons with wq stats
-mmplot(map.data=tp_sab2020v2,
+# using tn_sab2020v2 shows only the 5 polygons with wq stats
+mmplot(map.data=tn_sab2020v2,
        panel.types=c('dot_legend', 'labels', 'box_summary', 'map'),
        panel.data=list(NA,
                        'SEGMENT_NA',
-                       list('tp_lmin', 'tp_lq1', 'tp_lmed', 'tp_lq3', 'tp_lmax'),
+                       list('tn_lmin', 'tn_lq1', 'tn_lmed', 'tn_lq3', 'tn_lmax'),
                        NA),
        grouping = 3,
-       ord.by='tp_lmed', rev.ord=TRUE,
+       ord.by='tn_lmed', rev.ord=TRUE,
        median.row=FALSE)
 
 
-# using tp_sab2020v2 shows only the 5 polygons with stats
-# TP Refined Plot for St. Andrew Bay and Bayous
-mmplot(map.data=tp_sab2020v2,
+# using tn_sab2020v2 shows only the 5 polygons with stats
+# tn Refined Plot for St. Andrew Bay and Bayous
+mmplot(map.data=tn_sab2020v2,
        panel.types=c('dot_legend', 'labels', 'labels', 'labels', 'box_summary', 'map'),
        panel.data=list(NA,
                        'SEGMENT_NA',
-                       'tp_count',
-                       'tp_na_count',
-                       list('tp_lmin', 'tp_lq1', 'tp_lmed', 'tp_lq3', 'tp_lmax'),
+                       'tn_count',
+                       'tn_na_count',
+                       list('tn_lmin', 'tn_lq1', 'tn_lmed', 'tn_lq3', 'tn_lmax'),
                        NA),
        grouping = 3,
-       ord.by='tp_lmed',
+       ord.by='tn_lmed',
        rev.ord=TRUE,
        median.row=FALSE,
        plot.pGrp.spacing=1,
@@ -1051,20 +1068,20 @@ mmplot(map.data=tp_sab2020v2,
                            align='right',
                            text.size=.8),
                       
-                      list(5, header='2020 Detectable Total Phoshporous',
+                      list(5, header='2020 Detectable Total Nitrogen',
                            graph.bgcolor='lightgray',
-                           xaxis.ticks=c(-6.0, -5.0, -4.0, -3.0, -2.0),
-                           xaxis.labels=c(-6,-5, -4, -3, -2),
+                           xaxis.ticks=c(-2.5, -2.0, -1.5, -1.0, -0.5, 0.0),
+                           xaxis.labels=c(-2.5, -2.0, -1.5, -1.0, -0.5, 0.0),
                            xaxis.labels.size=1.25,
                            graph.bar.size = 0.5,
                            #xaxis.labels.angle=90,
-                           add.line=-3.96, add.line.col="black",
-                           xaxis.title='Log(TP, mg/L)', xaxis.title.size=1.25, panel.width=1.75),
+                           add.line=-1.079, add.line.col="black",
+                           xaxis.title='Log(tn, mg/L)', xaxis.title.size=1.25, panel.width=1.75),
                       
                       list(6, header='Light Gray Means Highlighted Above',
                            inactive.border.color=gray(.7), inactive.border.size=2,
                             panel.width=1.75)),
-print.file = "output_micromap/mmplot_tp_sab2020v2.jpeg", res=100)
+print.file = "output_micromap/mmplot_tn_sab2020v1.jpeg", res=100)
 
 
 
