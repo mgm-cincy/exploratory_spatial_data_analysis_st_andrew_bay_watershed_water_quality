@@ -63,6 +63,7 @@ distinct(bbl_7, Major_Seg) %>% dplyr::arrange(., Major_Seg)
 ```
 
 ## Filter Bays and Bayous
+
 ```{r filter_bays_bayous}
 
 bayous_wb1 <- dplyr::filter(bbl_7, SEGMENT_NA == "Burnt Mill Creek" | SEGMENT_NA == "Crooked Creek" | SEGMENT_NA == "Warren Bayou" | SEGMENT_NA == "Gulf ICWW between Choctawhatchee Bay and St. Andrew Bay" | SEGMENT_NA == "West Bay" | SEGMENT_NA == "Johnson Bayou_WestBay" | SEGMENT_NA == "Basin Bayou" | SEGMENT_NA == "Botheration Bayou" | SEGMENT_NA == "Doyle Bayou" | SEGMENT_NA == "Harrison Bayou" | SEGMENT_NA == "Little Johnson Bayou" |SEGMENT_NA == "Ward Creek")
@@ -98,9 +99,47 @@ bayous_sab1 <- dplyr::filter(bbl_7, SEGMENT_NA == "Alligator Bayou" |  SEGMENT_N
 ```
 
 ## Mapview Bays and Bayous
+
 ```{r mapview_bays_bayous}
 
 mapview(bayous_eb2, col.regions = "gray") + mapview(bayous_nb1, col.regions = "orange") + mapview(bayous_sab1, col.regions = "green") + mapview(bayous_wb2, col.regions = "blue")
 
 ```
 
+
+## Areas
+```{r area_bays}
+
+st_area(bayous_eb2)
+
+sum(st_area(bayous_eb2))
+
+dplyr::filter(bayous_eb2, SEGMENT_NA == "East Bay") %>% 
+  st_area(.)
+
+st_area(bayous_nb1)
+
+sum(st_area(bayous_nb1))
+
+dplyr::filter(bayous_nb1, SEGMENT_NA == "North Bay") %>% 
+  st_area(.)
+
+dplyr::filter(bayous_nb1, SEGMENT_NA == "Deer Point Lake") %>% 
+  st_area(.)
+
+st_area(bayous_sab1)
+
+sum(st_area(bayous_sab1))
+
+dplyr::filter(bayous_sab1, SEGMENT_NA == "St. Andrew Bay") %>% 
+  st_area(.)
+
+
+st_area(bayous_wb2)
+
+sum(st_area(bayous_wb2))
+
+dplyr::filter(bayous_wb2, SEGMENT_NA == "West Bay") %>% 
+  st_area(.)
+
+```
