@@ -102,7 +102,7 @@ bayous_sab1 <- dplyr::filter(bbl_7, SEGMENT_NA == "Alligator Bayou" |  SEGMENT_N
 
 ```{r mapview_bays_bayous}
 
-mapview(bayous_eb2, col.regions = "gray") + mapview(bayous_nb1, col.regions = "orange") + mapview(bayous_sab1, col.regions = "green") + mapview(bayous_wb2, col.regions = "blue")
+mapview(bayous_eb2, col.regions = "red") + mapview(bayous_nb1, col.regions = "orange") + mapview(bayous_sab1, col.regions = "green") + mapview(bayous_wb2, col.regions = "blue")
 
 ```
 
@@ -133,7 +133,6 @@ sum(st_area(bayous_sab1))
 
 dplyr::filter(bayous_sab1, SEGMENT_NA == "St. Andrew Bay") %>% 
   st_area(.)
-
 
 st_area(bayous_wb2)
 
