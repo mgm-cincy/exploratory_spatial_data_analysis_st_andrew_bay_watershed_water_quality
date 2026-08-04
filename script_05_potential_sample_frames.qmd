@@ -106,8 +106,8 @@ mapview(bayous_eb2, col.regions = "red") + mapview(bayous_nb1, col.regions = "or
 
 ```
 
-
 ## Areas
+
 ```{r area_bays}
 
 st_area(bayous_eb2)
@@ -142,3 +142,58 @@ dplyr::filter(bayous_wb2, SEGMENT_NA == "West Bay") %>%
   st_area(.)
 
 ```
+
+## Geoprocessing of Survey Frame
+```{r geoprocessing}
+
+all_frame1 <- dplyr::filter(bbl_7, SEGMENT_NA == "Burnt Mill Creek" | SEGMENT_NA == "Crooked Creek" | SEGMENT_NA == "Warren Bayou" | SEGMENT_NA == "Gulf ICWW between Choctawhatchee Bay and St. Andrew Bay" | SEGMENT_NA == "West Bay" | SEGMENT_NA == "Johnson Bayou_WestBay" | SEGMENT_NA == "Basin Bayou" | SEGMENT_NA == "Botheration Bayou" | SEGMENT_NA == "Doyle Bayou" | SEGMENT_NA == "Harrison Bayou" | SEGMENT_NA == "Little Johnson Bayou" |SEGMENT_NA == "Ward Creek" | Major_Seg == "North Bay" | SEGMENT_NA == "Robinson Bayou", Major_Seg == "East Bay" | SEGMENT_NA == "Alligator Bayou" | SEGMENT_NA == "Grand Lagoon" |SEGMENT_NA == "Hog Island Sound" | SEGMENT_NA == "Johnson Bayou"| SEGMENT_NA == "Lake Huntington" | SEGMENT_NA == "Massalina Bayou" | SEGMENT_NA == "Posten Bayou" | SEGMENT_NA == "Pretty Bayou" | SEGMENT_NA == "St. Andrew Bay")
+# returns 9 obs
+
+st_is_valid(bayous_wb2, reason = T)
+bayous_wb3 <- st_make_valid(bayous_wb2)
+st_is_valid(bayous_wb3, reason = T)
+
+st_is_valid(bayous_nb1, reason = T)
+
+comb_wb1 <- st_combine(bayous_wb3)
+st_is_valid(comb_wb1, reason = T)
+comb_wb1 <- st_make_valid(comb_wb1)
+st_is_valid(comb_wb1, reason = T)
+
+comb_nb1 <- st_combine(bayous_nb1)
+st_is_valid(comb_nb1, reason = T)
+comb_nb1 <- st_make_valid(comb_nb1)
+st_is_valid(comb_nb1)
+
+
+wbnb1 <- st_union(comb_wb1,comb_nb1)
+mapview(wbnb1)
+
+wbnb1 <- st_sf(wbnb1)
+mapview(wbnb1)
+
+
+
+all_frame2 <- frame1 |> 
+  mutate(
+  SEGMENT_NA = SEGMENT_NA |>
+    replace_values(
+      "Gulf ICWW between Choctawhatchee Bay and St. Andrew Bay" ~ "West Bay ICWW",
+      "Gulf ICWW between St. Andrew Bay and St. Joseph Bay" ~ "East Bay ICWW"
+    )
+  )  
+
+bayous_eb2 <- bayous_eb1 |>
+  mutate(
+  SEGMENT_NA = SEGMENT_NA |>
+    replace_values(
+      "Gulf ICWW between St. Andrew Bay and St. Joseph Bay" ~ "East Bay ICWW"
+    )
+  )
+
+frame1 <- bbl_7
+
+st_combine(frame1)
+plot(st_union(frame1))
+```
+
