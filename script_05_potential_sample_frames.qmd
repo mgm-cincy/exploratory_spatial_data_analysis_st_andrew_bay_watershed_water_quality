@@ -217,7 +217,21 @@ class(wbnbdplsab1)
 
 mapview(wbnbdplsab1)
 
+st_is_valid(bayous_eb2, reason = T)
 
+bayous_eb2 <- st_combine(bayous_eb2)
+
+st_is_valid(bayous_eb2, reason = T)
+bayous_eb2 <- st_make_valid(bayous_eb2)
+st_is_valid(bayous_eb2, reason = T)
+
+
+wbnbdplsabeb1 <- st_union(wbnbdplsab1, bayous_eb2)
+
+wbnbdplsabeb1 <- st_sf(wbnbdplsabeb1)
+class(wbnbdplsabeb1)
+
+mapview(wbnbdplsabeb1)
 
 
 all_frame2 <- frame1 |> 
