@@ -78,8 +78,12 @@ bayous_wb2 <- bayous_wb1 |>
   )  
 
 # filter for North Bay and include Robinson Bay, which is near North Bay and St. Andrew Bay border
-bayous_nb1 <- dplyr::filter(bbl_7, Major_Seg == "North Bay" | SEGMENT_NA == "Robinson Bayou")
-# using bbl_7 returns 17 obs/polygon
+bayous_nb1 <- dplyr::filter(bbl_7, Major_Seg == "North Bay" | SEGMENT_NA == "Robinson Bayou") %>% 
+  filter_out(., SEGMENT_NA == "Deer Point Lake")
+# using bbl_7 returns 16 obs/polygon
+
+# deer point lake
+bayous_dpl1 <- dplyr::filter(bbl_7, SEGMENT_NA == "Deer Point Lake")
 
 bayous_eb1 <- dplyr::filter(bbl_7, Major_Seg == "East Bay")
 # returns 42 polygons
@@ -100,15 +104,19 @@ bayous_sab1 <- dplyr::filter(bbl_7, SEGMENT_NA == "Alligator Bayou" |  SEGMENT_N
 
 ## Mapview Bays and Bayous
 
+For West Bay, from Burnt Mill Creek to West ICWW I think use downstream of the powerlines as the cutoff for that part of the sample frame. 
+
 ```{r mapview_bays_bayous}
 
-mapview(bayous_eb2, col.regions = "red") + mapview(bayous_nb1, col.regions = "orange") + mapview(bayous_sab1, col.regions = "green") + mapview(bayous_wb2, col.regions = "blue")
+mapview(bayous_dpl1, col.regions = "purple") + mapview(bayous_eb2, col.regions = "red") + mapview(bayous_nb1, col.regions = "orange") + mapview(bayous_sab1, col.regions = "green") + mapview(bayous_wb2, col.regions = "blue")
 
 ```
 
 ## Areas
 
 ```{r area_bays}
+
+st_area(bayous_dpl1)
 
 st_area(bayous_eb2)
 
@@ -144,10 +152,12 @@ dplyr::filter(bayous_wb2, SEGMENT_NA == "West Bay") %>%
 ```
 
 ## Geoprocessing of Survey Frame
+
 ```{r geoprocessing}
 
-all_frame1 <- dplyr::filter(bbl_7, SEGMENT_NA == "Burnt Mill Creek" | SEGMENT_NA == "Crooked Creek" | SEGMENT_NA == "Warren Bayou" | SEGMENT_NA == "Gulf ICWW between Choctawhatchee Bay and St. Andrew Bay" | SEGMENT_NA == "West Bay" | SEGMENT_NA == "Johnson Bayou_WestBay" | SEGMENT_NA == "Basin Bayou" | SEGMENT_NA == "Botheration Bayou" | SEGMENT_NA == "Doyle Bayou" | SEGMENT_NA == "Harrison Bayou" | SEGMENT_NA == "Little Johnson Bayou" |SEGMENT_NA == "Ward Creek" | Major_Seg == "North Bay" | SEGMENT_NA == "Robinson Bayou", Major_Seg == "East Bay" | SEGMENT_NA == "Alligator Bayou" | SEGMENT_NA == "Grand Lagoon" |SEGMENT_NA == "Hog Island Sound" | SEGMENT_NA == "Johnson Bayou"| SEGMENT_NA == "Lake Huntington" | SEGMENT_NA == "Massalina Bayou" | SEGMENT_NA == "Posten Bayou" | SEGMENT_NA == "Pretty Bayou" | SEGMENT_NA == "St. Andrew Bay")
-# returns 9 obs
+# code not working
+# all_frame1 <- dplyr::filter(bbl_7, SEGMENT_NA == "Burnt Mill Creek" | SEGMENT_NA == "Crooked Creek" | SEGMENT_NA == "Warren Bayou" | SEGMENT_NA == "Gulf ICWW between Choctawhatchee Bay and St. Andrew Bay" | SEGMENT_NA == "West Bay" | SEGMENT_NA == "Johnson Bayou_WestBay" | SEGMENT_NA == "Basin Bayou" | SEGMENT_NA == "Botheration Bayou" | SEGMENT_NA == "Doyle Bayou" | SEGMENT_NA == "Harrison Bayou" | SEGMENT_NA == "Little Johnson Bayou" |SEGMENT_NA == "Ward Creek" | Major_Seg == "North Bay" | SEGMENT_NA == "Robinson Bayou", Major_Seg == "East Bay" | SEGMENT_NA == "Alligator Bayou" | SEGMENT_NA == "Grand Lagoon" |SEGMENT_NA == "Hog Island Sound" | SEGMENT_NA == "Johnson Bayou"| SEGMENT_NA == "Lake Huntington" | SEGMENT_NA == "Massalina Bayou" | SEGMENT_NA == "Posten Bayou" | SEGMENT_NA == "Pretty Bayou" | SEGMENT_NA == "St. Andrew Bay")
+# # returns 9 obs
 
 st_is_valid(bayous_wb2, reason = T)
 bayous_wb3 <- st_make_valid(bayous_wb2)
@@ -169,8 +179,44 @@ st_is_valid(comb_nb1)
 wbnb1 <- st_union(comb_wb1,comb_nb1)
 mapview(wbnb1)
 
+# note change from large sfc_multipolygon to sf object
 wbnb1 <- st_sf(wbnb1)
+class(wbnb1)
 mapview(wbnb1)
+
+st_is_valid(bayous_dpl1, reason = T)
+# st_combine makes object a list of 1
+bayous_dpl1 <- st_combine(bayous_dpl1)
+
+# st_union makes object into sfc_multipolygon
+wbnbdpl1 <- st_union(bayous_dpl1, wbnb1)
+
+# st_sf makes object into sf object
+wbnbdpl1 <-st_sf(wbnbdpl1)
+class(wbnbdpl1)
+
+mapview(wbnbdpl1)
+
+st_is_valid(bayous_sab1, reason = T)
+
+# st_combine makes object a list of 1
+bayous_sab1 <- st_combine(bayous_sab1)
+
+st_is_valid(bayous_sab1, reason = T)
+bayous_sab1 <- st_make_valid(bayous_sab1)
+st_is_valid(bayous_sab1)
+
+st_is_valid(wbnbdpl1, reason = T)
+
+# st_union makes object into sfc_multipolygon
+wbnbdplsab1 <- st_union(bayous_sab1, wbnbdpl1)
+
+# st_sf makes object into sf object
+wbnbdplsab1 <-st_sf(wbnbdplsab1)
+class(wbnbdplsab1)
+
+mapview(wbnbdplsab1)
+
 
 
 
@@ -196,4 +242,3 @@ frame1 <- bbl_7
 st_combine(frame1)
 plot(st_union(frame1))
 ```
-
