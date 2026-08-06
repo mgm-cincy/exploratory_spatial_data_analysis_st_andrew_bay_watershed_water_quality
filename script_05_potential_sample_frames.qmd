@@ -104,7 +104,7 @@ bayous_sab1 <- dplyr::filter(bbl_7, SEGMENT_NA == "Alligator Bayou" |  SEGMENT_N
 
 ## Mapview Bays and Bayous
 
-For West Bay, from Burnt Mill Creek to West ICWW I think use downstream of the powerlines as the cutoff for that part of the sample frame. 
+For West Bay, from Burnt Mill Creek to West ICWW I think use downstream of the powerlines as the cutoff for that part of the sample frame.
 
 ```{r mapview_bays_bayous}
 
@@ -113,7 +113,7 @@ mapview(bayous_dpl1, col.regions = "purple") + mapview(bayous_eb2, col.regions =
 ```
 
 ## Areas
-
+Not sure about these areas as topology of polygons has not been checked with `st_is_valid`.
 ```{r area_bays}
 
 st_area(bayous_dpl1)
@@ -151,8 +151,13 @@ dplyr::filter(bayous_wb2, SEGMENT_NA == "West Bay") %>%
 
 ```
 
-## Geoprocessing of Survey Frame
-
+## Geoprocessing of All One Survey Frame
+I think the steps for combinging polygons are:
+A. Check topology of each polygon with `st_is_valid(x, reason = TRUE)`
+If need, use 'st_make_valid` function.
+B. For each polygon do `st_combine`. I believe this unions any internal polygon, and the object now becomes a list of 1.
+C. Use `st_union` on 2 polygons to make 1 large sfc_multipolyon object.
+D. Use 'st_sf` to make 1 large sfc_multipolygon in to an sf object.
 ```{r geoprocessing}
 
 # code not working
@@ -233,26 +238,10 @@ class(wbnbdplsabeb1)
 
 mapview(wbnbdplsabeb1)
 
+st_area(wbnbdplsabeb1)
 
-all_frame2 <- frame1 |> 
-  mutate(
-  SEGMENT_NA = SEGMENT_NA |>
-    replace_values(
-      "Gulf ICWW between Choctawhatchee Bay and St. Andrew Bay" ~ "West Bay ICWW",
-      "Gulf ICWW between St. Andrew Bay and St. Joseph Bay" ~ "East Bay ICWW"
-    )
-  )  
+st_is_valid(wbnbdplsabeb1, reason = T)
 
-bayous_eb2 <- bayous_eb1 |>
-  mutate(
-  SEGMENT_NA = SEGMENT_NA |>
-    replace_values(
-      "Gulf ICWW between St. Andrew Bay and St. Joseph Bay" ~ "East Bay ICWW"
-    )
-  )
+sf_all1 <- wbnbdplsabeb1
 
-frame1 <- bbl_7
-
-st_combine(frame1)
-plot(st_union(frame1))
 ```
