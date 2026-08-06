@@ -32,6 +32,8 @@ library(tidyverse)
 
 ## Log
 
+2026-08-06 made sf_all1, all one survey frame. Checked bay topologies.
+
 ## Read Bays, Bayous and Lakes V7
 
 Using bbl_7 from Rose Horn.
@@ -59,13 +61,22 @@ distinct(bbl_7, SEGMENT_NA) %>% dplyr::arrange(., SEGMENT_NA)
 distinct(bbl_7, Major_Seg) %>% dplyr::arrange(., Major_Seg)
 # returns 8 Major_Seg
 
+st_is_valid(bbl_7, reason = TRUE)
+# 189 is SEGMENT_NA == White Flank Pond
 
+# I can't see ring self-intersection.
+dplyr::filter(bbl_7, SEGMENT_NA == "White Flank Pond") %>% 
+  mapview(.)
+
+bbl_7 <- st_make_valid(bbl_7)
+
+st_is_valid(bbl_7, reason = T)
 ```
 
-## Filter Bays and Bayous
+## Filter Bays and Check Topology
 
 ```{r filter_bays_bayous}
-
+# filter west bay
 bayous_wb1 <- dplyr::filter(bbl_7, SEGMENT_NA == "Burnt Mill Creek" | SEGMENT_NA == "Crooked Creek" | SEGMENT_NA == "Warren Bayou" | SEGMENT_NA == "Gulf ICWW between Choctawhatchee Bay and St. Andrew Bay" | SEGMENT_NA == "West Bay" | SEGMENT_NA == "Johnson Bayou_WestBay" | SEGMENT_NA == "Basin Bayou" | SEGMENT_NA == "Botheration Bayou" | SEGMENT_NA == "Doyle Bayou" | SEGMENT_NA == "Harrison Bayou" | SEGMENT_NA == "Little Johnson Bayou" |SEGMENT_NA == "Ward Creek")
 # returns 12 obs matching 12 segment names
 
@@ -77,14 +88,29 @@ bayous_wb2 <- bayous_wb1 |>
     )
   )  
 
+st_is_valid(bayous_wb2, reason = T)
+# identified Johnson Bayou_WestBay as Ring Self-Intersection
+
+bayous_wb2 <- st_make_valid(bayous_wb2)
+st_is_valid(bayous_wb2, reason = T)
+mapview(bayous_wb2)
+
+
 # filter for North Bay and include Robinson Bay, which is near North Bay and St. Andrew Bay border
 bayous_nb1 <- dplyr::filter(bbl_7, Major_Seg == "North Bay" | SEGMENT_NA == "Robinson Bayou") %>% 
   filter_out(., SEGMENT_NA == "Deer Point Lake")
 # using bbl_7 returns 16 obs/polygon
 
-# deer point lake
+st_is_valid(bayous_nb1, reason = T)
+mapview(bayous_nb1)
+
+# filter for deer point lake
 bayous_dpl1 <- dplyr::filter(bbl_7, SEGMENT_NA == "Deer Point Lake")
 
+st_is_valid(bayous_dpl1, reason = T)
+mapview(bayous_dpl1)
+
+# filter for east bay 
 bayous_eb1 <- dplyr::filter(bbl_7, Major_Seg == "East Bay")
 # returns 42 polygons
 
@@ -96,9 +122,17 @@ bayous_eb2 <- bayous_eb1 |>
     )
   )
 
+st_is_valid(bayous_eb2, reason = T)
+mapview(bayous_eb2)
+
+# filter for st andrew bay
 # dropped Crooked Island Sound polygon
 bayous_sab1 <- dplyr::filter(bbl_7, SEGMENT_NA == "Alligator Bayou" |  SEGMENT_NA == "Grand Lagoon" |SEGMENT_NA == "Hog Island Sound" | SEGMENT_NA == "Johnson Bayou"| SEGMENT_NA == "Lake Huntington" | SEGMENT_NA == "Massalina Bayou" | SEGMENT_NA == "Posten Bayou" | SEGMENT_NA == "Pretty Bayou" | SEGMENT_NA == "St. Andrew Bay")
 # returns 9 obs
+
+st_is_valid(bayous_sab1, reason = T)
+
+mapview(bayous_sab1)
 
 ```
 
@@ -245,3 +279,8 @@ st_is_valid(wbnbdplsabeb1, reason = T)
 sf_all1 <- wbnbdplsabeb1
 
 ```
+
+## Polygon Edits for BBL_7
+In West Bay, the Johnson Bayou WestBay should be corrected to have Maj_Seg be West Bay instead of St. Andrew Bay.
+Should Deer Point Lake be edited to label polygons for Williams Bayou, Bayou George, Bear Creek and Cedar Creek? This would create a segment fore Deer Point Lake and corresponding bayous analogous to rest of the bay segments.
+In St. Andrew Bay, why does Alligator Bayou have Maj_Seg assignment of Lake and not St. Andrew Bay?
