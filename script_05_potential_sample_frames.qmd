@@ -32,6 +32,8 @@ library(tidyverse)
 
 ## Log
 
+2026-08-10 made sf_baysegmt1, which contains only 5 bay segments, including Deer Point Lake. No bayous, creeks or lagoons are included. Stratification for the survey design would be by SEGMENT_NA.
+
 2026-08-06 made sf_all1, all one survey frame. Checked bay topologies.
 
 ## Read Bays, Bayous and Lakes V7
@@ -147,7 +149,9 @@ mapview(bayous_dpl1, col.regions = "purple") + mapview(bayous_eb2, col.regions =
 ```
 
 ## Areas
+
 Not sure about these areas as topology of polygons has not been checked with `st_is_valid`.
+
 ```{r area_bays}
 
 st_area(bayous_dpl1)
@@ -185,14 +189,19 @@ dplyr::filter(bayous_wb2, SEGMENT_NA == "West Bay") %>%
 
 ```
 
-## Geoprocessing of All One Survey Frame
-I think the steps for combinging polygons are:
-A. Check topology of each polygon with `st_is_valid(x, reason = TRUE)`
-If need, use 'st_make_valid` function.
-B. For each polygon do `st_combine`. I believe this unions any internal polygon, and the object now becomes a list of 1.
-C. Use `st_union` on 2 polygons to make 1 large sfc_multipolyon object.
-D. Use 'st_sf` to make 1 large sfc_multipolygon in to an sf object.
-```{r geoprocessing}
+## All One Survey Frame Geoprocessing
+
+I think the steps for combining polygons are:
+
+1.   Check topology of each polygon with `st_is_valid(x, reason = TRUE)` If need, use 'st_make_valid`function.`
+
+2.  `For each polygon do`st_combine`. I believe this unions any internal polygon, and the object now becomes a list of 1.`
+
+3.  `Use`st_union`on 2 polygons to make 1 large sfc_multipolyon object.`
+
+4.  `Use 'st_sf` to make 1 large sfc_multipolygon in to an sf object.
+
+```{r all_one_survey_geoprocessing}
 
 # code not working
 # all_frame1 <- dplyr::filter(bbl_7, SEGMENT_NA == "Burnt Mill Creek" | SEGMENT_NA == "Crooked Creek" | SEGMENT_NA == "Warren Bayou" | SEGMENT_NA == "Gulf ICWW between Choctawhatchee Bay and St. Andrew Bay" | SEGMENT_NA == "West Bay" | SEGMENT_NA == "Johnson Bayou_WestBay" | SEGMENT_NA == "Basin Bayou" | SEGMENT_NA == "Botheration Bayou" | SEGMENT_NA == "Doyle Bayou" | SEGMENT_NA == "Harrison Bayou" | SEGMENT_NA == "Little Johnson Bayou" |SEGMENT_NA == "Ward Creek" | Major_Seg == "North Bay" | SEGMENT_NA == "Robinson Bayou", Major_Seg == "East Bay" | SEGMENT_NA == "Alligator Bayou" | SEGMENT_NA == "Grand Lagoon" |SEGMENT_NA == "Hog Island Sound" | SEGMENT_NA == "Johnson Bayou"| SEGMENT_NA == "Lake Huntington" | SEGMENT_NA == "Massalina Bayou" | SEGMENT_NA == "Posten Bayou" | SEGMENT_NA == "Pretty Bayou" | SEGMENT_NA == "St. Andrew Bay")
@@ -280,7 +289,31 @@ sf_all1 <- wbnbdplsabeb1
 
 ```
 
+## Bay-Segments Geoprocesssing
+This sample frame has only the main bay segments, including Deer Point Lake. Stratification will be done by SEGMENT_NA. This sample frame does not contain any bayous, creeks, or lagoons.
+```{r bay_segments_geoprocessing}
+
+bay_segmts1 <- dplyr::filter(bbl_7, SEGMENT_NA == "West Bay" | SEGMENT_NA == "North Bay" | SEGMENT_NA == "Deer Point Lake" | SEGMENT_NA == "St. Andrew Bay" | SEGMENT_NA == "East Bay")
+
+st_is_valid(bay_segmts1)
+
+mapview(bay_segmts1)
+
+class(bay_segmts1)
+
+st_area(bay_segmts1)
+
+bay_segmts1$area_m2 <- st_area(bay_segmts1)
+
+sum(st_area(bay_segmts1))
+
+# sample frame
+sf_baysegmt1 <- bay_segmts1
+
+mapview(sf_baysegmt1)
+
+```
+
 ## Polygon Edits for BBL_7
-In West Bay, the Johnson Bayou WestBay should be corrected to have Maj_Seg be West Bay instead of St. Andrew Bay.
-Should Deer Point Lake be edited to label polygons for Williams Bayou, Bayou George, Bear Creek and Cedar Creek? This would create a segment fore Deer Point Lake and corresponding bayous analogous to rest of the bay segments.
-In St. Andrew Bay, why does Alligator Bayou have Maj_Seg assignment of Lake and not St. Andrew Bay?
+
+In West Bay, the Johnson Bayou WestBay should be corrected to have Maj_Seg be West Bay instead of St. Andrew Bay. Should Deer Point Lake be edited to label polygons for Williams Bayou, Bayou George, Bear Creek and Cedar Creek? This would create a segment fore Deer Point Lake and corresponding bayous analogous to rest of the bay segments. In St. Andrew Bay, why does Alligator Bayou have Maj_Seg assignment of Lake and not St. Andrew Bay?
