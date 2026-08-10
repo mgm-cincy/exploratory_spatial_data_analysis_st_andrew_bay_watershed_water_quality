@@ -195,7 +195,7 @@ dplyr::filter(bayous_wb2, SEGMENT_NA == "West Bay") %>%
 
 I think the steps for combining polygons are:
 
-1.   Check topology of each polygon with `st_is_valid(x, reason = TRUE)` If need, use 'st_make_valid`function.`
+1.  Check topology of each polygon with `st_is_valid(x, reason = TRUE)` If need, use 'st_make_valid`function.`
 
 2.  `For each polygon do`st_combine`. I believe this unions any internal polygon, and the object now becomes a list of 1.`
 
@@ -288,7 +288,9 @@ sf_all1 <- wbnbdplsabeb1
 ```
 
 ## Bay-Segments Geoprocesssing
+
 This sample frame has only the main bay segments, including Deer Point Lake. Stratification for the survey design will be done by SEGMENT_NA. This sample frame does not contain any bayous, creeks, or lagoons.
+
 ```{r bay_segments_geoprocessing}
 
 bay_segmts1 <- dplyr::filter(bbl_7, SEGMENT_NA == "West Bay" | SEGMENT_NA == "North Bay" | SEGMENT_NA == "Deer Point Lake" | SEGMENT_NA == "St. Andrew Bay" | SEGMENT_NA == "East Bay")
@@ -313,10 +315,11 @@ mapview(sf_baysegmt1)
 ```
 
 ## Bays,Bayous, Creeks, and Lakes Geoprocessing
+
 ```{r bays_bayous_geoprocessing}
 
-# code not working
-bbl_frame1 <- dplyr::filter(bbl_7, SEGMENT_NA == "Burnt Mill Creek" | SEGMENT_NA == "Crooked Creek" | SEGMENT_NA == "Warren Bayou" | SEGMENT_NA == "Gulf ICWW between Choctawhatchee Bay and St. Andrew Bay" | SEGMENT_NA == "West Bay" | SEGMENT_NA == "Johnson Bayou_WestBay" | SEGMENT_NA == "Basin Bayou" | SEGMENT_NA == "Botheration Bayou" | SEGMENT_NA == "Doyle Bayou" | SEGMENT_NA == "Harrison Bayou" | SEGMENT_NA == "Little Johnson Bayou" |SEGMENT_NA == "Ward Creek" | SEGMENT_NA == "North Bay" | SEGMENT_NA == "Robinson Bayou"| SEGMENT_NA == "Deer Point Lake" | Major_Seg == "East Bay" | SEGMENT_NA == "Alligator Bayou" | SEGMENT_NA == "Grand Lagoon" |SEGMENT_NA == "Hog Island Sound" | SEGMENT_NA == "Johnson Bayou"| SEGMENT_NA == "Lake Huntington" | SEGMENT_NA == "Massalina Bayou" | SEGMENT_NA == "Posten Bayou" | SEGMENT_NA == "Pretty Bayou" | SEGMENT_NA == "St. Andrew Bay")
+
+bbl_frame1 <- dplyr::filter(bbl_7, SEGMENT_NA == "Burnt Mill Creek" | SEGMENT_NA == "Crooked Creek" | SEGMENT_NA == "Warren Bayou" | SEGMENT_NA == "Gulf ICWW between Choctawhatchee Bay and St. Andrew Bay" | SEGMENT_NA == "West Bay" | SEGMENT_NA == "Johnson Bayou_WestBay" | SEGMENT_NA == "Basin Bayou" | SEGMENT_NA == "Botheration Bayou" | SEGMENT_NA == "Doyle Bayou" | SEGMENT_NA == "Harrison Bayou" | SEGMENT_NA == "Little Johnson Bayou" |SEGMENT_NA == "Ward Creek" | SEGMENT_NA == "North Bay" | SEGMENT_NA == "Robinson Bayou"| SEGMENT_NA == "Deer Point Lake" | Major_Seg == "East Bay" | SEGMENT_NA == "Alligator Bayou" | SEGMENT_NA == "Grand Lagoon" |SEGMENT_NA == "Hog Island Sound" | SEGMENT_NA == "Johnson Bayou"| SEGMENT_NA == "Lake Huntington" | SEGMENT_NA == "Massalina Bayou" | SEGMENT_NA == "Posten Bayou" | SEGMENT_NA == "Pretty Bayou" | SEGMENT_NA == "St. Andrew Bay" | SEGMENT_NA == "Gulf ICWW between St. Andrew Bay and St. Joseph Bay")
 # returns 66 obs
 
 mapview(bbl_frame1)
@@ -333,12 +336,25 @@ bbl_frame2 <- bbl_frame1 |>
 st_is_valid(bbl_frame2)
 
 
+bbl_frame3 <- bbl_frame2 |>
+  mutate(
+    wbody_type = case_when(
+      (Major_Seg == "East Bay" & SEGMENT_NA == "East Bay" ~ "eb"),
+      (Major_Seg == "East Bay" & SEGMENT_NA != "East Bay" ~ "eb_b"),
+      (Major_Seg == "North Bay" & SEGMENT_NA == "North Bay" ~ "nb"),
+      (Major_Seg == "North Bay" & SEGMENT_NA == "Deer Point Lake" ~ "dpl"),
+      (Major_Seg == "St. Andrew Bay" & SEGMENT_NA == "St. Andrew Bay" ~ "sab"),
+      (Major_Seg == "St. Andrew Bay" & SEGMENT_NA != "St. Andrew Bay" ~ "sab_b"),
+      (Major_Seg == "West Bay" & SEGMENT_NA == "West Bay" ~ "wb"),
+      (Major_Seg == "West Bay" & SEGMENT_NA != "North Bay" ~ "wb_b"),
+      SEGMENT_NA == "West BAY ICWW" ~ "wb_b",
+      SEGMENT_NA == "Alligator Bayou" ~ "sab_b"
+       )
+    )
+
 
 
 ```
-
-
-
 
 ## Polygon Edits for BBL_7
 
