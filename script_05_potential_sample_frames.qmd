@@ -285,6 +285,12 @@ st_is_valid(wbnbdplsabeb1, reason = T)
 
 sf_all1 <- wbnbdplsabeb1
 
+# Writing a single shapefile to the working directory
+st_write(sf_all1,
+dsn = "output_sampleframes_surveys/sf_all1.shp",
+driver = "ESRI Shapefile",
+append = FALSE)
+
 ```
 
 ## Bay-Segments Geoprocesssing
@@ -312,20 +318,33 @@ sf_baysegmt1 <- bay_segmts1
 
 mapview(sf_baysegmt1)
 
+# Writing a single shapefile to the working directory
+st_write(sf_baysegmt1,
+dsn = "output_sampleframes_surveys/sf_baysegmt1.shp",
+driver = "ESRI Shapefile",
+append = FALSE)
+
 ```
 
-## Bays,Bayous, Creeks, and Lakes Geoprocessing
+## Bays, Bayous, Creeks, and Lakes Geoprocessing
+
 I think in my inital coding I forgot to include bayous from North Bay.
 
-Filter for bay segments, bayous, creeks, and lakes to make a bays and bayous sample frame. Create a stratification variable, waterbody type (wbody_type). The levels in waterbody type include 5 bay segments, this inlcudes Deer Point Lake, and for each bay segment that has bayous and other waterbody types, there is a correspond bayou indicated by "_b". For example, there is an eb, for the East Bay segment, and then eb_b, which occurs 42 times, for the bayous, creek, etc. in East Bay.
+Filter for bay segments, bayous, creeks, and lakes to make a bays and bayous sample frame. Create a stratification variable, waterbody type (wbody_type). The levels in waterbody type include 5 bay segments, this inlcudes Deer Point Lake, and for each bay segment that has bayous and other waterbody types, there is a correspond bayou indicated by "\_b". For example, there is an eb, for the East Bay segment, and then eb_b, which occurs 41 times, for the bayous, creek, etc. in East Bay.
 
 ```{r bays_bayous_geoprocessing}
 
 
-bbl_frame1 <- dplyr::filter(bbl_7, SEGMENT_NA == "Burnt Mill Creek" | SEGMENT_NA == "Crooked Creek" | SEGMENT_NA == "Warren Bayou" | SEGMENT_NA == "Gulf ICWW between Choctawhatchee Bay and St. Andrew Bay" | SEGMENT_NA == "West Bay" | SEGMENT_NA == "Johnson Bayou_WestBay" | SEGMENT_NA == "Basin Bayou" | SEGMENT_NA == "Botheration Bayou" | SEGMENT_NA == "Doyle Bayou" | SEGMENT_NA == "Harrison Bayou" | SEGMENT_NA == "Little Johnson Bayou" |SEGMENT_NA == "Ward Creek" | SEGMENT_NA == "North Bay" | SEGMENT_NA == "Robinson Bayou"| SEGMENT_NA == "Deer Point Lake" | Major_Seg == "East Bay" | SEGMENT_NA == "Alligator Bayou" | SEGMENT_NA == "Grand Lagoon" |SEGMENT_NA == "Hog Island Sound" | SEGMENT_NA == "Johnson Bayou"| SEGMENT_NA == "Lake Huntington" | SEGMENT_NA == "Massalina Bayou" | SEGMENT_NA == "Posten Bayou" | SEGMENT_NA == "Pretty Bayou" | SEGMENT_NA == "St. Andrew Bay" | SEGMENT_NA == "Gulf ICWW between St. Andrew Bay and St. Joseph Bay")
-# returns 66 obs
+bbl_frame1 <- dplyr::filter(bbl_7, SEGMENT_NA == "Burnt Mill Creek" | SEGMENT_NA == "Crooked Creek" | SEGMENT_NA == "Warren Bayou" | SEGMENT_NA == "Gulf ICWW between Choctawhatchee Bay and St. Andrew Bay" | SEGMENT_NA == "West Bay" | SEGMENT_NA == "Johnson Bayou_WestBay" | SEGMENT_NA == "Basin Bayou" | SEGMENT_NA == "Botheration Bayou" | SEGMENT_NA == "Doyle Bayou" | SEGMENT_NA == "Harrison Bayou" | SEGMENT_NA == "Little Johnson Bayou" |SEGMENT_NA == "Ward Creek" | Major_Seg == "North Bay" | SEGMENT_NA == "Robinson Bayou"| SEGMENT_NA == "Deer Point Lake" | Major_Seg == "East Bay" | SEGMENT_NA == "Alligator Bayou" | SEGMENT_NA == "Grand Lagoon" |SEGMENT_NA == "Hog Island Sound" | SEGMENT_NA == "Johnson Bayou"| SEGMENT_NA == "Lake Huntington" | SEGMENT_NA == "Massalina Bayou" | SEGMENT_NA == "Posten Bayou" | SEGMENT_NA == "Pretty Bayou" | SEGMENT_NA == "St. Andrew Bay" | SEGMENT_NA == "Gulf ICWW between St. Andrew Bay and St. Joseph Bay")
+# returns 80 obs
 
 mapview(bbl_frame1)
+
+bbl_frame1 %>% 
+  group_by(Major_Seg, SEGMENT_NA) %>% 
+  summarize(., count = dplyr::n()) %>% 
+  print(n = Inf)
+
 
 bbl_frame2 <- bbl_frame1 |> 
   mutate(
@@ -338,7 +357,7 @@ bbl_frame2 <- bbl_frame1 |>
 
 st_is_valid(bbl_frame2)
 
-
+# creating a stratifcation variable of waterbody type, wbody_type
 bbl_frame3 <- bbl_frame2 |>
   mutate(
     wbody_type = case_when(
@@ -346,19 +365,32 @@ bbl_frame3 <- bbl_frame2 |>
       (Major_Seg == "East Bay" & SEGMENT_NA != "East Bay" ~ "eb_b"),
       (Major_Seg == "North Bay" & SEGMENT_NA == "North Bay" ~ "nb"),
       (Major_Seg == "North Bay" & SEGMENT_NA == "Deer Point Lake" ~ "dpl"),
-      (Major_Seg == "North Bay" & SEGMENT_NA != "Deer Point Lake") ~ "nb_b"),
+      (Major_Seg == "North Bay" & SEGMENT_NA != "Deer Point Lake" ~ "nb_b"),
       (Major_Seg == "St. Andrew Bay" & SEGMENT_NA == "St. Andrew Bay" ~ "sab"),
       (Major_Seg == "St. Andrew Bay" & SEGMENT_NA != "St. Andrew Bay" ~ "sab_b"),
       (Major_Seg == "West Bay" & SEGMENT_NA == "West Bay" ~ "wb"),
       (Major_Seg == "West Bay" & SEGMENT_NA != "North Bay" ~ "wb_b"),
-      SEGMENT_NA == "West BAY ICWW" ~ "wb_b",
+      SEGMENT_NA == "West Bay ICWW" ~ "wb_b",
       SEGMENT_NA == "Alligator Bayou" ~ "sab_b"
        )
-
+  )
 
 st_area(bbl_frame3)
 
 bbl_frame3$area_m2 <- st_area(bbl_frame3)
+
+bbl_frame3 %>% 
+  group_by(wbody_type) %>% 
+  summarize(., count = dplyr::n()) %>% 
+  print(n = Inf)
+
+sf_bbl1 <- bbl_frame3
+
+# Writing a single shapefile to the working directory
+st_write(sf_bbl1,
+dsn = "output_sampleframes_surveys/sf_bbl1.shp",
+driver = "ESRI Shapefile",
+append = FALSE)
 
 ```
 
