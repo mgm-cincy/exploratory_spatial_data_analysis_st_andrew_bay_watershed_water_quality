@@ -315,6 +315,9 @@ mapview(sf_baysegmt1)
 ```
 
 ## Bays,Bayous, Creeks, and Lakes Geoprocessing
+I think in my inital coding I forgot to include bayous from North Bay.
+
+Filter for bay segments, bayous, creeks, and lakes to make a bays and bayous sample frame. Create a stratification variable, waterbody type (wbody_type). The levels in waterbody type include 5 bay segments, this inlcudes Deer Point Lake, and for each bay segment that has bayous and other waterbody types, there is a correspond bayou indicated by "_b". For example, there is an eb, for the East Bay segment, and then eb_b, which occurs 42 times, for the bayous, creek, etc. in East Bay.
 
 ```{r bays_bayous_geoprocessing}
 
@@ -343,6 +346,7 @@ bbl_frame3 <- bbl_frame2 |>
       (Major_Seg == "East Bay" & SEGMENT_NA != "East Bay" ~ "eb_b"),
       (Major_Seg == "North Bay" & SEGMENT_NA == "North Bay" ~ "nb"),
       (Major_Seg == "North Bay" & SEGMENT_NA == "Deer Point Lake" ~ "dpl"),
+      (Major_Seg == "North Bay" & SEGMENT_NA != "Deer Point Lake") ~ "nb_b"),
       (Major_Seg == "St. Andrew Bay" & SEGMENT_NA == "St. Andrew Bay" ~ "sab"),
       (Major_Seg == "St. Andrew Bay" & SEGMENT_NA != "St. Andrew Bay" ~ "sab_b"),
       (Major_Seg == "West Bay" & SEGMENT_NA == "West Bay" ~ "wb"),
@@ -350,9 +354,11 @@ bbl_frame3 <- bbl_frame2 |>
       SEGMENT_NA == "West BAY ICWW" ~ "wb_b",
       SEGMENT_NA == "Alligator Bayou" ~ "sab_b"
        )
-    )
 
 
+st_area(bbl_frame3)
+
+bbl_frame3$area_m2 <- st_area(bbl_frame3)
 
 ```
 
