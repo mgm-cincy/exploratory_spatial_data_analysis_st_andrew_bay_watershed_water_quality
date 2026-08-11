@@ -34,6 +34,8 @@ library(spsurvey)
 
 ## Log
 
+2026-08-11 made sf_bbl1, which is a sample frame of 80 polygons containing bays, bayous, creeks, lagoons, and lakes. saved as a shapefile in output_sampleframes_surveys folder.
+
 2026-08-10 made sf_baysegmt1, which contains only 5 bay segments, including Deer Point Lake. No bayous, creeks or lagoons are included. Stratification for the survey design would be by SEGMENT_NA.
 
 2026-08-06 made sf_all1, all one survey frame. Checked bay topologies.
@@ -328,7 +330,7 @@ append = FALSE)
 
 ## Bays, Bayous, Creeks, and Lakes Geoprocessing
 
-I think in my inital coding I forgot to include bayous from North Bay.
+I think in my inital coding I forgot to include bayous from North Bay, and on 08/11/2026 I corrected that.
 
 Filter for bay segments, bayous, creeks, and lakes to make a bays and bayous sample frame. Create a stratification variable, waterbody type (wbody_type). The levels in waterbody type include 5 bay segments, this inlcudes Deer Point Lake, and for each bay segment that has bayous and other waterbody types, there is a correspond bayou indicated by "\_b". For example, there is an eb, for the East Bay segment, and then eb_b, which occurs 41 times, for the bayous, creek, etc. in East Bay.
 
