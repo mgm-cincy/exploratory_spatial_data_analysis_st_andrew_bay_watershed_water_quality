@@ -34,6 +34,10 @@ library(spsurvey)
 
 ## Log
 
+2026-08-31 sorted bbl_8 by SEGMENT_NA and see Alligator Bayou and Alligator Bayou_GeneratingPlant, but both have Major_Seg assignment of St. Andrew Bay. I believe the Alligator Bayou by the generating plant should be assigned to North Bay as Major_Seg.
+
+2026-08-18 Ryann Rossi loaded Bays_Bayous_Lakes_V8.shp to GIS data. It contains updates to Alligator Bayou. Need to run that spatial data to make the 3 sample frames.
+
 2026-08-11 made sf_bbl1, which is a sample frame of 80 polygons containing bays, bayous, creeks, lagoons, and lakes. saved as a shapefile in output_sampleframes_surveys folder.
 
 2026-08-10 made sf_baysegmt1, which contains only 5 bay segments, including Deer Point Lake. No bayous, creeks or lagoons are included. Stratification for the survey design would be by SEGMENT_NA.
@@ -41,6 +45,8 @@ library(spsurvey)
 2026-08-06 made sf_all1, all one survey frame. Checked bay topologies.
 
 ## Read Bays, Bayous and Lakes V7
+
+Using bbl_8 from Ryan Rossi.
 
 Using bbl_7 from Rose Horn.
 
@@ -50,33 +56,33 @@ Rose Horn took 2 polygons for Alligator Bayou, which borders the U.S. Coast Guar
 
 Need to see if I have 8 polygon names for: East Bay, Grand Lagoon, North Bay, St. Andrew Bay, West Bay, Crooked and Burnt Mill Creeks, and Deer Point Lake as I want to use those 6 polygons in linked micromap. Perhaps by using SEGMENT_NA and Major_Seg I can get the polygons I want.
 
-```{r bbl_v7}
+```{r bbl_v8}
 
-bbl_7 <- st_read("data_gis/Bays_Bayous_Lakes_V7.shp")
+bbl_8 <- st_read("data_gis/Bays_Bayous_Lakes_V8.shp")
 
-bbl_7 <- bbl_7 %>% st_transform(3087)
+bbl_8 <- bbl_8 %>% st_transform(3087)
 
-names(bbl_7)
-summary(bbl_7)
-mapview(bbl_7)
+names(bbl_8)
+summary(bbl_8)
+mapview(bbl_8)
 
 
-distinct(bbl_7, SEGMENT_NA) %>% dplyr::arrange(., SEGMENT_NA)
-# now with bbl_7 have 194 distinct segment names and 194 obs, I believe, because Harrison Bayou was split in to Harrison Bayou and Little Johnson Bayou. with bbl_5 have 193 distinct segment names and 193 obs. Previously in bbl_4 had 190 distinct SEGMENT_NA, but 191 obs suggesting one polygon is sharing a name
+distinct(bbl_8, SEGMENT_NA) %>% dplyr::arrange(., SEGMENT_NA)
+# now with bbl_8 have 194 distinct segment names and 194 obs, I believe, because Harrison Bayou was split in to Harrison Bayou and Little Johnson Bayou. with bbl_5 have 193 distinct segment names and 193 obs. Previously in bbl_4 had 190 distinct SEGMENT_NA, but 191 obs suggesting one polygon is sharing a name
 
-distinct(bbl_7, Major_Seg) %>% dplyr::arrange(., Major_Seg)
+distinct(bbl_8, Major_Seg) %>% dplyr::arrange(., Major_Seg)
 # returns 8 Major_Seg
 
-st_is_valid(bbl_7, reason = TRUE)
+st_is_valid(bbl_8, reason = TRUE)
 # 189 is SEGMENT_NA == White Flank Pond
 
 # I can't see ring self-intersection.
-dplyr::filter(bbl_7, SEGMENT_NA == "White Flank Pond") %>% 
+dplyr::filter(bbl_8, SEGMENT_NA == "White Flank Pond") %>% 
   mapview(.)
 
 bbl_7 <- st_make_valid(bbl_7)
 
-st_is_valid(bbl_7, reason = T)
+st_is_valid(bbl_8, reason = T)
 ```
 
 ## Filter Bays and Check Topology
