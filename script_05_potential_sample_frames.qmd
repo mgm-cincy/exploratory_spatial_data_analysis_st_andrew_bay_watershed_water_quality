@@ -34,6 +34,8 @@ library(spsurvey)
 
 ## Log
 
+2026-09-01 using bbl_9 to build 3 sample frames and those sample frame file  names will contain a 2 indicating version 2.
+
 2026-08-31 sorted bbl_8 by SEGMENT_NA and see Alligator Bayou and Alligator Bayou_GeneratingPlant, but both have Major_Seg assignment of St. Andrew Bay. I believe the Alligator Bayou by the generating plant should be assigned to North Bay as Major_Seg.
 
 2026-08-18 Ryann Rossi loaded Bays_Bayous_Lakes_V8.shp to GIS data. It contains updates to Alligator Bayou. Need to run that spatial data to make the 3 sample frames.
@@ -58,38 +60,39 @@ Need to see if I have 8 polygon names for: East Bay, Grand Lagoon, North Bay, St
 
 ```{r bbl_v8}
 
-bbl_8 <- st_read("data_gis/Bays_Bayous_Lakes_V8.shp")
+bbl_9 <- st_read("data_gis/Bays_Bayous_Lakes_v9.shp")
 
-bbl_8 <- bbl_8 %>% st_transform(3087)
+bbl_9 <- bbl_9 %>% st_transform(3087)
 
-names(bbl_8)
-summary(bbl_8)
-mapview(bbl_8)
+names(bbl_9)
+summary(bbl_9)
+mapview(bbl_9)
 
 
-distinct(bbl_8, SEGMENT_NA) %>% dplyr::arrange(., SEGMENT_NA)
-# now with bbl_8 have 194 distinct segment names and 194 obs, I believe, because Harrison Bayou was split in to Harrison Bayou and Little Johnson Bayou. with bbl_5 have 193 distinct segment names and 193 obs. Previously in bbl_4 had 190 distinct SEGMENT_NA, but 191 obs suggesting one polygon is sharing a name
+distinct(bbl_9, SEGMENT_NA) %>% dplyr::arrange(., SEGMENT_NA)
+# now with bbl_9 have 194 distinct segment names and 194 obs, I believe, because Harrison Bayou was split in to Harrison Bayou and Little Johnson Bayou. with bbl_5 have 193 distinct segment names and 193 obs. Previously in bbl_4 had 190 distinct SEGMENT_NA, but 191 obs suggesting one polygon is sharing a name
 
-distinct(bbl_8, Major_Seg) %>% dplyr::arrange(., Major_Seg)
+distinct(bbl_9, Major_Seg) %>% dplyr::arrange(., Major_Seg)
 # returns 8 Major_Seg
 
-st_is_valid(bbl_8, reason = TRUE)
+st_is_valid(bbl_9, reason = TRUE)
 # 189 is SEGMENT_NA == White Flank Pond
 
 # I can't see ring self-intersection.
-dplyr::filter(bbl_8, SEGMENT_NA == "White Flank Pond") %>% 
+dplyr::filter(bbl_9, SEGMENT_NA == "White Flank Pond") %>% 
   mapview(.)
 
-bbl_8 <- st_make_valid(bbl_8)
+bbl_9 <- st_make_valid(bbl_9)
 
-st_is_valid(bbl_8, reason = T)
+st_is_valid(bbl_9, reason = T)
 ```
 
 ## Filter Bays and Check Topology
-For North Bay had to add SEGMENT_NA == "Alligator Bayou_GeneratingPlant". 
+
+
 ```{r filter_bays_bayous}
 # filter west bay
-bayous_wb1 <- dplyr::filter(bbl_8, SEGMENT_NA == "Burnt Mill Creek" | SEGMENT_NA == "Crooked Creek" | SEGMENT_NA == "Warren Bayou" | SEGMENT_NA == "Gulf ICWW between Choctawhatchee Bay and St. Andrew Bay" | SEGMENT_NA == "West Bay" | SEGMENT_NA == "Johnson Bayou_WestBay" | SEGMENT_NA == "Basin Bayou" | SEGMENT_NA == "Botheration Bayou" | SEGMENT_NA == "Doyle Bayou" | SEGMENT_NA == "Harrison Bayou" | SEGMENT_NA == "Little Johnson Bayou" |SEGMENT_NA == "Ward Creek")
+bayous_wb1 <- dplyr::filter(bbl_9, SEGMENT_NA == "Burnt Mill Creek" | SEGMENT_NA == "Crooked Creek" | SEGMENT_NA == "Warren Bayou" | SEGMENT_NA == "Gulf ICWW between Choctawhatchee Bay and St. Andrew Bay" | SEGMENT_NA == "West Bay" | SEGMENT_NA == "Johnson Bayou_WestBay" | SEGMENT_NA == "Basin Bayou" | SEGMENT_NA == "Botheration Bayou" | SEGMENT_NA == "Doyle Bayou" | SEGMENT_NA == "Harrison Bayou" | SEGMENT_NA == "Little Johnson Bayou" |SEGMENT_NA == "Ward Creek")
 # returns 12 obs matching 12 segment names
 
 bayous_wb2 <- bayous_wb1 |> 
@@ -109,7 +112,7 @@ mapview(bayous_wb2)
 
 
 # filter for North Bay and include Robinson Bay, which is near North Bay and St. Andrew Bay border
-bayous_nb1 <- dplyr::filter(bbl_8, Major_Seg == "North Bay" | SEGMENT_NA == "Robinson Bayou" | SEGMENT_NA == "Alligator Bayou_GeneratingPlant") %>% 
+bayous_nb1 <- dplyr::filter(bbl_9, Major_Seg == "North Bay" | SEGMENT_NA == "Robinson Bayou") %>% 
   filter_out(., SEGMENT_NA == "Deer Point Lake")
 # using bbl_8 returns 17 obs/polygon
 
@@ -117,13 +120,13 @@ st_is_valid(bayous_nb1, reason = T)
 mapview(bayous_nb1)
 
 # filter for deer point lake
-bayous_dpl1 <- dplyr::filter(bbl_8, SEGMENT_NA == "Deer Point Lake")
+bayous_dpl1 <- dplyr::filter(bbl_9, SEGMENT_NA == "Deer Point Lake")
 
 st_is_valid(bayous_dpl1, reason = T)
 mapview(bayous_dpl1)
 
 # filter for east bay 
-bayous_eb1 <- dplyr::filter(bbl_8, Major_Seg == "East Bay")
+bayous_eb1 <- dplyr::filter(bbl_9, Major_Seg == "East Bay")
 # returns 42 polygons
 
 bayous_eb2 <- bayous_eb1 |>
@@ -139,7 +142,7 @@ mapview(bayous_eb2)
 
 # filter for st andrew bay
 # dropped Crooked Island Sound polygon
-bayous_sab1 <- dplyr::filter(bbl_8, SEGMENT_NA == "Alligator Bayou" |  SEGMENT_NA == "Grand Lagoon" |SEGMENT_NA == "Hog Island Sound" | SEGMENT_NA == "Johnson Bayou"| SEGMENT_NA == "Lake Huntington" | SEGMENT_NA == "Massalina Bayou" | SEGMENT_NA == "Posten Bayou" | SEGMENT_NA == "Pretty Bayou" | SEGMENT_NA == "St. Andrew Bay")
+bayous_sab1 <- dplyr::filter(bbl_9, SEGMENT_NA == "Alligator Bayou" |  SEGMENT_NA == "Grand Lagoon" |SEGMENT_NA == "Hog Island Sound" | SEGMENT_NA == "Johnson Bayou"| SEGMENT_NA == "Lake Huntington" | SEGMENT_NA == "Massalina Bayou" | SEGMENT_NA == "Posten Bayou" | SEGMENT_NA == "Pretty Bayou" | SEGMENT_NA == "St. Andrew Bay")
 # returns 9 obs
 
 st_is_valid(bayous_sab1, reason = T)
@@ -160,7 +163,6 @@ mapview(bayous_dpl1, col.regions = "purple") + mapview(bayous_eb2, col.regions =
 
 ## Areas
 
-Not sure about these areas as topology of polygons has not been checked with `st_is_valid`.
 
 ```{r area_bays}
 
@@ -180,7 +182,7 @@ sum(st_area(bayous_nb1))
 dplyr::filter(bayous_nb1, SEGMENT_NA == "North Bay") %>% 
   st_area(.)
 
-dplyr::filter(bayous_nb1, SEGMENT_NA == "Deer Point Lake") %>% 
+dplyr::filter(bayous_nb1, SEGMENT_NA == "Deer Point Lake") %>%
   st_area(.)
 
 st_area(bayous_sab1)
@@ -199,6 +201,9 @@ dplyr::filter(bayous_wb2, SEGMENT_NA == "West Bay") %>%
 
 ```
 
+## Survey Frames and bbl_9
+For final survey frames built from bbl_9 sf object, I will put a 2 in their file name to stand for version 2 before I write them out as a shapefile.
+
 ## All One Survey Frame Geoprocessing
 
 I think the steps for combining polygons are:
@@ -214,12 +219,12 @@ I think the steps for combining polygons are:
 ```{r all_one_survey_geoprocessing}
 
 st_is_valid(bayous_wb2, reason = T)
-bayous_wb3 <- st_make_valid(bayous_wb2)
-st_is_valid(bayous_wb3, reason = T)
+# bayous_wb3 <- st_make_valid(bayous_wb2)
+# st_is_valid(bayous_wb3, reason = T)
 
 st_is_valid(bayous_nb1, reason = T)
 
-comb_wb1 <- st_combine(bayous_wb3)
+comb_wb1 <- st_combine(bayous_wb2)
 st_is_valid(comb_wb1, reason = T)
 comb_wb1 <- st_make_valid(comb_wb1)
 st_is_valid(comb_wb1, reason = T)
@@ -291,11 +296,11 @@ st_area(wbnbdplsabeb1)
 
 st_is_valid(wbnbdplsabeb1, reason = T)
 
-sf_all1 <- wbnbdplsabeb1
+sf_all2 <- wbnbdplsabeb1
 
 # Writing a single shapefile to the working directory
-st_write(sf_all1,
-dsn = "output_sampleframes_surveys/sf_all1.shp",
+st_write(sf_all2,
+dsn = "output_sampleframes_surveys/sf_all2.shp",
 driver = "ESRI Shapefile",
 append = FALSE)
 
@@ -307,7 +312,7 @@ This sample frame has only the main bay segments, including Deer Point Lake. Str
 
 ```{r bay_segments_geoprocessing}
 
-bay_segmts1 <- dplyr::filter(bbl_7, SEGMENT_NA == "West Bay" | SEGMENT_NA == "North Bay" | SEGMENT_NA == "Deer Point Lake" | SEGMENT_NA == "St. Andrew Bay" | SEGMENT_NA == "East Bay")
+bay_segmts1 <- dplyr::filter(bbl_9, SEGMENT_NA == "West Bay" | SEGMENT_NA == "North Bay" | SEGMENT_NA == "Deer Point Lake" | SEGMENT_NA == "St. Andrew Bay" | SEGMENT_NA == "East Bay")
 
 st_is_valid(bay_segmts1)
 
@@ -322,13 +327,13 @@ bay_segmts1$area_m2 <- st_area(bay_segmts1)
 sum(st_area(bay_segmts1))
 
 # sample frame
-sf_baysegmt1 <- bay_segmts1
+sf_baysegmt2 <- bay_segmts1
 
-mapview(sf_baysegmt1)
+mapview(sf_baysegmt2)
 
 # Writing a single shapefile to the working directory
-st_write(sf_baysegmt1,
-dsn = "output_sampleframes_surveys/sf_baysegmt1.shp",
+st_write(sf_baysegmt2,
+dsn = "output_sampleframes_surveys/sf_baysegmt2.shp",
 driver = "ESRI Shapefile",
 append = FALSE)
 
@@ -336,15 +341,16 @@ append = FALSE)
 
 ## Bays, Bayous, Creeks, and Lakes Geoprocessing
 
-I think in my inital coding I forgot to include bayous from North Bay, and on 08/11/2026 I corrected that.
+Sum of Waterbody type for nb and nb_b is 16 yet bayous_nb has 17 obs. Similarly, for sab and sab_b the sum is 10 yet bayous_sab1 has 9 obs.
+
+I think in my initial coding I forgot to include bayous from North Bay, and on 08/11/2026 I corrected that.
 
 Filter for bay segments, bayous, creeks, and lakes to make a bays and bayous sample frame. Create a stratification variable, waterbody type (wbody_type). The levels in waterbody type include 5 bay segments, this inlcudes Deer Point Lake, and for each bay segment that has bayous and other waterbody types, there is a correspond bayou indicated by "\_b". For example, there is an eb, for the East Bay segment, and then eb_b, which occurs 41 times, for the bayous, creek, etc. in East Bay.
 
 ```{r bays_bayous_geoprocessing}
 
-
-bbl_frame1 <- dplyr::filter(bbl_7, SEGMENT_NA == "Burnt Mill Creek" | SEGMENT_NA == "Crooked Creek" | SEGMENT_NA == "Warren Bayou" | SEGMENT_NA == "Gulf ICWW between Choctawhatchee Bay and St. Andrew Bay" | SEGMENT_NA == "West Bay" | SEGMENT_NA == "Johnson Bayou_WestBay" | SEGMENT_NA == "Basin Bayou" | SEGMENT_NA == "Botheration Bayou" | SEGMENT_NA == "Doyle Bayou" | SEGMENT_NA == "Harrison Bayou" | SEGMENT_NA == "Little Johnson Bayou" |SEGMENT_NA == "Ward Creek" | Major_Seg == "North Bay" | SEGMENT_NA == "Robinson Bayou"| SEGMENT_NA == "Deer Point Lake" | Major_Seg == "East Bay" | SEGMENT_NA == "Alligator Bayou" | SEGMENT_NA == "Grand Lagoon" |SEGMENT_NA == "Hog Island Sound" | SEGMENT_NA == "Johnson Bayou"| SEGMENT_NA == "Lake Huntington" | SEGMENT_NA == "Massalina Bayou" | SEGMENT_NA == "Posten Bayou" | SEGMENT_NA == "Pretty Bayou" | SEGMENT_NA == "St. Andrew Bay" | SEGMENT_NA == "Gulf ICWW between St. Andrew Bay and St. Joseph Bay")
-# returns 80 obs
+bbl_frame1 <- dplyr::filter(bbl_9, SEGMENT_NA == "Burnt Mill Creek" | SEGMENT_NA == "Crooked Creek" | SEGMENT_NA == "Warren Bayou" | SEGMENT_NA == "Gulf ICWW between Choctawhatchee Bay and St. Andrew Bay" | SEGMENT_NA == "West Bay" | SEGMENT_NA == "Johnson Bayou_WestBay" | SEGMENT_NA == "Basin Bayou" | SEGMENT_NA == "Botheration Bayou" | SEGMENT_NA == "Doyle Bayou" | SEGMENT_NA == "Harrison Bayou" | SEGMENT_NA == "Little Johnson Bayou" |SEGMENT_NA == "Ward Creek" | Major_Seg == "North Bay" | SEGMENT_NA == "Robinson Bayou"| SEGMENT_NA == "Deer Point Lake" | Major_Seg == "East Bay" | SEGMENT_NA == "Alligator Bayou" | SEGMENT_NA == "Grand Lagoon" |SEGMENT_NA == "Hog Island Sound" | SEGMENT_NA == "Johnson Bayou"| SEGMENT_NA == "Lake Huntington" | SEGMENT_NA == "Massalina Bayou" | SEGMENT_NA == "Posten Bayou" | SEGMENT_NA == "Pretty Bayou" | SEGMENT_NA == "St. Andrew Bay" | SEGMENT_NA == "Gulf ICWW between St. Andrew Bay and St. Joseph Bay")
+# returns 81 obs as bbl_9 has both Alligator Bayou and Alligator Bayou_GeneratingPlant
 
 mapview(bbl_frame1)
 
@@ -365,7 +371,7 @@ bbl_frame2 <- bbl_frame1 |>
 
 st_is_valid(bbl_frame2)
 
-# creating a stratifcation variable of waterbody type, wbody_type
+# creating a stratification variable of waterbody type, wbody_type
 bbl_frame3 <- bbl_frame2 |>
   mutate(
     wbody_type = case_when(
@@ -378,8 +384,7 @@ bbl_frame3 <- bbl_frame2 |>
       (Major_Seg == "St. Andrew Bay" & SEGMENT_NA != "St. Andrew Bay" ~ "sab_b"),
       (Major_Seg == "West Bay" & SEGMENT_NA == "West Bay" ~ "wb"),
       (Major_Seg == "West Bay" & SEGMENT_NA != "North Bay" ~ "wb_b"),
-      SEGMENT_NA == "West Bay ICWW" ~ "wb_b",
-      SEGMENT_NA == "Alligator Bayou" ~ "sab_b"
+      SEGMENT_NA == "West Bay ICWW" ~ "wb_b"
        )
   )
 
@@ -392,10 +397,10 @@ bbl_frame3 %>%
   summarize(., count = dplyr::n()) %>% 
   print(n = Inf)
 
-sf_bbl1 <- bbl_frame3
+sf_bbl2 <- bbl_frame3
 
 # Writing a single shapefile to the working directory
-st_write(sf_bbl1,
+st_write(sf_bbl2,
 dsn = "output_sampleframes_surveys/sf_bbl1.shp",
 driver = "ESRI Shapefile",
 append = FALSE)
