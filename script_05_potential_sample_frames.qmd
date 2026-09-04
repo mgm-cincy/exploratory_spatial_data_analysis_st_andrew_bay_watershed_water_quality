@@ -34,7 +34,9 @@ library(spsurvey)
 
 ## Log
 
-2026-09-01 using bbl_9 to build 3 sample frames and those sample frame file  names will contain a 2 indicating version 2.
+2026-09-04 sent Ryann and email asking if I should change Robinson Bayou waterbody type, wbody_type, from sab_b to nb_b.
+
+2026-09-01 using bbl_9 to build 3 sample frames and those sample frame file names will contain a 2 indicating version 2.
 
 2026-08-31 sorted bbl_8 by SEGMENT_NA and see Alligator Bayou and Alligator Bayou_GeneratingPlant, but both have Major_Seg assignment of St. Andrew Bay. I believe the Alligator Bayou by the generating plant should be assigned to North Bay as Major_Seg.
 
@@ -88,7 +90,6 @@ st_is_valid(bbl_9, reason = T)
 ```
 
 ## Filter Bays and Check Topology
-
 
 ```{r filter_bays_bayous}
 # filter west bay
@@ -163,7 +164,6 @@ mapview(bayous_dpl1, col.regions = "purple") + mapview(bayous_eb2, col.regions =
 
 ## Areas
 
-
 ```{r area_bays}
 
 st_area(bayous_dpl1)
@@ -202,6 +202,7 @@ dplyr::filter(bayous_wb2, SEGMENT_NA == "West Bay") %>%
 ```
 
 ## Survey Frames and bbl_9
+
 For final survey frames built from bbl_9 sf object, I will put a 2 in their file name to stand for version 2 before I write them out as a shapefile.
 
 ## All One Survey Frame Geoprocessing
@@ -341,7 +342,7 @@ append = FALSE)
 
 ## Bays, Bayous, Creeks, and Lakes Geoprocessing
 
-Sum of Waterbody type for nb and nb_b is 16 yet bayous_nb has 17 obs. Similarly, for sab and sab_b the sum is 10 yet bayous_sab1 has 9 obs.
+Sum of Waterbody type for nb and nb_b is 16 yet bayous_nb has 17 obs. Similarly, for sab and sab_b the sum is 10 yet bayous_sab1 has 9 obs. For bayous_nb1, it has 17 polygons because filtering included Robinson Bayou, which is actually in St. Andrew Bay. Correspondingly, filtering for bayous_sab1, does not include Robinson Bayou.
 
 I think in my initial coding I forgot to include bayous from North Bay, and on 08/11/2026 I corrected that.
 
