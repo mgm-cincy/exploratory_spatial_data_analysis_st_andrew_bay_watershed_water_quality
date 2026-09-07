@@ -34,6 +34,8 @@ library(spsurvey)
 
 ## Log
 
+2026-09-09 note that Robinson Bayou assigned sab_b for wbody_type, but that changed below to be nb_b
+
 2026-09-04 sent Ryann and email asking if I should change Robinson Bayou waterbody type, wbody_type, from sab_b to nb_b.
 
 2026-09-01 using bbl_9 to build 3 sample frames and those sample frame file names will contain a 2 indicating version 2.
@@ -392,10 +394,10 @@ bbl_frame3 <- bbl_frame2 |>
 
 # note that Robinson Bayou assigned sab_b for wbody_type, but that changed below to be nb_b
 
-bbl_frame3 |> 
+bbl_frame3 <- bbl_frame3 |> 
   mutate(
     wbody_type = case_when(
-      Major_Seg == "St. Andrew Bay" & SEGMENT_NA == "Robinson Bay" ~ "nb_b",
+      Major_Seg == "St. Andrew Bay" & SEGMENT_NA == "Robinson Bayou" ~ "nb_b",
        TRUE ~ wbody_type)
   )
 
@@ -404,29 +406,16 @@ st_area(bbl_frame3)
 
 bbl_frame3$area_m2 <- st_area(bbl_frame3)
 
-
-
-
 bbl_frame3 %>% 
   group_by(wbody_type) %>% 
   summarize(., count = dplyr::n()) %>% 
   print(n = Inf)
 
-
-
-# bayous_wb2 <- bayous_wb1 |> 
-#   mutate(
-#   SEGMENT_NA = SEGMENT_NA |>
-#     replace_values(
-#       "Gulf ICWW between Choctawhatchee Bay and St. Andrew Bay" ~ "West Bay ICWW"
-#     )
-#   )  
-
 sf_bbl2 <- bbl_frame3
 
 # Writing a single shapefile to the working directory
 st_write(sf_bbl2,
-dsn = "output_sampleframes_surveys/sf_bbl1.shp",
+dsn = "output_sampleframes_surveys/sf_bbl2.shp",
 driver = "ESRI Shapefile",
 append = FALSE)
 
