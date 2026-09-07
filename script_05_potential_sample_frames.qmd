@@ -353,6 +353,7 @@ Filter for bay segments, bayous, creeks, and lakes to make a bays and bayous sam
 bbl_frame1 <- dplyr::filter(bbl_9, SEGMENT_NA == "Burnt Mill Creek" | SEGMENT_NA == "Crooked Creek" | SEGMENT_NA == "Warren Bayou" | SEGMENT_NA == "Gulf ICWW between Choctawhatchee Bay and St. Andrew Bay" | SEGMENT_NA == "West Bay" | SEGMENT_NA == "Johnson Bayou_WestBay" | SEGMENT_NA == "Basin Bayou" | SEGMENT_NA == "Botheration Bayou" | SEGMENT_NA == "Doyle Bayou" | SEGMENT_NA == "Harrison Bayou" | SEGMENT_NA == "Little Johnson Bayou" |SEGMENT_NA == "Ward Creek" | Major_Seg == "North Bay" | SEGMENT_NA == "Robinson Bayou"| SEGMENT_NA == "Deer Point Lake" | Major_Seg == "East Bay" | SEGMENT_NA == "Alligator Bayou" | SEGMENT_NA == "Grand Lagoon" |SEGMENT_NA == "Hog Island Sound" | SEGMENT_NA == "Johnson Bayou"| SEGMENT_NA == "Lake Huntington" | SEGMENT_NA == "Massalina Bayou" | SEGMENT_NA == "Posten Bayou" | SEGMENT_NA == "Pretty Bayou" | SEGMENT_NA == "St. Andrew Bay" | SEGMENT_NA == "Gulf ICWW between St. Andrew Bay and St. Joseph Bay")
 # returns 81 obs as bbl_9 has both Alligator Bayou and Alligator Bayou_GeneratingPlant
 
+
 mapview(bbl_frame1)
 
 bbl_frame1 %>% 
@@ -372,7 +373,7 @@ bbl_frame2 <- bbl_frame1 |>
 
 st_is_valid(bbl_frame2)
 
-# creating a stratification variable of waterbody type, wbody_type
+# creating a stratification variable of waterbody type, wbody_type to distinguish each of the major segments and their bayous
 bbl_frame3 <- bbl_frame2 |>
   mutate(
     wbody_type = case_when(
@@ -389,14 +390,37 @@ bbl_frame3 <- bbl_frame2 |>
        )
   )
 
+# note that Robinson Bayou assigned sab_b for wbody_type, but that changed below to be nb_b
+
+bbl_frame3 |> 
+  mutate(
+    wbody_type = case_when(
+      Major_Seg == "St. Andrew Bay" & SEGMENT_NA == "Robinson Bay" ~ "nb_b",
+       TRUE ~ wbody_type)
+  )
+
+
 st_area(bbl_frame3)
 
 bbl_frame3$area_m2 <- st_area(bbl_frame3)
+
+
+
 
 bbl_frame3 %>% 
   group_by(wbody_type) %>% 
   summarize(., count = dplyr::n()) %>% 
   print(n = Inf)
+
+
+
+# bayous_wb2 <- bayous_wb1 |> 
+#   mutate(
+#   SEGMENT_NA = SEGMENT_NA |>
+#     replace_values(
+#       "Gulf ICWW between Choctawhatchee Bay and St. Andrew Bay" ~ "West Bay ICWW"
+#     )
+#   )  
 
 sf_bbl2 <- bbl_frame3
 
@@ -408,6 +432,8 @@ append = FALSE)
 
 ```
 
-## Polygon Edits for BBL_7
+## Polygon Edits for BBL_9
+
+In BBL_9, Ryann Rossi edited 2 Alligator Bayous. One Alligator Bayou is in St. Andrew Bay, and the other Alligator Bayou_GeneratingPlant is in North Bay.
 
 In West Bay, the Johnson Bayou WestBay should be corrected to have Maj_Seg be West Bay instead of St. Andrew Bay. Should Deer Point Lake be edited to label polygons for Williams Bayou, Bayou George, Bear Creek and Cedar Creek? This would create a segment fore Deer Point Lake and corresponding bayous analogous to rest of the bay segments. In St. Andrew Bay, why does Alligator Bayou have Maj_Seg assignment of Lake and not St. Andrew Bay?
