@@ -165,7 +165,9 @@ mapview(np_sf1) + mapview(nnc_1)
 
 ```
 
-## Read Bays, Bayous and Lakes V7
+## Read Bays, Bayous and Lakes V9
+
+Using bbl_9 from Ryann Rossi as it was updated to distinguish 2 Alligator Bayous, one in St. Andrew Bay and the other in North Bay. 
 
 Using bbl_7 from Rose Horn.
 
@@ -175,24 +177,24 @@ Rose Horn took 2 polygons for Alligator Bayou, which borders the U.S. Coast Guar
 
 Need to see if I have 8 polygon names for: East Bay, Grand Lagoon, North Bay, St. Andrew Bay, West Bay, Crooked and Burnt Mill Creeks, and Deer Point Lake as I want to use those 6 polygons in linked micromap. Perhaps by using SEGMENT_NA and Major_Seg I can get the polygons I want.
 
-```{r bbl_v7}
+```{r bbl_v9}
 
-bbl_7 <- st_read("data_gis/Bays_Bayous_Lakes_V7.shp")
+bbl_9 <- st_read("data_gis/Bays_Bayous_Lakes_v9.shp")
 
-bbl_7 <- bbl_7 %>% st_transform(3087)
+bbl_9 <- bbl_9 %>% st_transform(3087)
 
-summary(bbl_7)
-mapview(bbl_7)
+summary(bbl_9)
+mapview(bbl_9)
 
 
-distinct(bbl_7, SEGMENT_NA) %>% dplyr::arrange(., SEGMENT_NA)
-# now with bbl_7 have 194 distinct segment names and 194 obs, I believe, because Harrison Bayou was split in to Harrison Bayou and Little Johnson Bayou. with bbl_5 have 193 distinct segment names and 193 obs. Previously in bbl_4 had 190 distinct SEGMENT_NA, but 191 obs suggesting one polygon is sharing a name
+distinct(bbl_9, SEGMENT_NA) %>% dplyr::arrange(., SEGMENT_NA)
+# now with bbl_9 have 194 distinct segment names and 194 obs, I believe, because Harrison Bayou was split in to Harrison Bayou and Little Johnson Bayou. with bbl_5 have 193 distinct segment names and 193 obs. Previously in bbl_4 had 190 distinct SEGMENT_NA, but 191 obs suggesting one polygon is sharing a name
 
-distinct(bbl_7, Major_Seg) %>% dplyr::arrange(., Major_Seg)
+distinct(bbl_9, Major_Seg) %>% dplyr::arrange(., Major_Seg)
 # returns 8 Major_Seg
 
 
-mapview(np_sf1) + mapview(bbl_7)
+mapview(np_sf1) + mapview(bbl_9)
 # a burnt mill creek station from 2024-04-25 is off polygon
 
 # these 8 polygons might be what I use for a linked micromap
@@ -1111,6 +1113,160 @@ print.file = "output_micromap/mmplot_tp_sab2020v3.jpeg", res=100)
 
 
 ```
+
+## 23 Polygon Linked Micromap
+
+Trying to make a linked micromap using all 23 sampled polygons in St. Andrew Bay. Two steps are involved. First get a 5-number summary of all 23 polygons. Second, merge that summary with the 80 polygons from bays, bayous, and lakes sample frame built in script 05.
+
+I will bring the station code for each bay-segment to see if I can combine that all into one data frame for a 5-number summary. I did a lot of copying and pasting to get that code together so run through it very carefully.
+
+```{r baywide_linked_micromap}
+# West Bay
+wb_station1 <- dplyr::filter(np_sf1, bay == "Crooked Creek" | bay == "Burnt Mill Creek" | bay == "Warren Bayou" | bay == "West Bay")
+# return 1778 observations, of which 1418 observations have sta_nr numeric entry, and 360 have monitoring location id entry
+
+wb_station2 <- dplyr::filter_out(wb_station1, monitoring_location_id == "BAY-WE-STBAY-5")
+# believe this filtering out removes all 28 obs for monitoring location BAY-WE-STBAY-5 so now have 1750 obs
+
+distinct(wb_station2, monitoring_location_id) %>% arrange(., monitoring_location_id) %>% print(n=Inf)
+# now returns to 20 obs and no BAY-WE-STBAY-5 observation
+
+wb_station3 <- wb_station2 |>
+  mutate(
+    bay = case_when(monitoring_location_id == "BAY-WEST-BAY-12" ~ "West Bay ICWW",
+                       TRUE ~ bay
+                       )
+    )
+
+# getting 5-number summary from points data
+tp_wb2020 <- st_set_geometry(wb_station3, NULL) %>% 
+  dplyr::filter(., year == 2020 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.") %>% 
+  dplyr::select(., tp, bay) %>% 
+  group_by(., bay) %>% 
+  summarize(., tp_min = fivenum(tp)[1],
+            tp_q1 = fivenum(tp)[2],
+            tp_med = fivenum(tp)[3],
+            tp_q3 = fivenum(tp)[4],
+            tp_max = fivenum(tp)[5],
+            tp_lmin = log(fivenum(tp)[1]),
+            tp_lq1 = log(fivenum(tp)[2]),
+            tp_lmed = log(fivenum(tp)[3]),
+            tp_lq3 = log(fivenum(tp)[4]),
+            tp_lmax = log(fivenum(tp)[5]),
+            tp_count = dplyr::n(),
+            tp_mean = mean(tp, na.rm = TRUE),
+            tp_na_count = sum(is.na(tp))) %>% 
+  print(n = Inf)
+
+# North Bay
+nbdp_station1 <- dplyr::filter(np_sf1, bay == "Robinson Bayou" | bay == "Goose Bayou" | bay == "Upper Goose Bayou" | bay == "Fannin Bayou" | bay == "North Bay" | bay == "Deer Point Lake")
+# return 1531 observations
+
+# this creates an Upper Goose Bayou so stats can be assigned to that station
+nbdp_station2 <- nbdp_station1 |>
+  mutate(
+    bay = case_when(monitoring_location_id == "BAY-UPPER-GOOSE-BAYOU-1" ~ "Upper Goose Bayou",
+                       TRUE ~ bay
+                       )
+    )
+
+tp_nbdp2020 <- st_set_geometry(nbdp_station2, NULL) %>% 
+  dplyr::filter(., year == 2020 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.") %>% 
+  dplyr::select(., tp, bay) %>% 
+  group_by(., bay) %>% 
+  summarize(., tp_min = fivenum(tp)[1],
+            tp_q1 = fivenum(tp)[2],
+            tp_med = fivenum(tp)[3],
+            tp_q3 = fivenum(tp)[4],
+            tp_max = fivenum(tp)[5],
+            tp_lmin = log(fivenum(tp)[1]),
+            tp_lq1 = log(fivenum(tp)[2]),
+            tp_lmed = log(fivenum(tp)[3]),
+            tp_lq3 = log(fivenum(tp)[4]),
+            tp_lmax = log(fivenum(tp)[5]),
+            tp_count = dplyr::n(),
+            tp_mean = mean(tp, na.rm = TRUE),
+            tp_na_count = sum(is.na(tp))) %>% 
+  print(n = Inf)
+
+# East Bay
+eb_station1 <- dplyr::filter(np_sf1, bay == "Watson Bayou" | bay == "Pitts Bayou"| bay == "Callaway Bayou" | bay == "Laird Bayou" | bay == "Sandy Creek" | bay == "Parker Bayou"| bay == "Eagle Nest Bayou" | bay == "East Bay" | monitoring_location_id == "NWFYI0018")
+# returns 1733 obs
+
+# use short name of East Bay ICWW for SEGMENT_NA
+bayous_eb2 <- bayous_eb1 |>
+  mutate(
+  SEGMENT_NA = SEGMENT_NA |>
+    replace_values(
+      "Gulf ICWW between St. Andrew Bay and St. Joseph Bay" ~ "East Bay ICWW"
+    )
+  )
+
+# getting 5-number summary from points data
+tp_eb2020 <- st_set_geometry(eb_station1, NULL) %>% 
+  dplyr::filter(., year == 2020 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.") %>% 
+  dplyr::select(., tp, bay) %>% 
+  group_by(., bay) %>% 
+  summarize(., tp_min = fivenum(tp)[1],
+            tp_q1 = fivenum(tp)[2],
+            tp_med = fivenum(tp)[3],
+            tp_q3 = fivenum(tp)[4],
+            tp_max = fivenum(tp)[5],
+            tp_lmin = log(fivenum(tp)[1]),
+            tp_lq1 = log(fivenum(tp)[2]),
+            tp_lmed = log(fivenum(tp)[3]),
+            tp_lq3 = log(fivenum(tp)[4]),
+            tp_lmax = log(fivenum(tp)[5]),
+            tp_count = dplyr::n(),
+            tp_mean = mean(tp, na.rm = TRUE),
+            tp_na_count = sum(is.na(tp))) %>% 
+  print(n = Inf)
+# returns 6 obs
+
+# St. Andrew Bay
+sab_station1 <- dplyr::filter(np_sf1, bay == "Grand Lagoon"| bay == "Johnson Bayou" |bay == "Massalina Bayou" | bay == "Posten Bayou" | bay == "Pretty Bayou" | bay == "St. Andrew Bay")
+
+odd_coords_wb <- dplyr::filter(np_sf1, monitoring_location_id == "BAY-WE-STBAY-5")
+
+mapview(odd_coords_wb, col.regions = "green") + mapview(sab_station2, col.regions = "red")
+
+# bind odd West Bay station to rest of St. Andrew Bay stations
+sab_station3 <- dplyr::bind_rows(sab_station2, odd_coords_wb)
+# returns 2950 obs
+
+# assign BAY-WE-STBAY-5 to St. Andrew Bay instead of West Bay
+sab_station3 <- sab_station3 |>
+  mutate(
+    bay = case_when(monitoring_location_id == "BAY-WE-STBAY-5" ~ "St. Andrew Bay",
+                       TRUE ~ bay
+                       )
+    )
+
+tp_sab2020 <- st_set_geometry(sab_station3, NULL) %>% 
+  dplyr::filter(., year == 2020 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.") %>% 
+  dplyr::select(., tp, bay) %>% 
+  group_by(., bay) %>% 
+  summarize(., tp_min = fivenum(tp)[1],
+            tp_q1 = fivenum(tp)[2],
+            tp_med = fivenum(tp)[3],
+            tp_q3 = fivenum(tp)[4],
+            tp_max = fivenum(tp)[5],
+            tp_lmin = log(fivenum(tp)[1]),
+            tp_lq1 = log(fivenum(tp)[2]),
+            tp_lmed = log(fivenum(tp)[3]),
+            tp_lq3 = log(fivenum(tp)[4]),
+            tp_lmax = log(fivenum(tp)[5]),
+            tp_count = dplyr::n(),
+            tp_mean = mean(tp, na.rm = TRUE),
+            tp_na_count = sum(is.na(tp))) %>% 
+  print(n = Inf)
+# returns 6 obs
+
+
+
+```
+
+
 
 ## Station and Polygon Issues
 
