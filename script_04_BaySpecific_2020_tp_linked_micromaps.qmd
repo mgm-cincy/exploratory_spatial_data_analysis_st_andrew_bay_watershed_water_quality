@@ -1158,6 +1158,8 @@ tp_wb2020 <- st_set_geometry(wb_station3, NULL) %>%
             tp_na_count = sum(is.na(tp))) %>% 
   print(n = Inf)
 
+# returns 5 obs
+
 # North Bay
 nbdp_station1 <- dplyr::filter(np_sf1, bay == "Robinson Bayou" | bay == "Goose Bayou" | bay == "Upper Goose Bayou" | bay == "Fannin Bayou" | bay == "North Bay" | bay == "Deer Point Lake")
 # return 1531 observations
@@ -1188,19 +1190,11 @@ tp_nbdp2020 <- st_set_geometry(nbdp_station2, NULL) %>%
             tp_mean = mean(tp, na.rm = TRUE),
             tp_na_count = sum(is.na(tp))) %>% 
   print(n = Inf)
+# returns 6 obs
 
 # East Bay
 eb_station1 <- dplyr::filter(np_sf1, bay == "Watson Bayou" | bay == "Pitts Bayou"| bay == "Callaway Bayou" | bay == "Laird Bayou" | bay == "Sandy Creek" | bay == "Parker Bayou"| bay == "Eagle Nest Bayou" | bay == "East Bay" | monitoring_location_id == "NWFYI0018")
 # returns 1733 obs
-
-# use short name of East Bay ICWW for SEGMENT_NA
-bayous_eb2 <- bayous_eb1 |>
-  mutate(
-  SEGMENT_NA = SEGMENT_NA |>
-    replace_values(
-      "Gulf ICWW between St. Andrew Bay and St. Joseph Bay" ~ "East Bay ICWW"
-    )
-  )
 
 # getting 5-number summary from points data
 tp_eb2020 <- st_set_geometry(eb_station1, NULL) %>% 
@@ -1225,6 +1219,13 @@ tp_eb2020 <- st_set_geometry(eb_station1, NULL) %>%
 
 # St. Andrew Bay
 sab_station1 <- dplyr::filter(np_sf1, bay == "Grand Lagoon"| bay == "Johnson Bayou" |bay == "Massalina Bayou" | bay == "Posten Bayou" | bay == "Pretty Bayou" | bay == "St. Andrew Bay")
+
+sab_station2 <- dplyr::filter_out(sab_station1, monitoring_location_id == "NWFYI0018" | monitoring_location_id == "BAY-ST-EWBAY-3")
+# returns 2922 obs as removed 2 obs from FDEP NORTHWEST REGIONAL OPERATIONS CENTER taken near DuPont Bridge removed and 31 obs of BAY-ST-EWBAY-3 
+
+mapview(sab_station2, col.regions = "red") + bbl_9
+# show sta_nr 3.3 from 2006 and NWFY0017 from 2020 in East Bay, and both will be removed in stats by filtering on year == 20202 and sampling_agency_name == ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.
+
 
 odd_coords_wb <- dplyr::filter(np_sf1, monitoring_location_id == "BAY-WE-STBAY-5")
 
