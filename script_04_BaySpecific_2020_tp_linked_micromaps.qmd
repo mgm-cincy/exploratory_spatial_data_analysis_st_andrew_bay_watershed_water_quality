@@ -167,7 +167,7 @@ mapview(np_sf1) + mapview(nnc_1)
 
 ## Read Bays, Bayous and Lakes V9
 
-Using bbl_9 from Ryann Rossi as it was updated to distinguish 2 Alligator Bayous, one in St. Andrew Bay and the other in North Bay. 
+Using bbl_9 from Ryann Rossi as it was updated to distinguish 2 Alligator Bayous, one in St. Andrew Bay and the other in North Bay.
 
 Using bbl_7 from Rose Horn.
 
@@ -956,7 +956,7 @@ sab_station2 <- dplyr::filter_out(sab_station1, monitoring_location_id == "NWFYI
 # returns 2922 obs as removed 2 obs from FDEP NORTHWEST REGIONAL OPERATIONS CENTER taken near DuPont Bridge removed and 31 obs of BAY-ST-EWBAY-3 
 
 mapview(sab_station2, col.regions = "red") + bbl_7
-# show sta_nr 3.3 from 2006 and NWFY0017 from 2020 in East Bay, and both will be removed in stats by filtering on year == 20202 and sampling_agency_name == ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.
+# show sta_nr 3.3 from 2006 and NWFY0017 from 2020 in East Bay, and both will be removed in stats by filtering on year == 2020 and sampling_agency_name == ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.
 
 odd_coords_wb <- dplyr::filter(np_sf1, monitoring_location_id == "BAY-WE-STBAY-5")
 
@@ -1224,7 +1224,7 @@ sab_station2 <- dplyr::filter_out(sab_station1, monitoring_location_id == "NWFYI
 # returns 2922 obs as removed 2 obs from FDEP NORTHWEST REGIONAL OPERATIONS CENTER taken near DuPont Bridge removed and 31 obs of BAY-ST-EWBAY-3 
 
 mapview(sab_station2, col.regions = "red") + bbl_9
-# show sta_nr 3.3 from 2006 and NWFY0017 from 2020 in East Bay, and both will be removed in stats by filtering on year == 20202 and sampling_agency_name == ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.
+# show sta_nr 3.3 from 2006 and NWFY0017 from 2020 in East Bay, and both will be removed in stats by filtering on year == 2020 and sampling_agency_name == ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.
 
 
 odd_coords_wb <- dplyr::filter(np_sf1, monitoring_location_id == "BAY-WE-STBAY-5")
@@ -1263,11 +1263,50 @@ tp_sab2020 <- st_set_geometry(sab_station3, NULL) %>%
   print(n = Inf)
 # returns 6 obs
 
+#######################################################
+# Pulling all of the station data at one time
 
+# first pull stations
+all_station1 <- dplyr::filter(np_sf1, bay == "Crooked Creek" | bay == "Burnt Mill Creek" | bay == "Warren Bayou" | bay == "West Bay" | bay == "Robinson Bayou" | bay == "Goose Bayou" | bay == "Upper Goose Bayou" | bay == "Fannin Bayou" | bay == "North Bay" | bay == "Deer Point Lake" | bay == "Watson Bayou" | bay == "Pitts Bayou"| bay == "Callaway Bayou" | bay == "Laird Bayou" | bay == "Sandy Creek" | bay == "Parker Bayou"| bay == "Eagle Nest Bayou" | bay == "East Bay" | monitoring_location_id == "NWFYI0018" | bay == "Grand Lagoon"| bay == "Johnson Bayou" | bay == "Massalina Bayou" | bay == "Posten Bayou" | bay == "Pretty Bayou" | bay == "St. Andrew Bay")
+
+
+# second do any filtering out
+all_station2 <- dplyr::filter_out(all_station1, monitoring_location_id == "NWFYI0018")
+# removed 2 obs from FDEP NORTHWEST REGIONAL OPERATIONS CENTER taken near DuPont Bridge in East Bay
+
+# third do renaming and bay re-assignments
+all_station3 <- all_station2 |>
+  mutate(
+    bay = case_when(monitoring_location_id == "BAY-WEST-BAY-12" ~ "West Bay ICWW",
+    monitoring_location_id == "BAY-UPPER-GOOSE-BAYOU-1" ~ "Upper Goose Bayou",
+    monitoring_location_id == "BAY-WE-STBAY-5" ~ "St. Andrew Bay",
+    monitoring_location_id == "BAY-ST-EWBAY-3" ~ "East Bay",
+                       TRUE ~ bay
+                       )
+)
+
+
+distinct(all_station2, monitoring_location_id) %>% arrange(., monitoring_location_id) %>% print(n=Inf)
+# return 59 stations with Baywatch station names and 40 that are not.
+
+# QA check of does number obs from all_station2 match the bay-segment-specific code chunks
+
+# West Bay Passes when I added filter for West Bay ICC
+# zwb_station1 <- dplyr::filter(all_station2, bay == "Crooked Creek" | bay == "Burnt Mill Creek" | bay == "Warren Bayou" | bay == "West Bay" | bay == "West Bay ICWW")
+# return 1778 observations, of which 1418 observations have sta_nr numeric entry, and 360 have monitoring location id entry
+
+# distinct(zwb_station1, monitoring_location_id) %>% arrange(., monitoring_location_id) %>% print(n=Inf)
+# now returns to 20 obs and no BAY-WE-STBAY-5 observation and see BAY-WEST-BAY-12, which is West Bay ICWW
+
+# North Bay Passes
+# nbdp_station1 <- dplyr::filter(all_station2, bay == "Robinson Bayou" | bay == "Goose Bayou" | bay == "Upper Goose Bayou" | bay == "Fannin Bayou" | bay == "North Bay" | bay == "Deer Point Lake")
+
+# East Bay Passes
+# eb_station1 <- dplyr::filter(all_station2, bay == "Watson Bayou" | bay == "Pitts Bayou"| bay == "Callaway Bayou" | bay == "Laird Bayou" | bay == "Sandy Creek" | bay == "Parker Bayou"| bay == "Eagle Nest Bayou" | bay == "East Bay" | monitoring_location_id == "NWFYI0018")
+
+# St. Andrew Bay Passes when I add in BAY-WE-STBAY-5 and filter out NWFYI0018 and BAY-ST-EWBAY-3
 
 ```
-
-
 
 ## Station and Polygon Issues
 
