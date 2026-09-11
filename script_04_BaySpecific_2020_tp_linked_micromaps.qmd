@@ -32,6 +32,8 @@ library(tidyverse)
 
 ## Log
 
+2026-09-11 caught mistake in East Bay as I had omitted 7 obs from BAY-ST-EWBAY-3 so need to remake East Bay linked micromap and make 23 polygon linked micromap for entire St. Andrew Bay
+
 2026-07-30 mutated odd West Bay station so its bay assignment is now St. Andrew Bay and made mmplot_tp_sab2020v3.jpeg
 
 2026-07-29 bbl_v7 from Rose Horn was uploaded to repository, and methods and metadata were uploaded to Methods folder.
@@ -1116,6 +1118,8 @@ print.file = "output_micromap/mmplot_tp_sab2020v3.jpeg", res=100)
 
 ## 23 Polygon Linked Micromap
 
+Note in tp_all2020 summary East Bay has n=37 whereas above in East Bay linked micromap chunk n=30. I believe the increase is because I remembered to include monitoring_location_id=BAY-ST-EWBAY-3 to East Bay even though original bay assignment was to SAB. 
+
 Trying to make a linked micromap using all 23 sampled polygons in St. Andrew Bay. Two steps are involved. First get a 5-number summary of all 23 polygons. Second, merge that summary with the 80 polygons from bays, bayous, and lakes sample frame built in script 05.
 
 I will bring the station code for each bay-segment to see if I can combine that all into one data frame for a 5-number summary. I did a lot of copying and pasting to get that code together so run through it very carefully.
@@ -1286,8 +1290,54 @@ all_station3 <- all_station2 |>
 )
 
 
-distinct(all_station2, monitoring_location_id) %>% arrange(., monitoring_location_id) %>% print(n=Inf)
-# return 59 stations with Baywatch station names and 40 that are not.
+distinct(all_station3, monitoring_location_id) %>% arrange(., monitoring_location_id) %>% print(n=Inf)
+# return 98 stations with 57 stations with Baywatch station names and 39 that are not.
+
+
+tp_all2020 <- st_set_geometry(all_station3, NULL) %>% 
+  dplyr::filter(., year == 2020 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.") %>% 
+  dplyr::select(., tp, bay) %>% 
+  group_by(., bay) %>% 
+  summarize(., tp_min = fivenum(tp)[1],
+            tp_q1 = fivenum(tp)[2],
+            tp_med = fivenum(tp)[3],
+            tp_q3 = fivenum(tp)[4],
+            tp_max = fivenum(tp)[5],
+            tp_lmin = log(fivenum(tp)[1]),
+            tp_lq1 = log(fivenum(tp)[2]),
+            tp_lmed = log(fivenum(tp)[3]),
+            tp_lq3 = log(fivenum(tp)[4]),
+            tp_lmax = log(fivenum(tp)[5]),
+            tp_count = dplyr::n(),
+            tp_mean = mean(tp, na.rm = TRUE),
+            tp_na_count = sum(is.na(tp))) %>% 
+  print(n = Inf)
+# returns 23 obs
+
+tp_bw_all2020 <- dplyr::filter(all_station3, year == 2020 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.")
+
+mapview(tp_bw_all2020)
+
+tp_bw_distinct_obs2020 <- distinct(tp_bw_all2020) %>% arrange(., monitoring_location_id) %>% print(n=Inf)
+
+ztp_bw_all2020 <- st_set_geometry(all_station3, NULL) %>% 
+  dplyr::filter(., year == 2020 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.") %>% 
+  dplyr::select(., tp, bay) %>% 
+  group_by(., bay) %>% 
+  summarize(., tp_min = fivenum(tp)[1],
+            tp_q1 = fivenum(tp)[2],
+            tp_med = fivenum(tp)[3],
+            tp_q3 = fivenum(tp)[4],
+            tp_max = fivenum(tp)[5],
+            tp_lmin = log(fivenum(tp)[1]),
+            tp_lq1 = log(fivenum(tp)[2]),
+            tp_lmed = log(fivenum(tp)[3]),
+            tp_lq3 = log(fivenum(tp)[4]),
+            tp_lmax = log(fivenum(tp)[5]),
+            tp_count = dplyr::n(),
+            tp_mean = mean(tp, na.rm = TRUE),
+            tp_na_count = sum(is.na(tp))) %>% 
+  print(n = Inf)
 
 # QA check of does number obs from all_station2 match the bay-segment-specific code chunks
 
