@@ -32,6 +32,8 @@ library(tidyverse)
 
 ## Log
 
+2026-09-14 Re-running East Bay so now includes odd SAB station reassigned to East Bay, BAY-ST-EWBAY-3. The linked micromap, mmplot_tn_eb2020v4 now shows totals obs equal to 37, before it was 30.
+
 2026-08-01 did find tp and replace with tn for West Bay
 
 2026-07-28 copied tp script 04 to make tn linked micromaps
@@ -165,29 +167,29 @@ Rose Horn took 2 polygons for Alligator Bayou, which borders the U.S. Coast Guar
 
 Need to see if I have 8 polygon names for: East Bay, Grand Lagoon, North Bay, St. Andrew Bay, West Bay, Crooked and Burnt Mill Creeks, and Deer Point Lake as I want to use those 6 polygons in linked micromap. Perhaps by using SEGMENT_NA and Major_Seg I can get the polygons I want.
 
-```{r bbl_v7}
+```{r bbl_v9}
 
-bbl_7 <- st_read("data_gis/Bays_Bayous_Lakes_V7.shp")
+bbl_9 <- st_read("data_gis/Bays_Bayous_Lakes_V7.shp")
 
-bbl_7 <- bbl_7 %>% st_transform(3087)
+bbl_9 <- bbl_9 %>% st_transform(3087)
 
-summary(bbl_7)
-mapview(bbl_7)
+summary(bbl_9)
+mapview(bbl_9)
 
 
-distinct(bbl_7, SEGMENT_NA) %>% dplyr::arrange(., SEGMENT_NA)
-# with bbl_7 have 193 distinct segment names and 193 obs. Previously in bbl_4 had 190 distinct SEGMENT_NA, but 191 obs suggesting one polygon is sharing a name
+distinct(bbl_9, SEGMENT_NA) %>% dplyr::arrange(., SEGMENT_NA)
+# with bbl_9 have 193 distinct segment names and 193 obs. Previously in bbl_4 had 190 distinct SEGMENT_NA, but 191 obs suggesting one polygon is sharing a name
 
 # Is Major_Seg a new field from Rose?
-distinct(bbl_7, Major_Seg) %>% dplyr::arrange(., Major_Seg)
+distinct(bbl_9, Major_Seg) %>% dplyr::arrange(., Major_Seg)
 # returns 8 Major_Seg
 
 
-mapview(np_sf1) + mapview(bbl_7)
+mapview(np_sf1) + mapview(bbl_9)
 # a burnt mill creek station from 2024-04-25 is off polygon
 
 # these 8 polygons might be what I use for a linked micromap
-# polygons8 <- dplyr::filter(bbl_7, SEGMENT_NA == "West Bay" | SEGMENT_NA == "North Bay" | SEGMENT_NA == "St. Andrew Bay" | SEGMENT_NA == "East Bay" | SEGMENT_NA == "Burnt Mill Creek" | SEGMENT_NA == "Crooked Creek" | SEGMENT_NA == "Grand Lagoon" |SEGMENT_NA == "Deer Point Lake")
+# polygons8 <- dplyr::filter(bbl_9, SEGMENT_NA == "West Bay" | SEGMENT_NA == "North Bay" | SEGMENT_NA == "St. Andrew Bay" | SEGMENT_NA == "East Bay" | SEGMENT_NA == "Burnt Mill Creek" | SEGMENT_NA == "Crooked Creek" | SEGMENT_NA == "Grand Lagoon" |SEGMENT_NA == "Deer Point Lake")
 # 
 # mapview(polygons8)
 
@@ -732,6 +734,8 @@ print.file = "output_micromap/mmplot_tn_nbdp2020v2.jpeg", res=100)
 
 ## East Bay, Bayous, and Creeks
 
+On 2026-09-14 Re-running East Bay so now includes odd SAB station reassigned to East Bay, BAY-ST-EWBAY-3
+
 Excluding Massalina Bayou station and polygon as both will go into St. Andrew Bay. Excluding Lake Martin station and polygon as well.
 
 Filter bbl_7 by Major Segment for East Bay and get 42 polygons.
@@ -741,37 +745,54 @@ Filter bbl_7 by Major Segment for East Bay and get 42 polygons.
 eb_station1 <- dplyr::filter(np_sf1, bay == "Watson Bayou" | bay == "Pitts Bayou"| bay == "Callaway Bayou" | bay == "Laird Bayou" | bay == "Sandy Creek" | bay == "Parker Bayou"| bay == "Eagle Nest Bayou" | bay == "East Bay" | monitoring_location_id == "NWFYI0018")
 # returns 1733 obs
 
-mapview(eb_station1, col.regions = "red") + bbl_7
+mapview(eb_station1, col.regions = "red") + bbl_9
 
 distinct(eb_station1, monitoring_location_id) %>% arrange(., monitoring_location_id) %>% print(n=Inf)
 # returns 22 observations including 1 NA, 2 Callaway Bayou stations,  5 East Bayou stations, 3 Laird Bayou stations, 1 Parker Bayou station, 1 Pitts Bayou Station, 1 Watson Bayou station, 7 FDEP Stations, that begin with G3TLHR, and 1 NWFY10018 station
 
-ggplot(eb_station1 |> filter(year >=2020), aes(x=yrmm_factor, y=log(tn))) + geom_point() + facet_wrap(vars(monitoring_location_id))
+# an St. Andrew Bay station that should be an East Bay station
+odd_coords_sab <- dplyr::filter(np_sf1, monitoring_location_id == "BAY-ST-EWBAY-3")
 
-ggplot(eb_station1 |> filter(year >=2020), aes(y=bay, x=log(tn))) + geom_boxplot() + facet_wrap(vars(yrmm_factor))
+mapview(odd_coords_sab, col.regions = "green") + mapview(eb_station1, col.regions = "red")
+
+# bind odd St. Andrew Bay station to rest of East Bay stations
+eb_station2 <- dplyr::bind_rows(eb_station1, odd_coords_sab)
+# returns 1764 obs
+
+# assign BAY-ST-EWBAY-3 to St. Andrew Bay instead of West Bay
+eb_station3 <- eb_station2 |>
+  mutate(
+    bay = case_when(monitoring_location_id == "BAY-ST-EWBAY-3" ~ "East Bay",
+                       TRUE ~ bay
+                       )
+    )
+
+ggplot(eb_station3 |> filter(year >=2020), aes(x=yrmm_factor, y=log(tn))) + geom_point() + facet_wrap(vars(monitoring_location_id))
+
+ggplot(eb_station3 |> filter(year >=2020), aes(y=bay, x=log(tn))) + geom_boxplot() + facet_wrap(vars(yrmm_factor))
 
 # evaluate samples within bays across all years
 # note 2 samples from St. Andrew Bay
-eb_station1 %>% 
+eb_station3 %>% 
   group_by(bay) %>% 
   summarize(., count = dplyr::n())
 
 # evaluate samples within bays sampled in 2020
 # note 1 sample from St. Andrew Bay
-eb_station1 %>% 
+eb_station3 %>% 
   dplyr::filter(., year == 2020) %>% 
   group_by(bay) %>% 
   summarize(., count = dplyr::n())
 
 # evaluate which years have the most samples
-eb_station1 %>% 
+eb_station3 %>% 
   dplyr::filter(., year >= 2020) %>% 
   group_by(year) %>% 
   summarize(., count = dplyr::n())
 
 # Bunkers Cove, Lannie Rowe, and Lake Martin dropped in bbl_7 and Massalina Bayou moved to St. Andrew Bay segement because close to border of SAB and East Bay. See metadata and methods from 07/28/2026 in Methods folder provided by Rose Horn
 
-bayous_eb1 <- dplyr::filter(bbl_7, Major_Seg == "East Bay")
+bayous_eb1 <- dplyr::filter(bbl_9, Major_Seg == "East Bay")
 # returns 42 polygons
 
 # this method is too laborious
@@ -779,7 +800,7 @@ bayous_eb1 <- dplyr::filter(bbl_7, Major_Seg == "East Bay")
 
 mapview(bayous_eb1)
 
-mapview(eb_station1, col.regions = "red") + mapview(bayous_eb1)
+mapview(eb_station3, col.regions = "red") + mapview(bayous_eb1)
 
 # use short name of East Bay ICWW for SEGMENT_NA
 bayous_eb2 <- bayous_eb1 |>
@@ -797,7 +818,7 @@ odd_point <- filter(eb_station1, bay == "Parker Bayou")
 mapview(odd_point)
 
 # note that just have an outline of Parker Bayou polygon as most of that polygon is overlaid by East Bay Polygon
-odd_polygon <- filter(bbl_7, SEGMENT_NA == "Parker Bayou")
+odd_polygon <- filter(bbl_9, SEGMENT_NA == "Parker Bayou")
 
 # Rose Horned fixed polygon slivers from bbl_4. In bbl_7, now have a single polygon for Parker Bayou and a single polygon for Pratt Bayou
 # show over a dozen polygon slivers along the margins of Parker Bayou. In Google Maps, looks like Parker Bayou should enclose embayments capture by a line from Parker Point to Donalson Point
@@ -806,7 +827,7 @@ mapview(odd_polygon)
 # FDEP stations labeled as Parker Bayou excluded by filtering below
 
 # getting 5-number summary from points data
-tn_eb2020 <- st_set_geometry(eb_station1, NULL) %>% 
+tn_eb2020 <- st_set_geometry(eb_station3, NULL) %>% 
   dplyr::filter(., year == 2020 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.") %>% 
   dplyr::select(., tn, bay) %>% 
   group_by(., bay) %>% 
@@ -836,18 +857,18 @@ tn_eb2020v3 <- right_join(bayous_eb2, tn_eb2020, by = join_by(SEGMENT_NA == bay)
 
 # need appropriate polygon for Parker Bayou as slivers are not visible
 
-# using tn_eb2020v2 shows how 35 bayous that do not have samples
+# using tn_eb2020v2 shows how 36 bayous that do not have samples
 mmplot(map.data=tn_eb2020v2,
        panel.types=c('dot_legend', 'labels', 'box_summary', 'map'),
        panel.data=list(NA,
                        'SEGMENT_NA',
                        list('tn_lmin', 'tn_lq1', 'tn_lmed', 'tn_lq3', 'tn_lmax'),
                        NA),
-       grouping = 5,
+       grouping = 6,
        ord.by='tn_lmed', rev.ord=TRUE,
        median.row=FALSE)
 
-# using tn_nb2020v3 shows only the 8 polygons with wq stats
+# using tn_nb2020v3 shows only the 6 polygons with wq stats
 mmplot(map.data=tn_eb2020v3,
        panel.types=c('dot_legend', 'labels', 'box_summary', 'map'),
        panel.data=list(NA,
@@ -906,7 +927,7 @@ mmplot(map.data=tn_eb2020v3,
                       
                       list(6, header='Light Gray Means Highlighted Above',
                            inactive.border.color=gray(.7), inactive.border.size=2, panel.width=1.75)),
-print.file = "output_micromap/mmplot_tn_eb2020v3.jpeg", res=100)
+print.file = "output_micromap/mmplot_tn_eb2020v4.jpeg", res=100)
 
 ```
 
