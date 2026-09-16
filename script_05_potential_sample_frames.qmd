@@ -50,9 +50,10 @@ library(spsurvey)
 
 2026-08-06 made sf_all1, all one survey frame. Checked bay topologies.
 
-## Read Bays, Bayous and Lakes V7
+## Read Bays, Bayous and Lakes V9
+Using bbl_9 from Ryann Rossi.
 
-Using bbl_8 from Ryan Rossi.
+Using bbl_8 from Ryann Rossi.
 
 Using bbl_7 from Rose Horn.
 
@@ -62,7 +63,7 @@ Rose Horn took 2 polygons for Alligator Bayou, which borders the U.S. Coast Guar
 
 Need to see if I have 8 polygon names for: East Bay, Grand Lagoon, North Bay, St. Andrew Bay, West Bay, Crooked and Burnt Mill Creeks, and Deer Point Lake as I want to use those 6 polygons in linked micromap. Perhaps by using SEGMENT_NA and Major_Seg I can get the polygons I want.
 
-```{r bbl_v8}
+```{r bbl_v9}
 
 bbl_9 <- st_read("data_gis/Bays_Bayous_Lakes_v9.shp")
 
