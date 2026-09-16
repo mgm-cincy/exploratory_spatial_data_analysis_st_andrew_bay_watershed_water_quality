@@ -1445,7 +1445,7 @@ mmplot(map.data=tp_bw_stats2020v2,
        panel.att=list(list(1, panel.width=1, point.type=20, point.size=2,
                            point.border=TRUE), 
                       
-                      list(2, header='Sampled Bay Segments \n& Bayous', panel.width=.9,#increased panel.width to 1.1 from .8
+                      list(2, header='Sampled Bay\n Segments & Bayous', panel.width=.9,#increased panel.width to 1.1 from .8
                            align='left', text.size=.8),
                       
                       list(3, header='Total #\n of Samples',
@@ -1472,7 +1472,7 @@ mmplot(map.data=tp_bw_stats2020v2,
                       list(6, header='Light Gray Means Highlighted Above',
                            inactive.border.color=gray(.7), inactive.border.size=2,
                             panel.width=1.75)),
-print.file = "output_micromap/mmplot_tp_bw2020v9.jpeg", res=100)
+print.file = "output_micromap/mmplot_tp_bw2020v1.jpeg", res=100)
 
 
 
