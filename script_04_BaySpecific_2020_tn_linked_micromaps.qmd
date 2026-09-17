@@ -159,7 +159,7 @@ mapview(np_sf1) + mapview(nnc_1)
 
 ```
 
-## Read Bays, Bayous and Lakes V74
+## Read Bays, Bayous and Lakes V9
 
 Using bbl_7 that Rose Horn sent, which has adjustments to distinguish polygons that had the same name. Still wonder why have Shape_Leng, Shape_Le_1 and Shape_Le_2.
 
@@ -1139,30 +1139,11 @@ all_station3 <- all_station2 |>
 distinct(all_station3, monitoring_location_id) %>% arrange(., monitoring_location_id) %>% print(n=Inf)
 # return 98 stations with 57 stations with Baywatch station names and 39 that are not.
 
-
-tn_all2020 <- st_set_geometry(all_station3, NULL) %>% 
-  dplyr::filter(., year == 2020 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.") %>% 
-  dplyr::select(., tn, bay) %>% 
-  group_by(., bay) %>% 
-  summarize(., tn_min = fivenum(tn)[1],
-            tn_q1 = fivenum(tn)[2],
-            tn_med = fivenum(tn)[3],
-            tn_q3 = fivenum(tn)[4],
-            tn_max = fivenum(tn)[5],
-            tn_lmin = log(fivenum(tn)[1]),
-            tn_lq1 = log(fivenum(tn)[2]),
-            tn_lmed = log(fivenum(tn)[3]),
-            tn_lq3 = log(fivenum(tn)[4]),
-            tn_lmax = log(fivenum(tn)[5]),
-            tn_count = dplyr::n(),
-            tn_mean = mean(tn, na.rm = TRUE),
-            tn_na_count = sum(is.na(tn))) %>% 
-  print(n = Inf)
-# returns 23 obs
-
 tn_bw_all2020 <- dplyr::filter(all_station3, year == 2020 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.")
 
 mapview(tn_bw_all2020)
+
+mapview(tn_bw_all2020, zcol = "SEGMENT_NA", legend = TRUE) + sf_bbl2
 
 # tn_bw_distinct_obs2020 <- distinct(tn_bw_all2020) %>% arrange(., monitoring_location_id) %>% print(n=Inf)
 
@@ -1192,6 +1173,8 @@ summary(log(tn_bw_all2020$tn))
 # use right_join so cut down polygons to n=23 to match stats
 tn_bw_stats2020v2 <- right_join(sf_bbl2, tn_bw_stats2020, by = join_by(SEGMENT_NA == bay), keep = TRUE)
 
+mapview(tn_bw_all2020, zcol = "SEGMENT_NA", legend = TRUE) + sf_bbl2
+
 
 # using tn_bw_stats2020v2 how 23 polygons that have sample stats
 mmplot(map.data=tn_bw_stats2020v2,
@@ -1206,6 +1189,58 @@ mmplot(map.data=tn_bw_stats2020v2,
        graph.bar.size = 0.4,
        ord.by='tn_lmed', rev.ord=TRUE,
        median.row=FALSE)
+
+
+# # using tn_bw_stats2020v2 how 23 polygons that have sample stats
+# tn Refined Plot for All Sampled Bay Segments and Bayous
+mmplot(map.data=tn_bw_stats2020v2,
+       panel.types=c('dot_legend', 'labels', 'labels', 'labels', 'box_summary', 'map'),
+       panel.data=list(NA,
+                       'SEGMENT_NA',
+                       'tn_count',
+                       'tn_na_count',
+                       list('tn_lmin', 'tn_lq1', 'tn_lmed', 'tn_lq3', 'tn_lmax'),
+                       NA),
+       grouping = c(5,5,3,5,5),
+       plot.pGrp.spacing = 2,
+       vertical.align = "center",
+       ord.by='tn_lmed',
+       rev.ord=TRUE,
+       median.row=FALSE,
+       plot.height=6, plot.width=9, #for poster use plot.height=6, plot.width=9,
+       colors=brewer.pal(5, "Spectral"), #for journal use plot.height=9, plot.width=6.8
+              
+       panel.att=list(list(1, panel.width=1, point.type=20, point.size=2,
+                           point.border=TRUE), 
+                      
+                      list(2, header='Sampled Bay\n Segments & Bayous', panel.width=.9,#increased panel.width to 1.1 from .8
+                           align='left', text.size=.8),
+                      
+                      list(3, header='Total #\n of Samples',
+                           panel.width=.5,
+                           align='right',
+                           text.size=.8),
+                      
+                      list(4, header='# of NA\n Samples',
+                           panel.width=.4,
+                           align='right',
+                           text.size=.8),
+                      
+                      list(5, header='2020 Detectable Total Nitrogen',
+                           graph.bgcolor='lightgray',
+                           xaxis.ticks=c(-2.5, -2.0, -1.5, -1.0, -0.5, 0.0),
+                           xaxis.labels=c(-2.5, -2.0, -1.5, -1.0, -0.5, 0.0),
+                           xaxis.labels.size=1.25,
+                           graph.bar.size = 0.75,
+                           #xaxis.labels.angle=90,
+                           add.line=-1.31, add.line.col="black",
+                           add.line.typ=4,
+                           xaxis.title='Log(TN, mg/L)', xaxis.title.size=1.25, panel.width=1.75),
+                      
+                      list(6, header='Light Gray Means Highlighted Above',
+                           inactive.border.color=gray(.7), inactive.border.size=2,
+                            panel.width=1.75)),
+print.file = "output_micromap/mmplot_tn_bw2020v1.jpeg", res=100)
 
 
 ```
