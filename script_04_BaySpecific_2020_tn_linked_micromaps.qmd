@@ -1108,6 +1108,109 @@ print.file = "output_micromap/mmplot_tn_sab2020v1.jpeg", res=100)
 
 ```
 
+## 23 Polygon Linked Micromap
+
+Trying to make a linked micromap using all 23 sampled polygons in St. Andrew Bay. Two steps are involved. First get a 5-number summary of all 23 polygons. Second, merge that summary with the 80 polygons from bays, bayous, and lakes sample frame built in script 05.
+
+```{r baywide_linked_micromap}
+
+# Pulling all of the station data at one time
+
+# first pull stations
+all_station1 <- dplyr::filter(np_sf1, bay == "Crooked Creek" | bay == "Burnt Mill Creek" | bay == "Warren Bayou" | bay == "West Bay" | bay == "Robinson Bayou" | bay == "Goose Bayou" | bay == "Upper Goose Bayou" | bay == "Fannin Bayou" | bay == "North Bay" | bay == "Deer Point Lake" | bay == "Watson Bayou" | bay == "Pitts Bayou"| bay == "Callaway Bayou" | bay == "Laird Bayou" | bay == "Sandy Creek" | bay == "Parker Bayou"| bay == "Eagle Nest Bayou" | bay == "East Bay" | monitoring_location_id == "NWFYI0018" | bay == "Grand Lagoon"| bay == "Johnson Bayou" | bay == "Massalina Bayou" | bay == "Posten Bayou" | bay == "Pretty Bayou" | bay == "St. Andrew Bay")
+
+
+# second do any filtering out
+all_station2 <- dplyr::filter_out(all_station1, monitoring_location_id == "NWFYI0018")
+# removed 2 obs from FDEP NORTHWEST REGIONAL OPERATIONS CENTER taken near DuPont Bridge in East Bay
+
+# third do renaming and bay re-assignments
+all_station3 <- all_station2 |>
+  mutate(
+    bay = case_when(monitoring_location_id == "BAY-WEST-BAY-12" ~ "West Bay ICWW",
+    monitoring_location_id == "BAY-UPPER-GOOSE-BAYOU-1" ~ "Upper Goose Bayou",
+    monitoring_location_id == "BAY-WE-STBAY-5" ~ "St. Andrew Bay",
+    monitoring_location_id == "BAY-ST-EWBAY-3" ~ "East Bay",
+                       TRUE ~ bay
+                       )
+)
+
+
+distinct(all_station3, monitoring_location_id) %>% arrange(., monitoring_location_id) %>% print(n=Inf)
+# return 98 stations with 57 stations with Baywatch station names and 39 that are not.
+
+
+tn_all2020 <- st_set_geometry(all_station3, NULL) %>% 
+  dplyr::filter(., year == 2020 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.") %>% 
+  dplyr::select(., tn, bay) %>% 
+  group_by(., bay) %>% 
+  summarize(., tn_min = fivenum(tn)[1],
+            tn_q1 = fivenum(tn)[2],
+            tn_med = fivenum(tn)[3],
+            tn_q3 = fivenum(tn)[4],
+            tn_max = fivenum(tn)[5],
+            tn_lmin = log(fivenum(tn)[1]),
+            tn_lq1 = log(fivenum(tn)[2]),
+            tn_lmed = log(fivenum(tn)[3]),
+            tn_lq3 = log(fivenum(tn)[4]),
+            tn_lmax = log(fivenum(tn)[5]),
+            tn_count = dplyr::n(),
+            tn_mean = mean(tn, na.rm = TRUE),
+            tn_na_count = sum(is.na(tn))) %>% 
+  print(n = Inf)
+# returns 23 obs
+
+tn_bw_all2020 <- dplyr::filter(all_station3, year == 2020 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.")
+
+mapview(tn_bw_all2020)
+
+# tn_bw_distinct_obs2020 <- distinct(tn_bw_all2020) %>% arrange(., monitoring_location_id) %>% print(n=Inf)
+
+tn_bw_stats2020 <- st_set_geometry(all_station3, NULL) %>% 
+  dplyr::filter(., year == 2020 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.") %>% 
+  dplyr::select(., tn, bay) %>% 
+  group_by(., bay) %>% 
+  summarize(., tn_min = fivenum(tn)[1],
+            tn_q1 = fivenum(tn)[2],
+            tn_med = fivenum(tn)[3],
+            tn_q3 = fivenum(tn)[4],
+            tn_max = fivenum(tn)[5],
+            tn_lmin = log(fivenum(tn)[1]),
+            tn_lq1 = log(fivenum(tn)[2]),
+            tn_lmed = log(fivenum(tn)[3]),
+            tn_lq3 = log(fivenum(tn)[4]),
+            tn_lmax = log(fivenum(tn)[5]),
+            tn_count = dplyr::n(),
+            tn_mean = mean(tn, na.rm = TRUE),
+            tn_na_count = sum(is.na(tn))) %>% 
+  print(n = Inf)
+
+summary(tn_bw_all2020$tn)
+
+summary(log(tn_bw_all2020$tn))
+
+# use right_join so cut down polygons to n=23 to match stats
+tn_bw_stats2020v2 <- right_join(sf_bbl2, tn_bw_stats2020, by = join_by(SEGMENT_NA == bay), keep = TRUE)
+
+
+# using tn_bw_stats2020v2 how 23 polygons that have sample stats
+mmplot(map.data=tn_bw_stats2020v2,
+       panel.types=c('dot_legend', 'labels', 'box_summary', 'map'),
+       panel.data=list(NA,
+                       'SEGMENT_NA',
+                       list('tn_lmin', 'tn_lq1', 'tn_lmed', 'tn_lq3', 'tn_lmax'),
+                       NA),
+       grouping = c(5,5,3,5,5),
+       plot.pGrp.spacing = 2,
+       vertical.align = "center",
+       graph.bar.size = 0.4,
+       ord.by='tn_lmed', rev.ord=TRUE,
+       median.row=FALSE)
+
+
+```
+
+
 ## Station and Polygon Issues
 
 Only 2 issues with polygons in bbl_7. First, Massalina Bayou is mistakenly assigned to Major Segment of North Bay and should be corrected to be East Bay. Second, in West Bay Harrrison Bayou polygon should be split in two. The southern bayou is Harrison Bayou, and the northern bayou is Little Johnson Bayou. At least that is how those 2 bayous are labeled in Google Maps and OpenTopoMap.
