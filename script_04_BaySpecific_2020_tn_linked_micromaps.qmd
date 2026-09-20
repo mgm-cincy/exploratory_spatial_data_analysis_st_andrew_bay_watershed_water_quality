@@ -1274,15 +1274,17 @@ all_station3 <- all_station2 |>
 distinct(all_station3, monitoring_location_id) %>% arrange(., monitoring_location_id) %>% print(n=Inf)
 # return 98 stations with 57 stations with Baywatch station names and 39 that are not.
 
-tn_bw_all2021 <- dplyr::filter(all_station3, year == 2021 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.")
+tn_bw_all2023 <- dplyr::filter(all_station3, year == 2023 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.")
 # in 2021 have 291 obs
+# in 2022 have 269 obs
+# in 2023 have 288 obs
 
-mapview(tn_bw_all2021)
+mapview(tn_bw_all2023)
 
-# tn_bw_distinct_obs2021 <- distinct(tn_bw_all2021) %>% arrange(., monitoring_location_id) %>% print(n=Inf)
+# tn_bw_distinct_obs2023 <- distinct(tn_bw_all2023) %>% arrange(., monitoring_location_id) %>% print(n=Inf)
 
-tn_bw_stats2021 <- st_set_geometry(all_station3, NULL) %>% 
-  dplyr::filter(., year == 2021 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.") %>% 
+tn_bw_stats2023 <- st_set_geometry(all_station3, NULL) %>% 
+  dplyr::filter(., year == 2023 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.") %>% 
   dplyr::select(., tn, bay) %>% 
   group_by(., bay) %>% 
   summarize(., tn_min = fivenum(tn)[1],
@@ -1300,18 +1302,21 @@ tn_bw_stats2021 <- st_set_geometry(all_station3, NULL) %>%
             tn_na_count = sum(is.na(tn))) %>% 
   print(n = Inf)
 
-summary(tn_bw_all2021$tn)
+summary(tn_bw_all2023$tn)
 
-summary(log(tn_bw_all2021$tn))
+
+# in 2023 median was 0.260 and -1.35 log transformed
+
+summary(log(tn_bw_all2023$tn))
 
 # use right_join so cut down polygons to n=23 to match stats
-tn_bw_stats2021v2 <- right_join(sf_bbl2, tn_bw_stats2021, by = join_by(SEGMENT_NA == bay), keep = TRUE)
+tn_bw_stats2023v2 <- right_join(sf_bbl2, tn_bw_stats2023, by = join_by(SEGMENT_NA == bay), keep = TRUE)
 
-mapview(tn_bw_stats2021v2, zcol = "tn_med", legend = TRUE) 
+mapview(tn_bw_stats2023v2, zcol = "tn_med", legend = TRUE) 
 
 
-# using tn_bw_stats2021v2 how 23 polygons that have sample stats
-mmplot(map.data=tn_bw_stats2021v2,
+# using tn_bw_stats2023v2 how 23 polygons that have sample stats
+mmplot(map.data=tn_bw_stats2023v2,
        panel.types=c('dot_legend', 'labels', 'box_summary', 'map'),
        panel.data=list(NA,
                        'SEGMENT_NA',
@@ -1325,9 +1330,9 @@ mmplot(map.data=tn_bw_stats2021v2,
        median.row=FALSE)
 
 
-# # using tn_bw_stats2021v2 how 23 polygons that have sample stats
+# # using tn_bw_stats2023v2 how 23 polygons that have sample stats
 # tn Refined Plot for All Sampled Bay Segments and Bayous
-mmplot(map.data=tn_bw_stats2021v2,
+mmplot(map.data=tn_bw_stats2023v2,
        panel.types=c('dot_legend', 'labels', 'labels', 'labels', 'box_summary', 'map'),
        panel.data=list(NA,
                        'SEGMENT_NA',
@@ -1360,21 +1365,21 @@ mmplot(map.data=tn_bw_stats2021v2,
                            align='right',
                            text.size=.8),
                       
-                      list(5, header='2021 Detectable Total Nitrogen',
+                      list(5, header='2023 Detectable Total Nitrogen',
                            graph.bgcolor='lightgray',
                            xaxis.ticks=c(-2.5, -2.0, -1.5, -1.0, -0.5, 0.0),
                            xaxis.labels=c(-2.5, -2.0, -1.5, -1.0, -0.5, 0.0),
                            xaxis.labels.size=1.25,
                            graph.bar.size = 0.75,
                            #xaxis.labels.angle=90,
-                           add.line=-1.20, add.line.col="black",
+                           add.line=-1.35, add.line.col="black",
                            add.line.typ=4,
                            xaxis.title='Log(TN, mg/L)', xaxis.title.size=1.25, panel.width=1.75),
                       
                       list(6, header='Light Gray Means Highlighted Above',
                            inactive.border.color=gray(.7), inactive.border.size=2,
                             panel.width=1.75)),
-print.file = "output_micromap/mmplot_tn_bw2021v1.jpeg", res=100)
+print.file = "output_micromap/mmplot_tn_bw2023v1.jpeg", res=100)
 
 
 
