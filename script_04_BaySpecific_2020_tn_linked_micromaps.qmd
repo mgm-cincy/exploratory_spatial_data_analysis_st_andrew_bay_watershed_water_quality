@@ -32,6 +32,8 @@ library(tidyverse)
 
 ## Log
 
+2026-09-21 made 23 polygon linked micromaps for 2021, 2022, and 2023
+
 2026-09-14 Re-running East Bay so now includes odd SAB station reassigned to East Bay, BAY-ST-EWBAY-3. The linked micromap, mmplot_tn_eb2020v4 now shows totals obs equal to 37, before it was 30.
 
 2026-08-01 did find tp and replace with tn for West Bay
@@ -1246,6 +1248,7 @@ print.file = "output_micromap/mmplot_tn_bw2020v1.jpeg", res=100)
 ```
 
 ## 2021-2023 23 Polygon Linked Micromap
+
 ```{r 2021_2023}
 
 
@@ -1384,8 +1387,6 @@ print.file = "output_micromap/mmplot_tn_bw2023v1.jpeg", res=100)
 
 
 ```
-
-
 
 ## Station and Polygon Issues
 
