@@ -32,6 +32,8 @@ library(tidyverse)
 
 ## Log
 
+2026-09-20 made mmplot_tp_bw2021v1., jpegmmplot_tp_bw2022v1.jpeg, and  mmplot_tp_bw2023v1.jpeg
+
 2026-09-14 Re-running East Bay linked micromap so now includes odd SAB station reassigned to East Bay, BAY-ST-EWBAY-3. Consequently, East Bay mmplot_tp_2020v4.jpeg shows total obs is now 37, it was 30.
 
 2026-09-11 caught mistake in East Bay as I had omitted 7 obs from BAY-ST-EWBAY-3 so need to remake East Bay linked micromap and make 23 polygon linked micromap for entire St. Andrew Bay
@@ -1338,8 +1340,13 @@ all_station3 <- all_station2 |>
 distinct(all_station3, monitoring_location_id) %>% arrange(., monitoring_location_id) %>% print(n=Inf)
 # return 98 stations with 57 stations with Baywatch station names and 39 that are not.
 
+tp_bw_all2020 <- dplyr::filter(all_station3, year == 2020 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.")
 
-tp_all2020 <- st_set_geometry(all_station3, NULL) %>% 
+mapview(tp_bw_all2020)
+summary(tp_bw_all2020$tp) 
+summary(log(tp_bw_all2020$tp))
+
+tp_bw_stats2020 <- st_set_geometry(all_station3, NULL) %>% 
   dplyr::filter(., year == 2020 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.") %>% 
   dplyr::select(., tp, bay) %>% 
   group_by(., bay) %>% 
@@ -1358,8 +1365,6 @@ tp_all2020 <- st_set_geometry(all_station3, NULL) %>%
             tp_na_count = sum(is.na(tp))) %>% 
   print(n = Inf)
 # returns 23 obs
-
-tp_bw_all2020 <- dplyr::filter(all_station3, year == 2020 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.")
 
 mapview(tp_bw_all2020)
 
@@ -1383,23 +1388,6 @@ tp_bw_stats2020 <- st_set_geometry(all_station3, NULL) %>%
             tp_mean = mean(tp, na.rm = TRUE),
             tp_na_count = sum(is.na(tp))) %>% 
   print(n = Inf)
-
-# QA check of does number obs from all_station2 match the bay-segment-specific code chunks
-
-# West Bay Passes when I added filter for West Bay ICC
-# zwb_station1 <- dplyr::filter(all_station2, bay == "Crooked Creek" | bay == "Burnt Mill Creek" | bay == "Warren Bayou" | bay == "West Bay" | bay == "West Bay ICWW")
-# return 1778 observations, of which 1418 observations have sta_nr numeric entry, and 360 have monitoring location id entry
-
-# distinct(zwb_station1, monitoring_location_id) %>% arrange(., monitoring_location_id) %>% print(n=Inf)
-# now returns to 20 obs and no BAY-WE-STBAY-5 observation and see BAY-WEST-BAY-12, which is West Bay ICWW
-
-# North Bay Passes
-# nbdp_station1 <- dplyr::filter(all_station2, bay == "Robinson Bayou" | bay == "Goose Bayou" | bay == "Upper Goose Bayou" | bay == "Fannin Bayou" | bay == "North Bay" | bay == "Deer Point Lake")
-
-# East Bay Passes
-# eb_station1 <- dplyr::filter(all_station2, bay == "Watson Bayou" | bay == "Pitts Bayou"| bay == "Callaway Bayou" | bay == "Laird Bayou" | bay == "Sandy Creek" | bay == "Parker Bayou"| bay == "Eagle Nest Bayou" | bay == "East Bay" | monitoring_location_id == "NWFYI0018")
-
-# St. Andrew Bay Passes when I add in BAY-WE-STBAY-5 and filter out NWFYI0018 and BAY-ST-EWBAY-3
 
 summary(tp_bw_all2020$tp)
 
@@ -1477,6 +1465,159 @@ print.file = "output_micromap/mmplot_tp_bw2020v1.jpeg", res=100)
 
 
 ```
+
+## 2021-2023 23 Polygon Linked Micromap
+```{r 2021_2023}
+# Pulling all of the station data at one time
+
+# first pull stations
+all_station1 <- dplyr::filter(np_sf1, bay == "Crooked Creek" | bay == "Burnt Mill Creek" | bay == "Warren Bayou" | bay == "West Bay" | bay == "Robinson Bayou" | bay == "Goose Bayou" | bay == "Upper Goose Bayou" | bay == "Fannin Bayou" | bay == "North Bay" | bay == "Deer Point Lake" | bay == "Watson Bayou" | bay == "Pitts Bayou"| bay == "Callaway Bayou" | bay == "Laird Bayou" | bay == "Sandy Creek" | bay == "Parker Bayou"| bay == "Eagle Nest Bayou" | bay == "East Bay" | monitoring_location_id == "NWFYI0018" | bay == "Grand Lagoon"| bay == "Johnson Bayou" | bay == "Massalina Bayou" | bay == "Posten Bayou" | bay == "Pretty Bayou" | bay == "St. Andrew Bay")
+
+
+# second do any filtering out
+all_station2 <- dplyr::filter_out(all_station1, monitoring_location_id == "NWFYI0018")
+# removed 2 obs from FDEP NORTHWEST REGIONAL OPERATIONS CENTER taken near DuPont Bridge in East Bay
+
+# third do renaming and bay re-assignments
+all_station3 <- all_station2 |>
+  mutate(
+    bay = case_when(monitoring_location_id == "BAY-WEST-BAY-12" ~ "West Bay ICWW",
+    monitoring_location_id == "BAY-UPPER-GOOSE-BAYOU-1" ~ "Upper Goose Bayou",
+    monitoring_location_id == "BAY-WE-STBAY-5" ~ "St. Andrew Bay",
+    monitoring_location_id == "BAY-ST-EWBAY-3" ~ "East Bay",
+                       TRUE ~ bay
+                       )
+)
+
+
+distinct(all_station3, monitoring_location_id) %>% arrange(., monitoring_location_id) %>% print(n=Inf)
+# return 98 stations with 57 stations with Baywatch station names and 39 that are not.
+
+tp_bw_all2023 <- dplyr::filter(all_station3, year == 2023 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.")
+# in 2020 have 286 obs, median 0.014, median logged -4.27, 9 Na'S
+# in 2021 have 291 obs, median 0.015, median logged -4.20, 0 NA,S
+# in 2022 have 269 obs, median 0.014, median logged -4.27, 4 NA'S
+# in 2023 have 288 obs, median 0.013, median logged -4.34, 21 NA's!!
+
+
+summary(tp_bw_all2023$tp)
+summary(log(tp_bw_all2023$tp))
+
+
+mapview(tp_bw_all2023)
+
+
+tp_bw_stats2023 <- st_set_geometry(all_station3, NULL) %>% 
+  dplyr::filter(., year == 2023 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.") %>% 
+  dplyr::select(., tp, bay) %>% 
+  group_by(., bay) %>% 
+  summarize(., tp_min = fivenum(tp)[1],
+            tp_q1 = fivenum(tp)[2],
+            tp_med = fivenum(tp)[3],
+            tp_q3 = fivenum(tp)[4],
+            tp_max = fivenum(tp)[5],
+            tp_lmin = log(fivenum(tp)[1]),
+            tp_lq1 = log(fivenum(tp)[2]),
+            tp_lmed = log(fivenum(tp)[3]),
+            tp_lq3 = log(fivenum(tp)[4]),
+            tp_lmax = log(fivenum(tp)[5]),
+            tp_count = dplyr::n(),
+            tp_mean = mean(tp, na.rm = TRUE),
+            tp_na_count = sum(is.na(tp))) %>% 
+  print(n = Inf)
+# returns 23 obs
+
+# QA check of does number obs from all_station2 match the bay-segment-specific code chunks
+
+# West Bay Passes when I added filter for West Bay ICC
+# zwb_station1 <- dplyr::filter(all_station2, bay == "Crooked Creek" | bay == "Burnt Mill Creek" | bay == "Warren Bayou" | bay == "West Bay" | bay == "West Bay ICWW")
+# return 1778 observations, of which 1418 observations have sta_nr numeric entry, and 360 have monitoring location id entry
+
+# distinct(zwb_station1, monitoring_location_id) %>% arrange(., monitoring_location_id) %>% print(n=Inf)
+# now returns to 20 obs and no BAY-WE-STBAY-5 observation and see BAY-WEST-BAY-12, which is West Bay ICWW
+
+# North Bay Passes
+# nbdp_station1 <- dplyr::filter(all_station2, bay == "Robinson Bayou" | bay == "Goose Bayou" | bay == "Upper Goose Bayou" | bay == "Fannin Bayou" | bay == "North Bay" | bay == "Deer Point Lake")
+
+# East Bay Passes
+# eb_station1 <- dplyr::filter(all_station2, bay == "Watson Bayou" | bay == "Pitts Bayou"| bay == "Callaway Bayou" | bay == "Laird Bayou" | bay == "Sandy Creek" | bay == "Parker Bayou"| bay == "Eagle Nest Bayou" | bay == "East Bay" | monitoring_location_id == "NWFYI0018")
+
+# St. Andrew Bay Passes when I add in BAY-WE-STBAY-5 and filter out NWFYI0018 and BAY-ST-EWBAY-3
+
+# use right_join so cut down polygons to n=23 to match stats
+tp_bw_stats2023v2 <- right_join(sf_bbl2, tp_bw_stats2023, by = join_by(SEGMENT_NA == bay), keep = TRUE)
+
+
+mapview(tp_bw_stats2023v2, zcol = "tp_med", legend = TRUE) 
+
+# using tp_bw_stats2023v2 how 23 polygons that have sample stats
+mmplot(map.data=tp_bw_stats2023v2,
+       panel.types=c('dot_legend', 'labels', 'box_summary', 'map'),
+       panel.data=list(NA,
+                       'SEGMENT_NA',
+                       list('tp_lmin', 'tp_lq1', 'tp_lmed', 'tp_lq3', 'tp_lmax'),
+                       NA),
+       grouping = c(5,5,3,5,5),
+       plot.pGrp.spacing = 2,
+       vertical.align = "center",
+       graph.bar.size = 0.4,
+       ord.by='tp_lmed', rev.ord=TRUE,
+       median.row=FALSE)
+
+# # using tp_bw_stats2023v2 how 23 polygons that have sample stats
+# TP Refined Plot for All Sampled Bay Segments and Bayous
+mmplot(map.data=tp_bw_stats2023v2,
+       panel.types=c('dot_legend', 'labels', 'labels', 'labels', 'box_summary', 'map'),
+       panel.data=list(NA,
+                       'SEGMENT_NA',
+                       'tp_count',
+                       'tp_na_count',
+                       list('tp_lmin', 'tp_lq1', 'tp_lmed', 'tp_lq3', 'tp_lmax'),
+                       NA),
+       grouping = c(5,5,3,5,5),
+       plot.pGrp.spacing = 2,
+       vertical.align = "center",
+       ord.by='tp_lmed',
+       rev.ord=TRUE,
+       median.row=FALSE,
+       plot.height=6, plot.width=9, #for poster use plot.height=6, plot.width=9,
+       colors=brewer.pal(5, "Spectral"), #for journal use plot.height=9, plot.width=6.8
+              
+       panel.att=list(list(1, panel.width=1, point.type=20, point.size=2,
+                           point.border=TRUE), 
+                      
+                      list(2, header='Sampled Bay\n Segments & Bayous', panel.width=.9,#increased panel.width to 1.1 from .8
+                           align='left', text.size=.8),
+                      
+                      list(3, header='Total #\n of Samples',
+                           panel.width=.5,
+                           align='right',
+                           text.size=.8),
+                      
+                      list(4, header='# of NA\n Samples',
+                           panel.width=.4,
+                           align='right',
+                           text.size=.8),
+                      
+                      list(5, header='2023 Detectable Total Phoshporous',
+                           graph.bgcolor='lightgray',
+                           xaxis.ticks=c(-6.0, -5.0, -4.0, -3.0, -2.0),
+                           xaxis.labels=c(-6,-5, -4, -3, -2),
+                           xaxis.labels.size=1.25,
+                           graph.bar.size = 0.75,
+                           #xaxis.labels.angle=90,
+                           add.line=-4.34, add.line.col="black",
+                           add.line.typ=4,
+                           xaxis.title='Log(TP, mg/L)', xaxis.title.size=1.25, panel.width=1.75),
+                      
+                      list(6, header='Light Gray Means Highlighted Above',
+                           inactive.border.color=gray(.7), inactive.border.size=2,
+                            panel.width=1.75)),
+print.file = "output_micromap/mmplot_tp_bw2023v1.jpeg", res=100)
+
+
+```
+
 
 ## Station and Polygon Issues
 
