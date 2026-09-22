@@ -32,6 +32,8 @@ library(tidyverse)
 
 ## Log
 
+2026-09-21 added facet bubble map to see if NA's occurred in the same time period and if very high TP concentrations also occured in same time period.
+
 2026-09-20 made mmplot_tp_bw2021v1., jpegmmplot_tp_bw2022v1.jpeg, and mmplot_tp_bw2023v1.jpeg
 
 2026-09-14 Re-running East Bay linked micromap so now includes odd SAB station reassigned to East Bay, BAY-ST-EWBAY-3. Consequently, East Bay mmplot_tp_2020v4.jpeg shows total obs is now 37, it was 30.
@@ -1620,7 +1622,7 @@ print.file = "output_micromap/mmplot_tp_bw2023v1.jpeg", res=100)
 ```
 
 ## Facet Bubble Map
-
+Trying to see if NA's occurred in the same time period and if very high TP concentrations also occured in same time period.
 ```{r facet_map}
 
 tp_bubble_facet <- tm_shape(sf_bbl2) +
