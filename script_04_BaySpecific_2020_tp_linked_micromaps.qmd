@@ -32,7 +32,7 @@ library(tidyverse)
 
 ## Log
 
-2026-09-20 made mmplot_tp_bw2021v1., jpegmmplot_tp_bw2022v1.jpeg, and  mmplot_tp_bw2023v1.jpeg
+2026-09-20 made mmplot_tp_bw2021v1., jpegmmplot_tp_bw2022v1.jpeg, and mmplot_tp_bw2023v1.jpeg
 
 2026-09-14 Re-running East Bay linked micromap so now includes odd SAB station reassigned to East Bay, BAY-ST-EWBAY-3. Consequently, East Bay mmplot_tp_2020v4.jpeg shows total obs is now 37, it was 30.
 
@@ -1467,6 +1467,7 @@ print.file = "output_micromap/mmplot_tp_bw2020v1.jpeg", res=100)
 ```
 
 ## 2021-2023 23 Polygon Linked Micromap
+
 ```{r 2021_2023}
 # Pulling all of the station data at one time
 
@@ -1617,6 +1618,38 @@ print.file = "output_micromap/mmplot_tp_bw2023v1.jpeg", res=100)
 
 
 ```
+
+## Facet Bubble Map
+
+```{r facet_map}
+
+tp_bubble_facet <- tm_shape(sf_bbl2) +
+  tm_fill("#dddddd") + 
+tm_shape(tp_bw_all2023) +
+  tm_bubbles(size =  "tp",
+             # size.scale = tm_scale_continuous_log(values.scale = "dep_result_value_number"),
+             size.legend = tm_legend("TP (mg/L)")) +
+  tm_facets(by = "yrmm_factor")
+
+tp_bubble <- tm_shape(sf_bbl2) +
+  tm_fill("#dddddd") + 
+tm_shape(tp_bw_all2023) +
+  tm_bubbles(size =  "tp",
+             # size.scale = tm_scale_continuous_log(values.scale = "dep_result_value_number"),
+             size.legend = tm_legend("TP (mg/L)"))
+
+
+#daily loop
+tp_bubble + tm_animate(frame = "date_factor", fps = 1, play = "loop")
+
+# monthly loop
+tp_bubble + tm_animate(frame = "yrmm_factor", fps = 1, play = "loop")
+
+
+
+
+```
+
 
 
 ## Station and Polygon Issues
