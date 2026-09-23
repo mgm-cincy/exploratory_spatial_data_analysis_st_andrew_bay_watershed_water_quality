@@ -34,7 +34,7 @@ library(tidyverse)
 
 2026-09-23 facet scatter plot of log TN and log TP by bays reveals some strong positive correlations for 2 nutrient concentrations, especially in Grand Lagoon
 
-2026-09-21 added facet bubble map to see if NA's occurred in the same time period and if very high TP concentrations also occured in same time period.
+2026-09-21 added facet bubble map to see if NA's occurred in the same time period and if very high TP concentrations also occurred in same time period.
 
 2026-09-20 made mmplot_tp_bw2021v1., jpegmmplot_tp_bw2022v1.jpeg, and mmplot_tp_bw2023v1.jpeg
 
