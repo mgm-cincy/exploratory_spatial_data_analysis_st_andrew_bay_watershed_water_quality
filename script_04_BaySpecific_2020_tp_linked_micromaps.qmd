@@ -1498,7 +1498,7 @@ all_station3 <- all_station2 |>
 distinct(all_station3, monitoring_location_id) %>% arrange(., monitoring_location_id) %>% print(n=Inf)
 # return 98 stations with 57 stations with Baywatch station names and 39 that are not.
 
-tp_bw_all2021 <- dplyr::filter(all_station3, year == 2021 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.")
+tp_bw_all2023 <- dplyr::filter(all_station3, year == 2023 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.")
 # in 2020 have 286 obs, median 0.014, median logged -4.27, 9 Na'S
 # in 2021 have 291 obs, median 0.015, median logged -4.20, 0 NA,S
 # in 2022 have 269 obs, median 0.014, median logged -4.27, 4 NA'S
@@ -1654,7 +1654,9 @@ tp_bubble + tm_animate(frame = "yrmm_factor", fps = 1, play = "loop")
 
 ggplot(tp_bw_all2020, aes(x = log(tp), y = log(tn))) + geom_point() + labs(x = "Log TP, (mg/L)", y = "Log TN, (mg/L)", title = "Total Phosphorus and Total Nitrogen Bay Segments", subtitle = "WIN Data BayWatch 2020, n = 286") + facet_wrap(vars(bay))
 
-ggplot(tp_bw_all2020, aes(x = log(tp), y = log(tn))) + geom_point() + labs(x = "Log TP, (mg/L)", y = "Log TN, (mg/L)", title = "Total Phosphorus and Total Nitrogen Bay Segments", subtitle = "WIN Data BayWatch 2020, n = 286") + facet_wrap(vars(bay), scales = "free")
+ggplot(tp_bw_all2023, aes(x = log(tp), y = log(tn))) + geom_point() + geom_smooth() + labs(x = "Log TP, (mg/L)", y = "Log TN, (mg/L)", title = "Total Phosphorus and Total Nitrogen Bay Segments", subtitle = "WIN Data BayWatch 2023, n = 288") + facet_wrap(vars(bay), scales = "free")
+
+ggsave("output_corr/corr_tp_smooth_2023v1.pdf", width = 10, height = 6, units = "in")
 
 
 ```
