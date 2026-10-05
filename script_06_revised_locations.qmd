@@ -1,0 +1,29 @@
+---
+title: "revised_locations"
+author: "Mike McManus"
+format: html
+editor: visual
+editor_options: 
+  chunk_output_type: console
+---
+
+## Libraries
+
+Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+
+## Log
+
+The purpose of this script is to evaluate and compare revised BayWatch monitoring locations provided by Phil Maxwell from Baywatch. Compare revised sites to monitoring locations from FDEP WINS.
+
+```{r}
+1 + 1
+```
+
+You can add options to executable code like this
+
+```{r}
+#| echo: false
+2 * 2
+```
+
+The `echo: false` option disables the printing of code (only output is displayed).
