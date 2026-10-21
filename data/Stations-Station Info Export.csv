@@ -1,0 +1,83 @@
+﻿U_of_F,WIN_Location_ID,LW_WIN_Location_ID,Number,Name,Latitude,Longitude,Station Notes,WBID,WBID_Water_Type,Waterbody_Class,HUC12,Primary Type,Secondary Type,Org Datum,Org Method
+Beatty Bayou-1,BAY-BEATTY BAYOU-1,BAY-BEATTY-BAYOU-1,1.84,Lower Beatty Bayou,30.253500,-85.621000,,1088,ESTUARY,2,31401010901,Surface Water,,,
+Burnt Mill Lower,BAY-BURNT M-1L,BAY-BURNT M-1L,2.73,Lower Burnt Mill Creek,30.301333,-85.760000,,901B,ESTUARY,3M,31401010602,Surface Water,,,
+Burnt Mill Upper,BAY-BURNT M-1U,BAY-BURNT M-1U,2.72,Upper Burnt Mill Creek,30.328550,-85.763000,,901B,ESTUARY,3M,31401010602,Surface Water,,,
+Callaway Bayou-2,BAY-CALLAWAY-BAYOU-2,BAY-CALLAWAYB-2,4.62,Lower Callaway Bayou,30.125000,-85.563333,,1110,ESTUARY,2,31401010902,Surface Water,,,
+Crooked Creek Lower,BAY-CROOKED L-1,BAY-CROOKED L-1,2.88,Lower Crooked Creek,30.290383,-85.805067,,1061A,ESTUARY,2,31401011100,Surface Water,,,
+Crooked Creek Upper,BAY-CROOKED U-1,BAY-CROOKED U-1,2.87,Upper Crooked Creek,30.313700,-85.811233,,973,ESTUARY,3M,31401010603,Surface Water,,,
+Crooked Creek Upper-2,BAY-CROOKED-UPPER-2,BAY-CROOKED-UPPER-2,2.93,Crooked Creek Boat Ramp,30.315250,-85.813183,,973,ESTUARY,3M,31401010603,Surface Water,,,
+Deerpoint-1,BAY-DEERPOIN-1,BAY-DEERPOIN-1,5.10,Deer Point 1,30.270590,-85.600180,,553C,LAKE,1,31401010505,Surface Water,,,
+Deerpoint-2,BAY-DEERPOIN-2,BAY-DEERPOIN-2,5.20,Deer Point 2,30.290000,-85.591667,,553C,LAKE,1,31401010505,Surface Water,,,
+Deerpoint-3,BAY-DEERPOIN-3,BAY-DEERPOIN-3,5.30,Deer Point 3,30.306667,-85.588670,,553C,LAKE,1,31401010505,Surface Water,,,
+East Bay-1,BAY-EA-STBAY-1,BAY-EA-STBAY-1,4.10,Davis Point,30.038333,-85.486667,,1061F,ESTUARY,2,31401011100,Surface Water,,,
+East Bay-2,BAY-EA-STBAY-2,BAY-EA-STBAY-2,4.20,Channel Marker 38,30.085000,-85.526667,,1061F,ESTUARY,2,31401011100,Surface Water,,,
+East Bay-3,BAY-EA-STBAY-3,BAY-EA-STBAY-3,4.30,Channel Marker 43,30.108333,-85.558333,,1061F,ESTUARY,2,31401011100,Surface Water,,,
+East Bay-4,BAY-EA-STBAY-4,BAY-EA-STBAY-4,4.40,S. Tyndall Bridge,30.098333,-85.610000,,1061F,ESTUARY,2,31401011100,Surface Water,,,
+East Bay-5,BAY-EA-STBAY-5,BAY-EA-STBAY-5,4.50,Military Point,30.125000,-85.630000,,1061D,ESTUARY,3M,31401011100,Surface Water,,,
+Fannin Bayou-1,BAY-FANNIN-BAYOU-1,BAY-FANNIN-BAYOU-1,1.70,Lower Fannin Bayou,30.269167,-85.656167,,1061G,ESTUARY,2,31401011100,Surface Water,,,
+Goose Bayou-1,BAY-GOOSE-BAYOU-1,BAY-GOOSE-BAYOU-1,1.88,Goose Bayou,30.224867,-85.691050,,1061G,ESTUARY,2,31401011100,Surface Water,,,
+Grand Lagoon-1,BAY-GR-LAGOON-1,BAY-GR-LAGOON-1,9.10,St. Thomas Square,30.169250,-85.787200,,1061E,ESTUARY,3M,31401011100,Surface Water,,,
+Grand Lagoon-2,BAY-GR-LAGOON-2,BAY-GR-LAGOON-2,9.20,Storm Water Pond,30.164630,-85.778180,"2026-09-03 - updated coordinates; station was moved ~43 m in 2020. cannot find documented reason for move; YSI logs show monitoring mostly continued at pre-2020 location. 
+ - previous (2020 era): 30.165000, -85.778333
+ - new (also pre-2020): 30.164630, -85.778180",1120,ESTUARY,3M,31401011100,Surface Water,,,
+Grand Lagoon-3,BAY-GR-LAGOON-3,BAY-GR-LAGOON-3,9.30,Dolphin St. Pier,30.151317,-85.757250,"2025-08-21 - Updated coordinates from 30.164630, -85.778180 to 30.151317, -85.757250. New coordinates obtained from 'Stations with GPS 2020 all sites.docx' and correspond with the station name, Dolphin St Pier, and where Deb Fable has been sampling. The previous coordinates are the old Station 2 coordinates and were copied in error to the wrong row in the station list in the 2020 update. ",1120,ESTUARY,3M,31401011100,Surface Water,,,
+Grand Lagoon-4,BAY-GR-LAGOON-4,BAY-GR-LAGOON-4,9.40,Lighthouse Marina,30.147667,-85.745333,,1061E,ESTUARY,3M,31401011100,Surface Water,,,
+Grand Lagoon-5,BAY-GR-LAGOON-5,BAY-GR-LAGOON-5,9.50,N. of State Park Pier,30.135000,-85.728333,"2026-09-03 - updated coordinates; station was moved ~275 m in 2020. cannot find documented reason for move; YSI logs show monitoring mostly continued at pre-2020 location (Beachcat Humminbird has 2020 coordinates so SABW-collected samples are the exception)
+- previous (2020 era): 30.137300, -85.729370
+- new (also pre-2020): 30.135000, -85.728333",1061E,ESTUARY,3M,31401011100,Surface Water,,,
+Johnson Bayou-1,BAY-JOHNSON-BAYOU-1,BAY-JOHNSON-BAYOU-1,3.62,Upper Johnson Bayou,30.162000,-85.669520,"2026-09-03 - updated station coordinates to 30.162000, -85.669520, which are the actual coordinates logged from Howard Lovett's dock on 2026-08-31. New coordinates are approx. 125m east of previous coordinates. 
+ - previous coordinates: 30.162167, -85.670833
+ - new coordinates: 30.162000, -85.669520
+2024-09-29 - There is a discrepancy between the DEP coordinates (30.16253, -85.67122), the coordinates here (30.162167, -85.670833), and the actual sampling location which is Howard Lovett's dock. The coordinates here in Airtable came from a 2020 document: Monitoring_Sites_Class.xlsx",1131C,ESTUARY,3M,31401010901,Surface Water,,,
+Laird Bayou-1,BAY-LAIRD BAYOU-1,BAY-LA-BAYOU-1,4.25,Laird Bayou 1,30.118333,-85.526333,,1127,ESTUARY,2,31401010902,Surface Water,,,
+Laird Bayou-2,BAY-LAIRD BAYOU-2,BAY-LA-BAYOU-2,4.26,Laird Bayou 2,30.127667,-85.519000,,1127,ESTUARY,2,31401010902,Surface Water,,,
+Laird Bayou-3,BAY-LAIRD BAYOU-3,BAY-LA-BAYOU-3,4.27,Laird Bayou 3,30.133333,-85.506500,,1127,ESTUARY,2,31401010902,Surface Water,,,
+Lullwater-1,BAY-LULLWATER-1,BAY-LULLWATER-1,1.00,Lullwater 1,30.220160,-85.882950,,1040E,LAKE,3F,31401011004,Surface Water,,,
+Lullwater-2,BAY-LULLWATER-2,BAY-LULLWATER-2,2.00,Lullwater 2,30.222050,-85.880210,,1040E,LAKE,3F,31401011004,Surface Water,,,
+Lullwater-3,BAY-LULLWATER-3,BAY-LULLWATER-3,3.00,Lullwater 3,30.222980,-85.883220,,1040E,LAKE,3F,31401011004,Surface Water,,,
+Lynn Haven Bayou-1,BAY-LYNN-HAVEN-BAYOU-1,,1.85,Lynn Haven Bayou 1,30.250150,-85.664130,"Added in May 2025 due to anticipated start of construction for Marina Island development within the next 12 months. 
+
+2025-08-04 - uploaded location to WIN, import file id 56102",1061G,ESTUARY,2,31401011100,Surface Water,Estuary,WGS84,DMAP
+Marin-1,BAY-MARIN-1,BAY-MARIN-1,5.41,Lake Marin 1,30.210500,-85.656770,,1084,STREAM,3F,31401010901,Surface Water,,,
+Marin-2,BAY-MARIN-2,BAY-MARIN-2,5.42,Lake Marin 2,30.210792,-85.654961,,1084,STREAM,3F,31401010901,Surface Water,,,
+Marin-3,BAY-MARIN-3,BAY-MARIN-3,5.43,Lake Marin 3,30.209170,-85.654970,,1084,STREAM,3F,31401010901,Surface Water,,,
+Martin-1,BAY-MARTIN-1,BAY-MARTIN-1,4.55,Lake Martin,30.135370,-85.606520,"2026-08-16 - updated coordinates from 30.140430, -85.607771 to 30.135370, -85.606520 due to inaccurate/outdated station coordinates. we have sampled from the boat ramp doc since before 2023. The old coordinates were ~575 m NNW at approx. the midpoint between the boat ramp and the Cherry Street bridge.",1133A,LAKE,3F,31401010901,Surface Water,,,
+Massalina Bayou-1,BAY-MASSALINA-BAYOU-1,BAY-MASSALINA-BAYOU-1,3.61,Lower Massalina Bayou,30.151667,-85.658333,,1144,ESTUARY,3M,31401010901,Surface Water,,,
+Mill Bayou-1,BAY-MILL-BAYOU-1,BAY-MILL-BAYOU-1,1.78,Lower Mill Bayou,30.250991,-85.609614,,1086,ESTUARY,2,31401010901,Surface Water,,,
+North Bay-1,BAY-NO-THBAY-1,BAY-NO-THBAY-1,1.10,North Bay 1,30.263333,-85.616667,,1061H,ESTUARY,2,31401011100,Surface Water,,,
+North Bay-2,BAY-NO-THBAY-2,BAY-NO-THBAY-2,1.20,North Bay 2,30.261667,-85.651667,,1061G,ESTUARY,2,31401011100,Surface Water,,,
+North Bay-3,BAY-NO-THBAY-3,BAY-NO-THBAY-3,1.30,North Bay 3,30.253333,-85.685000,,1061G,ESTUARY,2,31401011100,Surface Water,,,
+North Bay-4,BAY-NO-THBAY-4,BAY-NO-THBAY-4,1.40,North Bay 4,30.226667,-85.710000,,1061B,ESTUARY,2,31401011100,Surface Water,,,
+Parker Bayou-1,BAY-PARKER-BAYOU-1,BAY-PARKER-BAYOU-1,4.66,Lower Parker Bayou,30.125500,-85.600833,,1061D,ESTUARY,3M,31401011100,Surface Water,,,
+Pitts Bayou-1,BAY-PITTS-BAYOU-1,BAY-PITTS-BAYOU-1,4.64,Lower Pitts Bayou,30.121333,-85.596667,,1061D,ESTUARY,3M,31401011100,Surface Water,,,
+Posten Bayou-1,BAY-POSTEN-BAYOU-1,BAY-POSTEN-BAYOU-1,1.72,Lower Posten Bayou,30.192833,-85.716667,,1061B,ESTUARY,2,31401010901,Surface Water,,,
+Powell Creek East-1,BAY-POWELLSO-1,BAY-PO-KEAST-1,8.50,"Powell Creek East, Creek Mouth",30.266667,-85.955567,Needs location review - defined location doesn't align with longstanding sampled location in practice,1055A,ESTUARY,3M,31401011004,Surface Water,,,
+Powell Creek East-2,BAY-POWELLSO-2,BAY-PO-KEAST-2,8.60,"Powell Creek East, Dead Tree",30.261833,-85.950083,Needs location review - defined location doesn't align with longstanding sampled location in practice,1055B,ESTUARY,3M,31401011004,Surface Water,,,
+Powell-1,BAY-POWELL-1,BAY-POWELL-1,8.10,Lake Powell 1,30.272750,-85.967900,Needs location review - defined location doesn't align with longstanding sampled location in practice,1055A,ESTUARY,3M,31401011004,Surface Water,,,
+Powell-2,BAY-POWELL-2,BAY-POWELL-2,8.20,Lake Powell 2,30.274817,-85.984100,Needs location review - defined location doesn't align with longstanding sampled location in practice,1055A,ESTUARY,3M,31401011004,Surface Water,,,
+Powell-3,BAY-POWELL-3,BAY-POWELL-3,8.30,Lake Powell 3,30.281550,-85.994717,Needs location review - defined location doesn't align with longstanding sampled location in practice,1055A,ESTUARY,3M,31401011004,Surface Water,,,
+Powell-4,BAY-POWELL-4,BAY-POWELL-4,8.40,Lake Powell 4,30.272533,-85.985983,Needs location review - defined location doesn't align with longstanding sampled location in practice,1055A,ESTUARY,3M,31401011004,Surface Water,,,
+Powell-5,BAY-POWELL-5,BAY-POWELL-5,8.80,"Lake Powell, County Park Swim Area",30.268450,-85.975300,Needs location review - defined location doesn't align with longstanding sampled location in practice,1055A,ESTUARY,3M,31401011004,Surface Water,,,
+Powell-6,BAY-POWELL-6,BAY-POWELL-6,8.90,"Lake Powell, Golf Course",30.275367,-85.977783,Needs location review - defined location doesn't align with longstanding sampled location in practice,1055A,ESTUARY,3M,31401011004,Surface Water,,,
+Pretty Bayou-1,BAY-PRETTY-BAYOU-1,BAY-PRETTY-BAYOU-1,1.74,Lower Pretty Bayou,30.201717,-85.705883,,1128,ESTUARY,2,31401010901,Surface Water,,,
+Robinson Bayou-1,BAY-ROBINSON-BAYOU-1,BAY-ROBINSON-BAYOU-1,1.76,Lower Robinson Bayou,30.210567,-85.699133,"2026-09-03 - moved coordinates back to Feb 2009 location: 30.210567, -85.699133. The 1997/2020 location is difficult to reach in the winter without running aground and damaging seagrass. Anchoring is often required, which also damages seagrass at the 1997/2020 location.
+Location history:
+  - From 1997-2008, station coordinates were 30.211000, -85.699167.
+  - A 2011-01-24 station proofing report documents station was moved in Feb 2009 to 30.210567, -85.699133.
+  - 2020-11-04 Monitoring_Sites_Class.xlsx moved the station back to 30.211000, -85.699167. This is the location stored in the Beachcat's Humminbird
+",1123,ESTUARY,2,31401010901,Surface Water,,,
+St. Andrew Bay-1,BAY-ST-EWBAY-1,BAY-ST-EWBAY-1,3.10,Navy Mooring Buoy,30.175000,-85.736667,,1061C,ESTUARY,3M,31401011100,Surface Water,,,
+St. Andrew Bay-2,BAY-ST-EWBAY-2,BAY-ST-EWBAY-2,3.20,Channel Marker 5,30.156667,-85.685000,,1061C,ESTUARY,3M,31401011100,Surface Water,,,
+St. Andrew Bay-3,BAY-ST-EWBAY-3,BAY-ST-EWBAY-3,3.30,Channel Marker 20,30.140000,-85.658333,,1061D,ESTUARY,3M,31401011100,Surface Water,,,
+St. Andrew Bay-6,BAY-ST-EWBAY-6,BAY-ST-EWBAY-6,3.60,Tyndall Yacht Club,30.093333,-85.655000,,1061E,ESTUARY,3M,31401011100,Surface Water,,,
+St. Andrew Bay-7,BAY-ST-EWBAY-7,BAY-ST-EWBAY-7,3.70,New Pass,30.120000,-85.730000,,1061E,ESTUARY,3M,31401011100,Surface Water,,,
+St. Andrew Bay-12,BAY-ST. ANDREW BAY-12,BAY-ST. ANDREW BAY-12,3.40,Davis Point,30.121632,-85.693432,,1061E,ESTUARY,3M,31401011100,Surface Water,,,
+Upper Goose Bayou-1,BAY-UPPER-GOOSE-BAYOU-1,BAY-UPPER-GOOSE-BAYOU-1,1.87,Upper Goose Bayou,30.241283,-85.683467,,1061G,ESTUARY,2,31401011100,Surface Water,,,
+Warren Bayou-1,BAY-WARREN-BAYOU-1,BAY-WARREN-BAYOU-1,2.86,Lower Warren Bayou,30.277333,-85.737000,,1053A,ESTUARY,2,31401011100,Surface Water,,,
+Watson Bayou-1,BAY-WATSON-BAYOU-1,BAY-WATSON-BAYOU-1,3.68,Lower Watson Bayou,30.136333,-85.634833,,1061D,ESTUARY,3M,31401011100,Surface Water,,,
+West Bay-1,BAY-WE-STBAY-1,BAY-WE-STBAY-1,2.10,West Bay 1,30.245000,-85.833333,,1061A,ESTUARY,2,31401011100,Surface Water,,,
+West Bay-2,BAY-WE-STBAY-2,BAY-WE-STBAY-2,2.20,West Bay 2,30.268333,-85.808333,,1061A,ESTUARY,2,31401011100,Surface Water,,,
+West Bay-3,BAY-WE-STBAY-3,BAY-WE-STBAY-3,2.30,West Bay 3,30.290000,-85.766667,,1061A,ESTUARY,2,31401011100,Surface Water,,,
+West Bay-4,BAY-WE-STBAY-4,BAY-WE-STBAY-4,2.40,West Bay 4,30.240000,-85.741667,,1061C,ESTUARY,3M,31401011100,Surface Water,,,
+West Bay-5,BAY-WE-STBAY-5,BAY-WE-STBAY-5,2.50,West Bay 5,30.201667,-85.733333,,1061B,ESTUARY,2,31401011100,Surface Water,,,
+West Bay-12,BAY-WEST-BAY-12,BAY-WEST-BAY-12,2.21,ICWW at Powerline,30.286779,-85.849751,,1008,ESTUARY,3M,31401011002,Surface Water,,,
