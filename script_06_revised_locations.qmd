@@ -8,12 +8,100 @@ editor_options:
 ---
 
 ## Libraries
+```{r libraries}
+library(tidyverse)
+library(sf)
+library(mapview)
+library(janitor)
+library(leaflet)
+library(leafpop) # for popups in 
+library(leafsync) # sync mapview maps
+library(leafem) # add labels to map
+library(patchwork)
+library(nhdplusTools)
+library(tmap)
+library(forcats)
+library(gifski) #for tmap animation
+library(plotly)
+library(webshot) # save mapview object
+library(nngeo)
+library(micromap)
+library(tidyverse)
+library(spsurvey)
 
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+```
 
 ## Log
 
-The purpose of this script is to evaluate and compare revised BayWatch monitoring locations provided by Phil Maxwell from Baywatch. Compare revised sites to monitoring locations from FDEP WINS.
+The purpose of this script is to evaluate and compare revised BayWatch monitoring locations provided by Phil Maxwell from Baywatch. Compare revised sites to monitoring locations from FDEP WINS downloaded by Ryann Rossi. Can I get any metadata for Stations-Station Info.csv? Have 68 obs by 16 variables.
+
+```{r data}
+rev_station_ds1 <- read_csv("data/Stations-Station Info Export.csv")
+names(rev_station_ds1)
+head(rev_station_ds1)
+rev_station_ds1 <- clean_names(rev_station_ds1)
+# spec(np_ds1)
+# names(np_ds1)
+
+
+# See Long and Lat in decimal degrees and date as character
+View(np_ds1) 
+str(np_ds1)
+glimpse(np_ds1)
+class(np_ds1$date)
+
+#zdates <- distinct(np_ds1, activity_start_date)
+#ym_ds1 <- lubridate::mdy(zdates$activity_start_date)
+#floor_date(ym_ds1, "month")
+#saveRDS(zdates, "zdates")
+
+# with activity start date still character have to assign factors
+# have to create activity start date as factor for tmap animation
+np_ds1$date_factor <- np_ds1$date
+np_ds1$yrmm_factor <- np_ds1$date
+
+# convert to date
+np_ds1$date <- lubridate::mdy(np_ds1$date)
+class(np_ds1$date)
+np_ds1$yrmm <- floor_date(np_ds1$date, "month")
+head(np_ds1$yrmm)
+class(np_ds1$yrmm)
+
+# have to create activity start date as factor for tmap animation
+np_ds1 <- arrange(np_ds1, date)
+np_ds1$date_factor <- as_factor(np_ds1$date_factor)
+head(np_ds1$date_factor)
+levels(np_ds1$date_factor)
+
+
+np_ds1$yrmm_factor <- as_factor(as.character(np_ds1$yrmm))
+head(np_ds1$yrmm_factor)
+levels(np_ds1$yrmm_factor)
+
+# filter(dg_sf1, (!is.na(log_n2o))
+
+np_ds1 <- filter(np_ds1, (!is.na(long)))
+# drops to 10,369 obs and summary(mp_ds2$lat) returns no NA
+
+unique(np_ds1$organization_name)
+distinct(np_ds1,bay) %>%  dplyr::arrange(., bay) %>% print(n=Inf)
+# 35 distinct bay entries
+distinct(np_ds1, monitoring_location_id) %>%  dplyr::arrange(., ) %>% print(n=Inf)
+# 130 distinct monitoring location id entries
+
+z1 <- filter(np_ds1, is.na(organization_name))
+# return 7,162 obs
+summary(z1$sta_nr) # code min 1.1 to max 9.5
+# believe having a numeric sta_nr code means this is a Lakewatch/Baywatch station and have long/lat coordinates for these stations
+
+z2 <- filter(np_ds1, organization_name == "FLORIDA LAKEWATCH")
+# return 2,380
+summary(z2$sta_nr) # returns all NAs
+# want to get numeric codes assigned to sta_nr, struggling to get that done
+
+
+```
+
 
 ```{r}
 1 + 1
