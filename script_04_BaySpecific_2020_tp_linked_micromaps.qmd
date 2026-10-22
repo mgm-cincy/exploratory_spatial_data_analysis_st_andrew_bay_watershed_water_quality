@@ -32,6 +32,8 @@ library(tidyverse)
 
 ## Log
 
+2026-10-22 Trying to understand why In script 04 between all_stations3 giving 57 baywatch station names/monitoring location id but bw_2023_stations2 gives 50 distinct stations.  Looks like, for example, missing first Callaway Bayou station.
+
 2026-09-23 facet scatter plot of log TN and log TP by bays reveals some strong positive correlations for 2 nutrient concentrations, especially in Grand Lagoon
 
 2026-09-21 added facet bubble map to see if NA's occurred in the same time period and if very high TP concentrations also occurred in same time period.
@@ -1504,6 +1506,11 @@ tp_bw_all2023 <- dplyr::filter(all_station3, year == 2023 & sampling_agency_name
 # in 2022 have 269 obs, median 0.014, median logged -4.27, 4 NA'S
 # in 2023 have 288 obs, median 0.013, median logged -4.34, 21 NA's!!
 
+bw_2023_stations1 <- dplyr::select(tp_bw_all2023, monitoring_location_id) 
+
+bw_2023_stations2 <- unique.data.frame(bw_2023_stations1)
+# returns 50 distinct stations
+print(bw_2023_stations2, n = Inf)
 
 summary(tp_bw_all2023$tp)
 summary(log(tp_bw_all2023$tp))
