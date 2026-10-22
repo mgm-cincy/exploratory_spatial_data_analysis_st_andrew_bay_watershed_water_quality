@@ -8,6 +8,7 @@ editor_options:
 ---
 
 ## Libraries
+
 ```{r libraries}
 library(tidyverse)
 library(sf)
@@ -44,63 +45,53 @@ rev_station_ds1 <- clean_names(rev_station_ds1)
 # names(np_ds1)
 
 
-# See Long and Lat in decimal degrees and date as character
-View(np_ds1) 
-str(np_ds1)
-glimpse(np_ds1)
-class(np_ds1$date)
-
-#zdates <- distinct(np_ds1, activity_start_date)
-#ym_ds1 <- lubridate::mdy(zdates$activity_start_date)
-#floor_date(ym_ds1, "month")
-#saveRDS(zdates, "zdates")
-
-# with activity start date still character have to assign factors
-# have to create activity start date as factor for tmap animation
-np_ds1$date_factor <- np_ds1$date
-np_ds1$yrmm_factor <- np_ds1$date
-
-# convert to date
-np_ds1$date <- lubridate::mdy(np_ds1$date)
-class(np_ds1$date)
-np_ds1$yrmm <- floor_date(np_ds1$date, "month")
-head(np_ds1$yrmm)
-class(np_ds1$yrmm)
-
-# have to create activity start date as factor for tmap animation
-np_ds1 <- arrange(np_ds1, date)
-np_ds1$date_factor <- as_factor(np_ds1$date_factor)
-head(np_ds1$date_factor)
-levels(np_ds1$date_factor)
-
-
-np_ds1$yrmm_factor <- as_factor(as.character(np_ds1$yrmm))
-head(np_ds1$yrmm_factor)
-levels(np_ds1$yrmm_factor)
 
 # filter(dg_sf1, (!is.na(log_n2o))
 
-np_ds1 <- filter(np_ds1, (!is.na(long)))
-# drops to 10,369 obs and summary(mp_ds2$lat) returns no NA
+summary(rev_station_ds1$latitude) #returns no NA
+summary(rev_station_ds1$longitude) #returns no NA
 
-unique(np_ds1$organization_name)
-distinct(np_ds1,bay) %>%  dplyr::arrange(., bay) %>% print(n=Inf)
-# 35 distinct bay entries
-distinct(np_ds1, monitoring_location_id) %>%  dplyr::arrange(., ) %>% print(n=Inf)
-# 130 distinct monitoring location id entries
-
-z1 <- filter(np_ds1, is.na(organization_name))
-# return 7,162 obs
-summary(z1$sta_nr) # code min 1.1 to max 9.5
-# believe having a numeric sta_nr code means this is a Lakewatch/Baywatch station and have long/lat coordinates for these stations
-
-z2 <- filter(np_ds1, organization_name == "FLORIDA LAKEWATCH")
-# return 2,380
-summary(z2$sta_nr) # returns all NAs
-# want to get numeric codes assigned to sta_nr, struggling to get that done
+unique(rev_station_ds1$number)
+distinct(rev_station_ds1,win_location_id) %>%  dplyr::arrange(., win_location_id) %>% print(n=Inf)
+# 68 distinct win_location_id entries
+distinct(rev_station_ds1, number) %>% dplyr::arrange(., number) %>% print(n=Inf)
+# 130 distinct number entries
 
 
 ```
+
+## Create SF object
+Revised locations outside of sf_bbl2 polygon include points in Lakes Powell, Lullwater, and Martin.
+
+```{r, create_sf}
+# create sf object
+coords <- data.frame(longitude  = rev_station_ds1$longitude, latitude = rev_station_ds1$latitude)
+head(coords)
+
+# See Marc Weber workshop above about Coordinate Reference Systems (CRS)
+
+rev_station_sf1 <- st_as_sf(rev_station_ds1, coords = c("longitude", "latitude"), crs =4269) %>% st_transform((5070))
+
+class(rev_station_sf1)
+
+st_crs(rev_station_sf1) == st_crs(sf_bbl2)
+st_crs(sf_bbl2)
+rev_station_sf1 <- rev_station_sf1 %>% st_transform(3087)
+st_crs(rev_station_sf1) == st_crs(sf_bbl2)
+
+mapview(rev_station_sf1) + mapview(sf_bbl2)
+
+
+# mapview(hab_sf1, zcol = "Depth", cex = "Depth", alpha.regions = .8, legend = TRUE, popup = popupTable(hab_sf1, zcol = c("Depth", "Site"))) + mapview(bigbend_seagrass)
+
+# index more spatially extensive sf object against small spatial extent results in a clip
+# now have 53 entries
+rev_station_sf2 <- rev_station_sf1[sf_bbl2, ]
+
+# I believe my linked micromaps are based on 58 stations
+mapview(rev_station_sf2)
+```
+
 
 
 ```{r}
