@@ -32,7 +32,7 @@ library(tidyverse)
 
 ## Log
 
-2026-10-31  Using bw_2023 stations1 repeat selection and counting again, but include bay variable to see if that count matches linked micromap 5 number summary stats
+2026-10-31 bw_2023_locationsbays2 has 23 bays containing 50 monitoring locations so compare that to revised locations. Using bw_2023 stations1 repeat selection and counting again, but include bay variable to see if that count matches linked micromap 5 number summary stats
 
 2026-10-22 Trying to understand why In script 04 between all_stations3 giving 57 baywatch station names/monitoring location id but bw_2023_stations2 gives 50 distinct stations. Looks like, for example, missing first Callaway Bayou station.
 
@@ -1524,7 +1524,13 @@ n_bw_2023_bays1 <- bw_2023_bays1 |> group_by(bay) |> summarise(
 
 bw_2023_locations2 <- unique.data.frame(bw_2023_locations1)
 # returns 50 distinct stations
-print(bw_2023_stations2, n = Inf)
+print(bw_2023_locations2, n = Inf)
+
+bw_2023_locationsbays1 <- dplyr::select(tp_bw_all2023, c(bay, monitoring_location_id)) 
+
+bw_2023_locationsbays2 <- unique.data.frame(bw_2023_locationsbays1)
+# returns 50 distinct stations
+arrange(bw_2023_locationsbays2, bay) |> print(n = Inf)
 
 summary(tp_bw_all2023$tp)
 summary(log(tp_bw_all2023$tp))
