@@ -61,6 +61,7 @@ distinct(rev_station_ds1, number) %>% dplyr::arrange(., number) %>% print(n=Inf)
 ```
 
 ## Create SF object
+
 Revised locations outside of sf_bbl2 polygon include points in Lakes Powell, Lullwater, and Martin.
 
 ```{r, create_sf}
@@ -92,17 +93,3 @@ rev_station_sf2 <- rev_station_sf1[sf_bbl2, ]
 mapview(rev_station_sf2)
 ```
 
-
-
-```{r}
-1 + 1
-```
-
-You can add options to executable code like this
-
-```{r}
-#| echo: false
-2 * 2
-```
-
-The `echo: false` option disables the printing of code (only output is displayed).
