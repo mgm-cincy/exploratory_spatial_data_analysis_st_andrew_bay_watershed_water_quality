@@ -36,7 +36,8 @@ library(spsurvey)
 
 The purpose of this script is to evaluate and compare revised BayWatch monitoring locations provided by Phil Maxwell from Baywatch. Compare revised sites to monitoring locations from FDEP WINS downloaded by Ryann Rossi. Can I get any metadata for Stations-Station Info.csv? Have 68 obs by 16 variables.
 
-2026-10-31  Do same selection and counting as I did using bw_2023 stations1 in script 04 repeat selection and counting again, but include bay variable to see if that count matches linked micromap 5 number summary stats
+2026-10-31 Synced revised locations with locations and bays from script 04
+Do same selection and counting as I did using bw_2023 stations1 in script 04 repeat selection and counting again, but include bay variable to see if that count matches linked micromap 5 number summary stats
 
 ```{r data}
 rev_station_ds1 <- read_csv("data/Stations-Station Info Export.csv")
@@ -64,7 +65,7 @@ distinct(rev_station_ds1, number) %>% dplyr::arrange(., number) %>% print(n=Inf)
 
 ## Create SF object
 
-Revised locations outside of sf_bbl2 polygon include points in Lakes Powell, Lullwater, and Martin.
+Revised locations outside of sf_bbl2 polygon, which comes from script 05, include points in Lakes Powell, Lullwater, and Martin.
 
 ```{r, create_sf}
 # create sf object
@@ -91,7 +92,9 @@ mapview(rev_station_sf1) + mapview(sf_bbl2)
 # now have 53 entries
 rev_station_sf2 <- rev_station_sf1[sf_bbl2, ]
 
-# I believe my linked micromaps are based on 58 stations
-mapview(rev_station_sf2)
-```
+# I believe my linked micromaps are based on 50 stations
+rev1 <- mapview(rev_station_sf2, col.regions = "magenta")
+locations_bays <- mapview(bw_2023_locationsbays2, col.regions = "green")
 
+sync(rev1, locations_bays, ncol = 1)
+```
