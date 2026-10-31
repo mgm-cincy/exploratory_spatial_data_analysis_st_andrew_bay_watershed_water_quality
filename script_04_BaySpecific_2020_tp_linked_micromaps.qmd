@@ -1508,14 +1508,21 @@ tp_bw_all2023 <- dplyr::filter(all_station3, year == 2023 & sampling_agency_name
 # in 2022 have 269 obs, median 0.014, median logged -4.27, 4 NA'S
 # in 2023 have 288 obs, median 0.013, median logged -4.34, 21 NA's!!
 
-# repeat selection and counting again, but include bay variable to see if that count matches linked micromap 5 number summary stats
-bw_2023_stations1 <- dplyr::select(tp_bw_all2023, monitoring_location_id) 
+# repeat selection and counting again, but use bay variable to see if that count matches linked micromap 5 number summary stats
+bw_2023_locations1 <- dplyr::select(tp_bw_all2023, monitoring_location_id) 
 
-n_bw_2023_stations1 <- bw_2023_stations1 |> group_by(monitoring_location_id) |> summarise(
+n_bw_2023_locations1 <- bw_2023_locations1 |> group_by(monitoring_location_id) |> summarise(
   n_location_id = dplyr::n()) |> 
   print(n = Inf)
 
-bw_2023_stations2 <- unique.data.frame(bw_2023_stations1)
+bw_2023_bays1 <- dplyr::select(tp_bw_all2023, bay) 
+
+n_bw_2023_bays1 <- bw_2023_bays1 |> group_by(bay) |> summarise(
+  n_bay_id = dplyr::n()) |> 
+  print(n = Inf)
+# n of bw_2023_bays1 matches n of 5-number summary of linked micromap
+
+bw_2023_locations2 <- unique.data.frame(bw_2023_locations1)
 # returns 50 distinct stations
 print(bw_2023_stations2, n = Inf)
 
