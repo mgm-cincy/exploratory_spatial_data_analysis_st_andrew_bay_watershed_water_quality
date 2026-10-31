@@ -36,6 +36,8 @@ library(spsurvey)
 
 The purpose of this script is to evaluate and compare revised BayWatch monitoring locations provided by Phil Maxwell from Baywatch. Compare revised sites to monitoring locations from FDEP WINS downloaded by Ryann Rossi. Can I get any metadata for Stations-Station Info.csv? Have 68 obs by 16 variables.
 
+2026-10-31  Do same selection and counting as I did using bw_2023 stations1 in script 04 repeat selection and counting again, but include bay variable to see if that count matches linked micromap 5 number summary stats
+
 ```{r data}
 rev_station_ds1 <- read_csv("data/Stations-Station Info Export.csv")
 names(rev_station_ds1)
