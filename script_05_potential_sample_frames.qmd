@@ -29,6 +29,7 @@ library(nngeo)
 library(micromap)
 library(tidyverse)
 library(spsurvey)
+library(nhdplusTools)
 
 ```
 
@@ -422,6 +423,48 @@ driver = "ESRI Shapefile",
 append = FALSE)
 
 ```
+
+## HUC8 and Flowlines
+```{r huc8_flowlines}
+
+huc8 <- get_huc(id = '03140101', type = "huc08")
+
+sab_nhd1 <- get_nhdplus(AOI = huc8, realization = "flowline")
+ 
+mapview(huc8) + bbl_9 + sab_nhd1
+
+
+ws_1 <- tm_shape(huc8) +
+  tm_polygons(col = "gray", fill_alpha = 0.6) +
+tm_shape(bbl_9) +
+  tm_polygons(col = "blue", fill = "blue") +
+tm_shape(sab_nhd1) +
+  tm_lines(col = "blue") +
+tm_basemap("OpenStreetMap")  
+
+
+tm_shape(huc8) +
+  tm_polygons(fill = "gray", col = "black", fill_alpha = 0.6) +
+tm_shape(bbl_9) +
+  tm_polygons(col = "blue", fill = "blue") +
+tm_shape(sab_nhd1) +
+  tm_lines(lwd = "ftype", col = "blue") +
+tm_layout(frame = FALSE)
+
+
+
+
+# Save map in landscape orientation
+tmap_save(
+  ws_1,
+  filename = "watershed_sab_landscape.png",
+  width = 11,
+  height = 8.5,
+  units = "in"
+)
+```
+
+
 
 ## Polygon Edits for BBL_9
 
