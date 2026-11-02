@@ -435,21 +435,29 @@ mapview(huc8) + bbl_9 + sab_nhd1
 
 
 ws_1 <- tm_shape(huc8) +
-  tm_polygons(col = "gray", fill_alpha = 0.6) +
-tm_shape(bbl_9) +
-  tm_polygons(col = "blue", fill = "blue") +
-tm_shape(sab_nhd1) +
-  tm_lines(col = "blue") +
-tm_basemap("OpenStreetMap")  
-
-
-tm_shape(huc8) +
+  tm_graticules() +
   tm_polygons(fill = "gray", col = "black", fill_alpha = 0.6) +
 tm_shape(bbl_9) +
   tm_polygons(col = "blue", fill = "blue") +
 tm_shape(sab_nhd1) +
-  tm_lines(lwd = "ftype", col = "blue") +
-tm_layout(frame = FALSE)
+  tm_lines(lwd = "ftype", col = "blue", lwd.legend = tm_legend(title = "USGS NHD Flowlines")) +
+tm_layout(frame = FALSE) +
+tm_scalebar(position = c("left", "bottom")) +
+tm_compass(type = "4star", size = 2, position = c("left", "top")) +
+tm_credits("USGS Watershed Polygon & Flowlines; SASJBEP Bays, Bayous & Lakes", position = tm_pos_out("right", "bottom"))
+
+
+tm_shape(huc8) +
+  tm_graticules() +
+  tm_polygons(fill = "gray", col = "black", fill_alpha = 0.6) +
+tm_shape(bbl_9) +
+  tm_polygons(col = "blue", fill = "blue") +
+tm_shape(sab_nhd1) +
+  tm_lines(lwd = "ftype", col = "blue", lwd.legend = tm_legend(title = "USGS NHD Flowlines")) +
+tm_layout(frame = FALSE) +
+tm_scalebar(position = c("left", "bottom")) +
+tm_compass(type = "4star", size = 2, position = c("left", "top")) +
+tm_credits("USGS Watershed Polygon & Flowlines; SASJBEP Bays, Bayous & Lakes", position = tm_pos_out("right", "bottom"))
 
 
 
