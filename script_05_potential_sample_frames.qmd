@@ -417,14 +417,15 @@ bbl_frame3 %>%
 sf_bbl2 <- bbl_frame3
 
 # Writing a single shapefile to the working directory
-st_write(sf_bbl2,
-dsn = "output_sampleframes_surveys/sf_bbl2.shp",
-driver = "ESRI Shapefile",
-append = FALSE)
+# already ran this code so commented out
+# st_write(sf_bbl2,
+# dsn = "output_sampleframes_surveys/sf_bbl2.shp",
+# driver = "ESRI Shapefile",
+# append = FALSE)
 
 ```
 
-## HUC8 and Flowlines
+## HUC8,Flowlines & Municipalities
 
 ```{r huc8_flowlines}
 
@@ -432,47 +433,51 @@ huc8 <- get_huc(id = '03140101', type = "huc08")
 
 sab_nhd1 <- get_nhdplus(AOI = huc8, realization = "flowline")
 
-st_layers("C:/Users/atweg/Documents/Mike/SASJBEP/bay_county_gis/MunicipalBoundary_-4686513074268482007.gpkg")
+st_layers("data_gis/MunicipalBoundary_-4686513074268482007.gpkg")
 
-bayco1 <- st_read("C:/Users/atweg/Documents/Mike/SASJBEP/bay_county_gis/MunicipalBoundary_-4686513074268482007.gpkg", layer = "Municipal_Boundaries")
+bayco1 <- st_read("data_gis/MunicipalBoundary_-4686513074268482007.gpkg", layer = "Municipal_Boundaries")
 
 mapview(bayco1, zcol = "NAME")
  
-mapview(huc8) + bbl_9 + bayco1 + sab_nhd1
+mapview(huc8) + sf_bbl2 + bayco1 + sab_nhd1
 
 
-ws_1 <- tm_shape(huc8) +
+ws_2 <- tm_shape(huc8) +
   tm_graticules() +
-  tm_polygons(fill = "gray", col = "black", fill_alpha = 0.6) +
+  tm_polygons(fill = "gray", col = "black", fill_alpha = 0.2, lwd = 2) +
 tm_shape(bbl_9) +
-  tm_polygons(col = "blue", fill = "blue") +
+  tm_polygons(fill = "blue", col = "blue") +
+tm_shape(bayco1) +
+  tm_polygons(fill = "NAME", fill_alpha = 0.6, fill.legend = tm_legend(title = "Municipalities")) +
 tm_shape(sab_nhd1) +
   tm_lines(lwd = "ftype", col = "blue", lwd.legend = tm_legend(title = "USGS NHD Flowlines")) +
 tm_layout(frame = FALSE) +
 tm_scalebar(position = c("left", "bottom")) +
 tm_compass(type = "4star", size = 2, position = c("left", "top")) +
-tm_credits("USGS Watershed Polygon & Flowlines; SASJBEP Bays, Bayous & Lakes", position = tm_pos_out("right", "bottom"))
+tm_credits("USGS Watershed Polygon & Flowlines; SASJBEP Bays, Bayous & Lakes; Bay County Open GIS Data Portal", position = tm_pos_out("right", "bottom"))
 
 
 tm_shape(huc8) +
   tm_graticules() +
-  tm_polygons(fill = "gray", col = "black", fill_alpha = 0.6) +
+  tm_polygons(fill = "gray", col = "black", fill_alpha = 0.2, lwd = 2) +
 tm_shape(bbl_9) +
-  tm_polygons(col = "blue", fill = "blue") +
+  tm_polygons(fill = "blue", col = "blue") +
+tm_shape(bayco1) +
+  tm_polygons(fill = "NAME", fill_alpha = 0.6, fill.legend = tm_legend(title = "Municipalities")) +
 tm_shape(sab_nhd1) +
   tm_lines(lwd = "ftype", col = "blue", lwd.legend = tm_legend(title = "USGS NHD Flowlines")) +
 tm_layout(frame = FALSE) +
 tm_scalebar(position = c("left", "bottom")) +
 tm_compass(type = "4star", size = 2, position = c("left", "top")) +
-tm_credits("USGS Watershed Polygon & Flowlines; SASJBEP Bays, Bayous & Lakes", position = tm_pos_out("right", "bottom"))
+tm_credits("USGS Watershed Polygon & Flowlines; SASJBEP Bays, Bayous & Lakes; Bay County Open GIS Data Portal", position = tm_pos_out("right", "bottom"))
 
 
 
 
 # Save map in landscape orientation
 tmap_save(
-  ws_1,
-  filename = "watershed_sab_landscape.png",
+  ws_2,
+  filename = "watershed_sab_landscape2.png",
   width = 11,
   height = 8.5,
   units = "in"
