@@ -425,13 +425,20 @@ append = FALSE)
 ```
 
 ## HUC8 and Flowlines
+
 ```{r huc8_flowlines}
 
 huc8 <- get_huc(id = '03140101', type = "huc08")
 
 sab_nhd1 <- get_nhdplus(AOI = huc8, realization = "flowline")
+
+st_layers("C:/Users/atweg/Documents/Mike/SASJBEP/bay_county_gis/MunicipalBoundary_-4686513074268482007.gpkg")
+
+bayco1 <- st_read("C:/Users/atweg/Documents/Mike/SASJBEP/bay_county_gis/MunicipalBoundary_-4686513074268482007.gpkg", layer = "Municipal_Boundaries")
+
+mapview(bayco1, zcol = "NAME")
  
-mapview(huc8) + bbl_9 + sab_nhd1
+mapview(huc8) + bbl_9 + bayco1 + sab_nhd1
 
 
 ws_1 <- tm_shape(huc8) +
@@ -471,8 +478,6 @@ tmap_save(
   units = "in"
 )
 ```
-
-
 
 ## Polygon Edits for BBL_9
 
