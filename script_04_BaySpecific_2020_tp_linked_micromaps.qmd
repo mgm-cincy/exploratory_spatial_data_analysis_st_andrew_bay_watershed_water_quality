@@ -32,6 +32,8 @@ library(tidyverse)
 
 ## Log
 
+2026-11-10 I caught that I had omitted Beatty Bayou and Mill Bayou stations. I corrected that and made 2023 TP linked micromap that shows 25 polygons and their box and whisker plots. I still need to make corrected TP and TN linked micromaps.
+
 2026-10-31 bw_2023_locationsbays2 has 23 bays containing 50 monitoring locations so compare that to revised locations. Using bw_2023 stations1 repeat selection and counting again, but include bay variable to see if that count matches linked micromap 5 number summary stats
 
 2026-10-22 Trying to understand why In script 04 between all_stations3 giving 57 baywatch station names/monitoring location id but bw_2023_stations2 gives 50 distinct stations. Looks like, for example, missing first Callaway Bayou station.
@@ -1475,7 +1477,7 @@ print.file = "output_micromap/mmplot_tp_bw2020v1.jpeg", res=100)
 ```
 
 ## 2021-2023 23 Polygon Linked Micromap
-
+On November 10, 2026, I caught that I had omitted Beatty Bayou and Mill Bayou stations. I corrected that and made 2023 TP linked micromap that shows 25 polygons and their box and whisker plots.
 ```{r 2021_2023}
 # Pulling all of the station data at one time
 
