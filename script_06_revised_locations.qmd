@@ -91,14 +91,10 @@ mapview(rev_station_sf1) + mapview(sf_bbl2)
 # now have 53 entries
 rev_station_sf2 <- rev_station_sf1[sf_bbl2, ]
 
-# I believe my linked micromaps are based on 50 stations
-rev1 <- mapview(rev_station_sf2, col.regions = "magenta")
-locations_bays <- mapview(bw_2023_locationsbays2, col.regions = "green")
-
-sync(rev1, locations_bays, ncol = 1)
 ```
 
 ## Sync Maps
+
 ```{r sync_maps}
 # I believe my linked micromaps are based on 50 stations
 rev1 <- mapview(rev_station_sf2, col.regions = "magenta")
@@ -108,6 +104,7 @@ sync(rev1, locations_bays, ncol = 1)
 ```
 
 ## Compare Coordinates
+
 ```{r compare_coords}
 
 st_crs(rev_station_sf2) == st_crs(bw_2023_locationsbays2)
@@ -147,4 +144,3 @@ View(distnn_rid1)
 # click show in window icon, which is next to the filter icon of distnn_or1 df tab. That dataframe window can be placed next to the synced maps so a match can be made between a station number and a monitoring location name.
 
 ```
-
