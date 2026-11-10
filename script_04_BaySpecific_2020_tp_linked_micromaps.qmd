@@ -1480,8 +1480,10 @@ print.file = "output_micromap/mmplot_tp_bw2020v1.jpeg", res=100)
 # Pulling all of the station data at one time
 
 # first pull stations
-all_station1 <- dplyr::filter(np_sf1, bay == "Crooked Creek" | bay == "Burnt Mill Creek" | bay == "Warren Bayou" | bay == "West Bay" | bay == "Robinson Bayou" | bay == "Goose Bayou" | bay == "Upper Goose Bayou" | bay == "Fannin Bayou" | bay == "North Bay" | bay == "Deer Point Lake" | bay == "Watson Bayou" | bay == "Pitts Bayou"| bay == "Callaway Bayou" | bay == "Laird Bayou" | bay == "Sandy Creek" | bay == "Parker Bayou"| bay == "Eagle Nest Bayou" | bay == "East Bay" | monitoring_location_id == "NWFYI0018" | bay == "Grand Lagoon"| bay == "Johnson Bayou" | bay == "Massalina Bayou" | bay == "Posten Bayou" | bay == "Pretty Bayou" | bay == "St. Andrew Bay")
+# omitted Beatty Bayou and Mill Bayou
+#xall_station1 <- dplyr::filter(np_sf1, bay == "Crooked Creek" | bay == "Burnt Mill Creek" | bay == "Warren Bayou" | bay == "West Bay" | bay == "Robinson Bayou" | bay == "Goose Bayou" | bay == "Upper Goose Bayou" | bay == "Fannin Bayou" | bay == "North Bay" | bay == "Deer Point Lake" | bay == "Watson Bayou" | bay == "Pitts Bayou"| bay == "Callaway Bayou" | bay == "Laird Bayou" | bay == "Sandy Creek" | bay == "Parker Bayou"| bay == "Eagle Nest Bayou" | bay == "East Bay" | monitoring_location_id == "NWFYI0018" | bay == "Grand Lagoon"| bay == "Johnson Bayou" | bay == "Massalina Bayou" | bay == "Posten Bayou" | bay == "Pretty Bayou" | bay == "St. Andrew Bay")
 
+all_station1 <- dplyr::filter(np_sf1, bay == "Crooked Creek" | bay == "Burnt Mill Creek" | bay == "Warren Bayou" | bay == "West Bay" | bay == "Robinson Bayou" | bay == "Beatty Bayou" | bay == "Goose Bayou" | bay == "Upper Goose Bayou" | bay == "Fannin Bayou" | bay == "Mill Bayou" | bay == "North Bay" | bay == "Deer Point Lake" | bay == "Watson Bayou" | bay == "Pitts Bayou"| bay == "Callaway Bayou" | bay == "Laird Bayou" | bay == "Sandy Creek" | bay == "Parker Bayou"| bay == "Eagle Nest Bayou" | bay == "East Bay" | monitoring_location_id == "NWFYI0018" | bay == "Grand Lagoon"| bay == "Johnson Bayou" | bay == "Massalina Bayou" | bay == "Posten Bayou" | bay == "Pretty Bayou" | bay == "St. Andrew Bay")
 
 # second do any filtering out
 all_station2 <- dplyr::filter_out(all_station1, monitoring_location_id == "NWFYI0018")
@@ -1500,13 +1502,17 @@ all_station3 <- all_station2 |>
 
 
 distinct(all_station3, monitoring_location_id) %>% arrange(., monitoring_location_id) %>% print(n=Inf)
-# return 98 stations with 57 stations with Baywatch station names and 39 that are not.
+# return 102 stations
 
 tp_bw_all2023 <- dplyr::filter(all_station3, year == 2023 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.")
+
+summary(tp_bw_all2023$tp)
+summary(log(tp_bw_all2023$tp))
+
 # in 2020 have 286 obs, median 0.014, median logged -4.27, 9 Na'S
 # in 2021 have 291 obs, median 0.015, median logged -4.20, 0 NA,S
 # in 2022 have 269 obs, median 0.014, median logged -4.27, 4 NA'S
-# in 2023 have 288 obs, median 0.013, median logged -4.34, 21 NA's!!
+# in 2023 have 303 obs, median 0.013, median logged -4.34, 21 NA's!!
 
 # repeat selection and counting again, but use bay variable to see if that count matches linked micromap 5 number summary stats
 bw_2023_locations1 <- dplyr::select(tp_bw_all2023, monitoring_location_id) 
@@ -1514,27 +1520,25 @@ bw_2023_locations1 <- dplyr::select(tp_bw_all2023, monitoring_location_id)
 n_bw_2023_locations1 <- bw_2023_locations1 |> group_by(monitoring_location_id) |> summarise(
   n_location_id = dplyr::n()) |> 
   print(n = Inf)
+# returns 53 observations, now including BAY-BEATTY-BAYOU-1 and 2(?) Mill Bayou Stations, BAY-MIL-BAY-1U and BAY-MILL-BAYOU-1. Each of those have 5 obs
 
 bw_2023_bays1 <- dplyr::select(tp_bw_all2023, bay) 
+
 
 n_bw_2023_bays1 <- bw_2023_bays1 |> group_by(bay) |> summarise(
   n_bay_id = dplyr::n()) |> 
   print(n = Inf)
-# n of bw_2023_bays1 matches n of 5-number summary of linked micromap
+# have 25 obs for 25 bays and bayous
 
 bw_2023_locations2 <- unique.data.frame(bw_2023_locations1)
-# returns 50 distinct stations
+# returns 53 distinct monitoring location ids
 print(bw_2023_locations2, n = Inf)
 
 bw_2023_locationsbays1 <- dplyr::select(tp_bw_all2023, c(bay, monitoring_location_id)) 
 
 bw_2023_locationsbays2 <- unique.data.frame(bw_2023_locationsbays1)
-# returns 50 distinct stations
-arrange(bw_2023_locationsbays2, bay) |> print(n = Inf)
-
-summary(tp_bw_all2023$tp)
-summary(log(tp_bw_all2023$tp))
-
+# returns 53 distinct stations
+print(bw_2023_locationsbays2, n = Inf)
 
 mapview(tp_bw_all2023)
 
@@ -1557,7 +1561,7 @@ tp_bw_stats2023 <- st_set_geometry(all_station3, NULL) %>%
             tp_mean = mean(tp, na.rm = TRUE),
             tp_na_count = sum(is.na(tp))) %>% 
   print(n = Inf)
-# returns 23 obs
+# returns 25 obs, not 23 obs, which occurred b/c I had omitted Beatty Bayou (n=5) and Mill Bayou (n=10)
 
 # QA check of does number obs from all_station2 match the bay-segment-specific code chunks
 
@@ -1576,27 +1580,27 @@ tp_bw_stats2023 <- st_set_geometry(all_station3, NULL) %>%
 
 # St. Andrew Bay Passes when I add in BAY-WE-STBAY-5 and filter out NWFYI0018 and BAY-ST-EWBAY-3
 
-# use right_join so cut down polygons to n=23 to match stats
+# use right_join so cut down polygons to n=25 to match stats
 tp_bw_stats2023v2 <- right_join(sf_bbl2, tp_bw_stats2023, by = join_by(SEGMENT_NA == bay), keep = TRUE)
 
 
 mapview(tp_bw_stats2023v2, zcol = "tp_med", legend = TRUE) 
 
-# using tp_bw_stats2023v2 how 23 polygons that have sample stats
+# using tp_bw_stats2023v2 show 25 polygons that have sample stats
 mmplot(map.data=tp_bw_stats2023v2,
        panel.types=c('dot_legend', 'labels', 'box_summary', 'map'),
        panel.data=list(NA,
                        'SEGMENT_NA',
                        list('tp_lmin', 'tp_lq1', 'tp_lmed', 'tp_lq3', 'tp_lmax'),
                        NA),
-       grouping = c(5,5,3,5,5),
+       grouping = c(5,5,5,5,5),
        plot.pGrp.spacing = 2,
        vertical.align = "center",
        graph.bar.size = 0.4,
        ord.by='tp_lmed', rev.ord=TRUE,
        median.row=FALSE)
 
-# # using tp_bw_stats2023v2 how 23 polygons that have sample stats
+# # using tp_bw_stats2023v2 show 25 polygons that have sample stats
 # TP Refined Plot for All Sampled Bay Segments and Bayous
 mmplot(map.data=tp_bw_stats2023v2,
        panel.types=c('dot_legend', 'labels', 'labels', 'labels', 'box_summary', 'map'),
@@ -1606,7 +1610,7 @@ mmplot(map.data=tp_bw_stats2023v2,
                        'tp_na_count',
                        list('tp_lmin', 'tp_lq1', 'tp_lmed', 'tp_lq3', 'tp_lmax'),
                        NA),
-       grouping = c(5,5,3,5,5),
+       grouping = c(5,5,5,5,5),
        plot.pGrp.spacing = 2,
        vertical.align = "center",
        ord.by='tp_lmed',
@@ -1645,7 +1649,7 @@ mmplot(map.data=tp_bw_stats2023v2,
                       list(6, header='Light Gray Means Highlighted Above',
                            inactive.border.color=gray(.7), inactive.border.size=2,
                             panel.width=1.75)),
-print.file = "output_micromap/mmplot_tp_bw2023v1.jpeg", res=100)
+print.file = "output_micromap/mmplot_tp_bw2023v2.jpeg", res=100)
 
 
 ```
