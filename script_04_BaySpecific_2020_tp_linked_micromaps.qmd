@@ -1476,8 +1476,10 @@ print.file = "output_micromap/mmplot_tp_bw2020v1.jpeg", res=100)
 
 ```
 
-## 2021-2023 23 Polygon Linked Micromap
+## 2021-2023 25 Polygon Linked Micromap
+
 On November 10, 2026, I caught that I had omitted Beatty Bayou and Mill Bayou stations. I corrected that and made 2023 TP linked micromap that shows 25 polygons and their box and whisker plots.
+
 ```{r 2021_2023}
 # Pulling all of the station data at one time
 
@@ -1506,47 +1508,48 @@ all_station3 <- all_station2 |>
 distinct(all_station3, monitoring_location_id) %>% arrange(., monitoring_location_id) %>% print(n=Inf)
 # return 102 stations
 
-tp_bw_all2023 <- dplyr::filter(all_station3, year == 2023 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.")
+tp_bw_all2022 <- dplyr::filter(all_station3, year == 2022 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.")
 
-summary(tp_bw_all2023$tp)
-summary(log(tp_bw_all2023$tp))
+summary(tp_bw_all2022$tp)
+summary(log(tp_bw_all2022$tp))
 
+# used median logged value in linked micromaps
 # in 2020 have 286 obs, median 0.014, median logged -4.27, 9 Na'S
 # in 2021 have 291 obs, median 0.015, median logged -4.20, 0 NA,S
-# in 2022 have 269 obs, median 0.014, median logged -4.27, 4 NA'S
+# in 2022 have 283 obs, median 0.014, median logged -4.27, 4 NA'S
 # in 2023 have 303 obs, median 0.013, median logged -4.34, 21 NA's!!
 
 # repeat selection and counting again, but use bay variable to see if that count matches linked micromap 5 number summary stats
-bw_2023_locations1 <- dplyr::select(tp_bw_all2023, monitoring_location_id) 
+bw_2022_locations1 <- dplyr::select(tp_bw_all2022, monitoring_location_id) 
 
-n_bw_2023_locations1 <- bw_2023_locations1 |> group_by(monitoring_location_id) |> summarise(
+n_bw_2022_locations1 <- bw_2022_locations1 |> group_by(monitoring_location_id) |> summarise(
   n_location_id = dplyr::n()) |> 
   print(n = Inf)
 # returns 53 observations, now including BAY-BEATTY-BAYOU-1 and 2(?) Mill Bayou Stations, BAY-MIL-BAY-1U and BAY-MILL-BAYOU-1. Each of those have 5 obs
 
-bw_2023_bays1 <- dplyr::select(tp_bw_all2023, bay) 
+bw_2022_bays1 <- dplyr::select(tp_bw_all2022, bay) 
 
 
-n_bw_2023_bays1 <- bw_2023_bays1 |> group_by(bay) |> summarise(
+n_bw_2022_bays1 <- bw_2022_bays1 |> group_by(bay) |> summarise(
   n_bay_id = dplyr::n()) |> 
   print(n = Inf)
 # have 25 obs for 25 bays and bayous
 
-bw_2023_locations2 <- unique.data.frame(bw_2023_locations1)
+bw_2022_locations2 <- unique.data.frame(bw_2022_locations1)
 # returns 53 distinct monitoring location ids
-print(bw_2023_locations2, n = Inf)
+print(bw_2022_locations2, n = Inf)
 
-bw_2023_locationsbays1 <- dplyr::select(tp_bw_all2023, c(bay, monitoring_location_id)) 
+bw_2022_locationsbays1 <- dplyr::select(tp_bw_all2022, c(bay, monitoring_location_id)) 
 
-bw_2023_locationsbays2 <- unique.data.frame(bw_2023_locationsbays1)
+bw_2022_locationsbays2 <- unique.data.frame(bw_2022_locationsbays1)
 # returns 53 distinct stations
-print(bw_2023_locationsbays2, n = Inf)
+print(bw_2022_locationsbays2, n = Inf)
 
-mapview(tp_bw_all2023)
+mapview(tp_bw_all2022)
 
 
-tp_bw_stats2023 <- st_set_geometry(all_station3, NULL) %>% 
-  dplyr::filter(., year == 2023 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.") %>% 
+tp_bw_stats2022 <- st_set_geometry(all_station3, NULL) %>% 
+  dplyr::filter(., year == 2022 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.") %>% 
   dplyr::select(., tp, bay) %>% 
   group_by(., bay) %>% 
   summarize(., tp_min = fivenum(tp)[1],
@@ -1583,13 +1586,13 @@ tp_bw_stats2023 <- st_set_geometry(all_station3, NULL) %>%
 # St. Andrew Bay Passes when I add in BAY-WE-STBAY-5 and filter out NWFYI0018 and BAY-ST-EWBAY-3
 
 # use right_join so cut down polygons to n=25 to match stats
-tp_bw_stats2023v2 <- right_join(sf_bbl2, tp_bw_stats2023, by = join_by(SEGMENT_NA == bay), keep = TRUE)
+tp_bw_stats2022v2 <- right_join(sf_bbl2, tp_bw_stats2022, by = join_by(SEGMENT_NA == bay), keep = TRUE)
 
 
-mapview(tp_bw_stats2023v2, zcol = "tp_med", legend = TRUE) 
+mapview(tp_bw_stats2022v2, zcol = "tp_med", legend = TRUE) 
 
-# using tp_bw_stats2023v2 show 25 polygons that have sample stats
-mmplot(map.data=tp_bw_stats2023v2,
+# using tp_bw_stats2022v2 show 25 polygons that have sample stats
+mmplot(map.data=tp_bw_stats2022v2,
        panel.types=c('dot_legend', 'labels', 'box_summary', 'map'),
        panel.data=list(NA,
                        'SEGMENT_NA',
@@ -1602,9 +1605,9 @@ mmplot(map.data=tp_bw_stats2023v2,
        ord.by='tp_lmed', rev.ord=TRUE,
        median.row=FALSE)
 
-# # using tp_bw_stats2023v2 show 25 polygons that have sample stats
+# # using tp_bw_stats2022v2 show 25 polygons that have sample stats
 # TP Refined Plot for All Sampled Bay Segments and Bayous
-mmplot(map.data=tp_bw_stats2023v2,
+mmplot(map.data=tp_bw_stats2022v2,
        panel.types=c('dot_legend', 'labels', 'labels', 'labels', 'box_summary', 'map'),
        panel.data=list(NA,
                        'SEGMENT_NA',
@@ -1637,21 +1640,21 @@ mmplot(map.data=tp_bw_stats2023v2,
                            align='right',
                            text.size=.8),
                       
-                      list(5, header='2023 Detectable Total Phoshporous',
+                      list(5, header='2022 Detectable Total Phoshporous',
                            graph.bgcolor='lightgray',
                            xaxis.ticks=c(-6.0, -5.0, -4.0, -3.0, -2.0),
                            xaxis.labels=c(-6,-5, -4, -3, -2),
                            xaxis.labels.size=1.25,
                            graph.bar.size = 0.75,
                            #xaxis.labels.angle=90,
-                           add.line=-4.34, add.line.col="black",
+                           add.line=-4.27, add.line.col="black",
                            add.line.typ=4,
                            xaxis.title='Log(TP, mg/L)', xaxis.title.size=1.25, panel.width=1.75),
                       
                       list(6, header='Light Gray Means Highlighted Above',
                            inactive.border.color=gray(.7), inactive.border.size=2,
                             panel.width=1.75)),
-print.file = "output_micromap/mmplot_tp_bw2023v2.jpeg", res=100)
+print.file = "output_micromap/mmplot_tp_bw2022v2.jpeg", res=100)
 
 
 ```
