@@ -1153,11 +1153,11 @@ print.file = "output_micromap/mmplot_tp_sab2020v3.jpeg", res=100)
 
 ```
 
-## 25 Polygon Linked Micromap 2020-2023
+## 25 Polygon Linked Micromaps TP 2020-2023
 
 On November 10, 2026, I caught that I had omitted Beatty Bayou and Mill Bayou stations. I corrected that and made 2020-2023 TP linked micromaps that shows 25 polygons and their box and whisker plots.
 
-```{r baywide_tp_20020_2023}
+```{r baywide_tp_2020_2023}
 # Pulling all of the station data at one time
 
 # first pull stations
