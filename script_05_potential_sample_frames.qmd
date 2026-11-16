@@ -35,6 +35,8 @@ library(nhdplusTools)
 
 ## Log
 
+2026-11-16 for sf_bbl2 experimented with calculating centroids and points on surface locations for bayous to delineate how far up a randomly draw GRTS point could be.
+
 2026-09-09 note that Robinson Bayou assigned sab_b for wbody_type, but that changed below to be nb_b
 
 2026-09-04 sent Ryann and email asking if I should change Robinson Bayou waterbody type, wbody_type, from sab_b to nb_b.
@@ -415,6 +417,17 @@ bbl_frame3 %>%
   print(n = Inf)
 
 sf_bbl2 <- bbl_frame3
+
+
+mapview(sf_bbl2, zcol = "wbody_type")
+
+centroid_bbl2 <- st_centroid(sf_bbl2)
+
+mapview(centroid_bbl2)
+
+point_on_sfbbl2 <- st_point_on_surface(sf_bbl2)
+
+mapview(point_on_sfbbl2)
 
 # Writing a single shapefile to the working directory
 # already ran this code so commented out
