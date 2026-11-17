@@ -1185,7 +1185,7 @@ all_station3 <- all_station2 |>
 distinct(all_station3, monitoring_location_id) %>% arrange(., monitoring_location_id) %>% print(n=Inf)
 # return 102 stations
 
-tp_bw_all2020 <- dplyr::filter(all_station3, year == 2020 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.")
+tp_bw_all2023 <- dplyr::filter(all_station3, year == 2023 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.")
 
 summary(tp_bw_all2020$tp)
 summary(log(tp_bw_all2020$tp))
@@ -1370,12 +1370,19 @@ tp_bubble + tm_animate(frame = "date_factor", fps = 1, play = "loop")
 tp_bubble + tm_animate(frame = "yrmm_factor", fps = 1, play = "loop")
 
 
-ggplot(tp_bw_all2020, aes(x = log(tp), y = log(tn))) + geom_point() + labs(x = "Log TP, (mg/L)", y = "Log TN, (mg/L)", title = "Total Phosphorus and Total Nitrogen Bay Segments", subtitle = "WIN Data BayWatch 2020, n = 286") + facet_wrap(vars(bay))
+ggplot(tp_bw_all2023, aes(x = log(tp), y = log(tn))) + geom_point() + labs(x = "Log TP, (mg/L)", y = "Log TN, (mg/L)", title = "Total Phosphorus and Total Nitrogen Bay Segments", subtitle = "WIN Data BayWatch 2023, n = 303") + facet_wrap(vars(bay))
 
-ggplot(tp_bw_all2023, aes(x = log(tp), y = log(tn))) + geom_point() + geom_smooth() + labs(x = "Log TP, (mg/L)", y = "Log TN, (mg/L)", title = "Total Phosphorus and Total Nitrogen Bay Segments", subtitle = "WIN Data BayWatch 2023, n = 288") + facet_wrap(vars(bay), scales = "free")
+ggsave("output_corr/corr_tptn_2023v2.pdf", width = 10, height = 6, units = "in")
 
-ggsave("output_corr/corr_tp_smooth_2023v1.pdf", width = 10, height = 6, units = "in")
+tp_bw_all <- dplyr::filter(all_station3, sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC." & (year == 2020 | year == 2021 | year == 2022 | year == 2023))
 
+ggplot(tp_bw_all, aes(x = log(tp), y = log(tn))) + geom_point(aes(colour = factor(year))) + labs(x = "Log TP, (mg/L)", y = "Log TN, (mg/L)", title = "Total Phosphorus and Total Nitrogen Bay Segments", subtitle = "WIN Data BayWatch 2020-2023, n = 1193") + facet_wrap(vars(bay), scales = "fixed")
+
+ggsave("output_corr/corr_tptn_2020_2023_fixed.pdf", width = 10, height = 6, units = "in")
+
+ggplot(tp_bw_all, aes(x = log(tp), y = log(tn))) + geom_point(aes(colour = factor(year))) + labs(x = "Log TP, (mg/L)", y = "Log TN, (mg/L)", title = "Total Phosphorus and Total Nitrogen Bay Segments", subtitle = "WIN Data BayWatch 2020-2023, n = 1193") + facet_wrap(vars(bay), scales = "free")
+
+ggsave("output_corr/corr_tptn_2020_2023_free.pdf", width = 10, height = 6, units = "in")
 
 ```
 
