@@ -427,7 +427,7 @@ mapview(centroid_bbl2)
 
 point_on_sfbbl2 <- st_point_on_surface(sf_bbl2)
 
-mapview(point_on_sfbbl2)
+mapview(point_on_sfbbl2, col.regions = "yellow") + sf_bbl2
 
 # Writing a single shapefile to the working directory
 # already ran this code so commented out
