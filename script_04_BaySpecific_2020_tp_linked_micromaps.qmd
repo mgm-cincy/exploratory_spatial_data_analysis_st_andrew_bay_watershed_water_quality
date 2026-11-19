@@ -1185,7 +1185,7 @@ all_station3 <- all_station2 |>
 distinct(all_station3, monitoring_location_id) %>% arrange(., monitoring_location_id) %>% print(n=Inf)
 # return 102 stations
 
-tp_bw_all2023 <- dplyr::filter(all_station3, year == 2023 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.")
+tp_bw_all2020 <- dplyr::filter(all_station3, year == 2020 & sampling_agency_name == "ST. ANDREW BAY RESOURCE MANAGEMENT ASSOCIATION INC.")
 
 summary(tp_bw_all2020$tp)
 summary(log(tp_bw_all2020$tp))
@@ -1227,7 +1227,7 @@ bw_2020_locationsbays2 <- unique.data.frame(bw_2020_locationsbays1)
 # returns 53 distinct stations
 print(bw_2020_locationsbays2, n = Inf)
 
-mapview(tp_bw_all2020)
+mapview(tp_bw_all2023)
 
 
 tp_bw_stats2020 <- st_set_geometry(all_station3, NULL) %>% 
